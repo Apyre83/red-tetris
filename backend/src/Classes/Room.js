@@ -1,0 +1,1 @@
+// generateur de chiffres aleatoire entre 0 et 7 pour la prochaine piece
