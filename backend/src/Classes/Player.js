@@ -1,4 +1,5 @@
-const { ROWS, COLS } = require('../constants/numbers');
+const { ROWS, COLS }    = require('../constants/numbers');
+const colors            = require('../constants/colors');
 // const ROWS = 4;
 // const COLS = 4;
 
@@ -40,21 +41,31 @@ class Player {
         this.ranking = 0;
         this.allTimeScores = 0;
 
-        this.isinRoom = 0;
+        this.listOfPieces = undefined;
+        this.isinRoom = false;
+        this.gameRoom = undefined;
         this.isDead = false;
         this.idActualPiece = undefined;
         this.actualPiece = undefined;
         this.actualScore = 0;
         this.board = this.createBoard();
+        // this.board = [
+        //     [[0, colors.empty], [0, colors.empty],  [1, colors.cyan],  [0, colors.empty]],
+        //     [[0, colors.empty], [1, colors.cyan],  [1, colors.cyan],  [0, colors.empty]],
+        //     [[1, colors.cyan],  [1, colors.cyan],  [1, colors.cyan],  [0, colors.empty]],
+        //     [[0, colors.empty], [0, colors.empty],  [0, colors.empty],  [0, colors.empty]],
+        // ]
         this.shadow = this.makeShadow();
     }
 
-//REFAIRE en mettant des tiles a la place pour la couleur 
-
     createBoard() {
+        // Board est sous forme Board[y][x]
         const board = [];
         for (let i = 0; i < ROWS; i++) {
-            const row = Array(COLS).fill(0);
+            const row = [];
+            for (let j = 0; j < COLS; j++) {
+                row.push([0, colors.empty]);
+            }
             board.push(row);
         }
         return board;
@@ -66,11 +77,11 @@ class Player {
         for (let i = 0; i < ROWS; i++) {
             for (let j = 0; j < COLS; j++) {
                 if (allColsFull[j]) {
-                    shadow[i][j] = 1;
+                    shadow[i][j] = [1, colors.full];
                 } else {
-                    if (this.board[i][j] == 1) {
+                    if (this.board[i][j][0] != 0) {
                         allColsFull[j] = true;
-                        shadow[i][j] = 1;
+                        shadow[i][j] = [1, colors.full];
                     } 
                 }
             }
@@ -78,23 +89,33 @@ class Player {
         console.log(allColsFull);
         return shadow;
     }
+
+    moveRigth() {
+        const width = this.actualPiece.width;
+        const x     = this.actualPiece.x;
+        const y     = this.actualPiece.y;
+        for (let i = 0 ; i < width ; i++) {
+            if (this.board[y - i][x + width][0] + this.piece[y - i][x + width - 1][0] > 1)
+                return;
+        }
+        this.actualPiece.y++;
+        // socket envoyer
+    }
     
-    moveLeft() {
-        this.actualPiece = this.actualPiece.rotate(-90);
+    rotateLeft() {
+        this.actualPiece = this.actualPiece.rotate('left');
         updateBoard();
     }
 
-    moveRight() {
-        this.actualPiece = this.actualPiece.rotate(90);
+    rotateRight() {
+        const rotated = this.actualPiece.rotate('right');
+
         updateBoard();
     }
-
-    // toutes les 500 ms on fait descendre la piece
-    // si la piece est bloquée on envoie une nouvelle piece
-    // si clique sur un bouton mouvement 
-    // faire mouvement + updateBoard
 }
 
+// TESTS
 const player = new Player(1, 2, 3);
-console.log(player.board[1][1]);
+console.log(player.board);
+console.log('Bloup');
 console.log(player.shadow);
