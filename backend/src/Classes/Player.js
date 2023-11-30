@@ -68,7 +68,7 @@ class Player {
                 if (allColsFull[j]) {
                     shadow[i][j] = 1;
                 } else {
-                    if (this.board[i][j] == 1) {
+                    if (this.board[i][j] != 0) {
                         allColsFull[j] = true;
                         shadow[i][j] = 1;
                     } 
@@ -79,13 +79,14 @@ class Player {
         return shadow;
     }
     
-    moveLeft() {
-        this.actualPiece = this.actualPiece.rotate(-90);
+    rotateLeft() {
+        this.actualPiece = this.actualPiece.rotate('left');
         updateBoard();
     }
 
-    moveRight() {
-        this.actualPiece = this.actualPiece.rotate(90);
+    rotateRight() {
+        const rotated = this.actualPiece.rotate('right');
+        
         updateBoard();
     }
 
