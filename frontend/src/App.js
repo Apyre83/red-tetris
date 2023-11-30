@@ -13,15 +13,14 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/:room/:playerName" element={<GameComponent />} />
-        {/* Ajoutez d'autres routes si nécessaire */}
-      </Routes>
-    </Router>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/:roomId" element={<GameComponent />} />
+          {/* autres routes */}
+        </Routes>
+      </Router>
   );
 }
 
 export default App;
-

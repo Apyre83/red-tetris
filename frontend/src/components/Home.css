@@ -1,0 +1,98 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    background-image: url('96po75b3dcr21.png');
+    /*background-image: url("1205458.jpg");*/
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.title {
+    font-size: 10em;
+    color: #4caf50;
+    margin-bottom: 20px;
+    font-family: 'tetris', sans-serif;
+}
+
+.home-form {
+    margin-top: 99px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.input-field {
+    background-color: #222;
+    color: #4caf50;
+    width: 300px;
+    padding: 10px;
+    font-size: 1em;
+    border: 2px solid #333;
+    border-radius: 5px;
+}
+
+.home-button {
+    background-color: #333;
+    border: 1px solid #4caf50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.home-button:hover {
+    background-color: #4caf50;
+    color: black;
+}
+
+@keyframes fallLikeTetromino {
+    0%, 19% { transform: translateY(-93vh); opacity: 1; }
+    20%, 39% { transform: translateY(-80vh); opacity: 1; }
+    40%, 59% { transform: translateY(-60vh); opacity: 1; }
+    60%, 79% { transform: translateY(-40vh); opacity: 1; }
+    80%, 99% { transform: translateY(-20vh); opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+
+.error-message {
+    color: #ff3860;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 10px 0 rgba(255, 56, 96, 0.5);
+    border: 1px solid #ff3860;
+    font-weight: bold;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: fallLikeTetromino 5s ease-out forwards;
+}
