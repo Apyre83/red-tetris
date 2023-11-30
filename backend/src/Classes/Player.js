@@ -40,7 +40,10 @@ class Player {
         this.name = name;
         this.ranking = 0;
         this.allTimeScores = 0;
-        this.isinRoom = 0;
+
+        this.listOfPieces = undefined;
+        this.isinRoom = false;
+        this.gameRoom = undefined;
         this.isDead = false;
         this.idActualPiece = undefined;
         this.actualPiece = undefined;
@@ -56,6 +59,7 @@ class Player {
     }
 
     createBoard() {
+        // Board est sous forme Board[y][x]
         const board = [];
         for (let i = 0; i < ROWS; i++) {
             const row = [];
@@ -84,6 +88,18 @@ class Player {
         }
         console.log(allColsFull);
         return shadow;
+    }
+
+    moveRigth() {
+        const width = this.actualPiece.width;
+        const x     = this.actualPiece.x;
+        const y     = this.actualPiece.y;
+        for (let i = 0 ; i < width ; i++) {
+            if (this.board[y - i][x + width][0] + this.piece[y - i][x + width - 1][0] > 1)
+                return;
+        }
+        this.actualPiece.y++;
+        // socket envoyer
     }
     
     rotateLeft() {

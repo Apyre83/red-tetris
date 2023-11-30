@@ -6,7 +6,8 @@ class Piece {
         this.data = this.getData();
         this.letter = this.data.letter;
         this.x = this.data.x;
-        this.y = 0;
+        this.y = this.tetromino[0].length - 1;
+        this.width = this.tetromino[0].length;
         this.color = this.data.color;
         this.tetromino = this.data.tetromino;
     }
