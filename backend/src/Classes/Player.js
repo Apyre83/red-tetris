@@ -3,38 +3,9 @@ const colors            = require('../constants/colors');
 // const ROWS = 4;
 // const COLS = 4;
 
-// class Player:	
-// int		_id;	
-// Socket	_socket;	
-// list*	_board;	
-// Game*	_isInRoom;	
-// bool	_isDead;	
-// int		_ranking;	
-// char*	_name;	
-// int		_idActualPiece;		
-// Piece	_actualPiece;	
-// Int		_timeSinceLastAction;	
-// int		_allTimeScores;	
-// int		_scoreActualGame;
-
-// function :	function moveLeft() => void;	
-// function moveRight() => void;	
-// function moveDown() => void;	
-// function DirectBotton() => void;	
-// function rotateRight() => void;	
-// function rotateLeft() => void;	
-
-// function updateBoard() => void;
-
-// function pause() => void;		
-// function	generateNewPiece() => piece	
-// function	isDead => booleen	
-// function sendShadowToRoom() => void	
-// function	fallPiece() => void 	
-// function sendShadowToRoom() => void;
-
 class Player {
-    constructor(id, socket, name) {
+    constructor(io, id, socket, name) {
+        this.io = io;
         this.id = id;
         this.socket = socket;
         this.name = name;
@@ -43,7 +14,6 @@ class Player {
 
         this.listOfPieces = undefined;
         this.isinRoom = false;
-        this.gameRoom = undefined;
         this.isDead = false;
         this.idActualPiece = undefined;
         this.actualPiece = undefined;
@@ -69,6 +39,23 @@ class Player {
             board.push(row);
         }
         return board;
+    }
+
+    updateBoard(mvt) {
+        
+        const oldPiece = this.actualPiece;
+        switch (mvt) {
+            case 'right':
+                this.actualPiece.y++;
+        }
+        const x = this.actualPiece.x;
+        const y = this.actualPiece.y;
+
+        for (let row = 0 ; row < this.actualPiece.width ; row++) {
+            for (let col = 0; col < this.actualPiece.width ; col++) {
+                this.board[]
+            }
+        }
     }
 
     makeShadow() {
@@ -98,8 +85,8 @@ class Player {
             if (this.board[y - i][x + width][0] + this.piece[y - i][x + width - 1][0] > 1)
                 return;
         }
-        this.actualPiece.y++;
-        // socket envoyer
+        // this.actualPiece.y++;
+        this.updateBoard('right');
     }
     
     rotateLeft() {
