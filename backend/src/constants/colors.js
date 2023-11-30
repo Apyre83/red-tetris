@@ -6,6 +6,7 @@ const blue = '#005a9d';
 const red = '#ee2733';
 const green = '#4eb748';
 const empty = '#ffffff';
+const full = '#000000';
 module.exports = {
     cyan,
     yellow,
@@ -14,5 +15,6 @@ module.exports = {
     blue,
     red,
     green,
-    empty
+    empty,
+    full
 }
