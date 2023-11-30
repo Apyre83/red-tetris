@@ -15,33 +15,32 @@ function Home() {
     window.location.href = `#${uniqueRoomName}${playerName ? '[' + playerName + ']' : ''}`;
   };
 
-  // Vous pouvez ajouter ici une fonction pour générer un nom de salle unique
-  // Par exemple, en utilisant une combinaison de date/heure et un identifiant aléatoire
+  function generateUniqueRoomName() {
+    return Math.random().toString(36).substr(2, 9);
+  }
 
   return (
-    <form onSubmit={handleJoinGame}>
-      <input
-        type="text"
-        placeholder="Nom de la salle"
-        value={room}
-        onChange={(e) => setRoom(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Votre nom"
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-      />
-      <button type="submit">Rejoindre</button>
-      <button onClick={handleCreateGame}>Créer une partie</button>
-    </form>
+    <div>
+      <h1>Red Tetris</h1>
+      <form>
+        <input
+          type="text"
+          placeholder="Nom de la salle"
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Votre nom"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+        />
+        <button onClick={handleJoinGame}>Rejoindre</button>
+        <button onClick={handleCreateGame}>Créer une partie</button>
+      </form>
+    </div>
   );
 }
 
 export default Home;
-
-// Exemple de fonction pour générer un nom de salle unique
-function generateUniqueRoomName() {
-  return Math.random().toString(36).substr(2, 9);
-}
 
