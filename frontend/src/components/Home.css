@@ -15,8 +15,9 @@ html, body {
     width: 100vw;
     margin: 0;
     padding: 0;
-    background-image: url('96po75b3dcr21.png');
+    /* background-image: url('../../public/96po75b3dcr21.png'); */
     /*background-image: url("1205458.jpg");*/
+    background-color: #222;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -24,10 +25,10 @@ html, body {
 }
 
 .title {
-    font-size: 10em;
+    font-size: 4em; /* Taille ajustée */
     color: #4caf50;
     margin-bottom: 20px;
-    font-family: 'tetris', sans-serif;
+    font-family: 'Tetris', sans-serif; /* Assurez-vous que cette police est chargée */
 }
 
 .home-form {

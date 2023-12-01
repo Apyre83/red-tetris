@@ -1,42 +1,31 @@
-// Action Types
+import io from 'socket.io-client';
+
 export const SOCKET_CONNECT = 'SOCKET_CONNECT';
 export const SOCKET_DISCONNECT = 'SOCKET_DISCONNECT';
 export const SOCKET_MESSAGE_RECEIVED = 'SOCKET_MESSAGE_RECEIVED';
 export const SOCKET_ERROR = 'SOCKET_ERROR';
 
-// Action Creator pour établir la connexion WebSocket
 export const connectWebSocket = () => {
     return (dispatch) => {
-        let socket = null;
-        try {
-            socket = new WebSocket('localhost:3000', 'echo-protocol');
-			console.log("socket", socket);
-        } catch (err) {
-            dispatch({type: SOCKET_ERROR, payload: err});
-            return;
-        }
+        const socket = io('http://localhost:8080');
 
-        socket.onopen = () => {
-            dispatch({type: SOCKET_CONNECT});
-        };
+        socket.on('connect', () => {
+            console.log("Connected to Socket.IO server");
+            dispatch({ type: 'SET_SOCKET_REFERENCE', payload: socket });
+        });
 
-        socket.onmessage = (event) => {
-            const message = event.data;
-            dispatch({type: SOCKET_MESSAGE_RECEIVED, payload: message});
-        };
-
-        socket.onerror = (error) => {
-            dispatch({type: SOCKET_ERROR, payload: error});
-        };
-
-        socket.onclose = () => {
+        socket.on('disconnect', () => {
             dispatch({type: SOCKET_DISCONNECT});
-        };
+        });
 
-        // Vous pouvez également ajouter d'autres gestionnaires d'événements si nécessaire
+        socket.on('error', (error) => {
+            dispatch({type: SOCKET_ERROR, payload: error});
+        });
 
-        // Ajoutez une référence au socket dans le state de l'application pour l'utiliser ailleurs
+        socket.on('message', (message) => {
+            dispatch({type: SOCKET_MESSAGE_RECEIVED, payload: message});
+        });
+
         dispatch({type: 'SET_SOCKET_REFERENCE', payload: socket});
     };
 };
-

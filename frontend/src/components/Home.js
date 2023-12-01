@@ -1,12 +1,29 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import './Home.css';
 
 function Home() {
+    const socket = useSelector(state => state.socket.socket); // Assurez-vous que le chemin est correct
+
+
     const [room, setRoom] = useState('');
     const [playerName, setPlayerName] = useState('');
     const [error, setError] = useState('');
     const [errorCount, setErrorCount] = useState(0);
 
+    useEffect(() => {
+        console.log("Socket: ", socket);
+        if (socket) {
+            socket.on('GAME_CREATED_OK', (data) => {
+                console.log("Game created successfully: ", data);
+                // TODO
+            });
+
+            return () => {
+                if (socket) socket.off('GAME_CREATED_OK');
+            };
+        }
+    }, [socket]);
 
     const handleJoinGame = (e) => {
         e.preventDefault();
@@ -32,6 +49,16 @@ function Home() {
         }
         setError('');
         const uniqueRoomName = generateUniqueRoomName();
+
+        if (socket) {
+            socket.emit('CREATE_GAME',{
+                room: uniqueRoomName,
+                playerName
+            });
+        } else {
+            console.error('Socket not connected');
+        }
+
         window.location.href = `#${uniqueRoomName}[${playerName}]`;
     };
 
@@ -42,7 +69,7 @@ function Home() {
     return (
         <div className="home-container">
           {error && <div key={errorCount} className="error-message">{error}</div>}
-            {/*<h1 className="title">TETRIS</h1>*/}
+            <h1 className="title">Tetris Game</h1>
             <form className="home-form">
                 <input
                     className="input-field"
