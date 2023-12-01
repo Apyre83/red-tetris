@@ -66,18 +66,13 @@ class Player {
         const x = this.actualPiece.x;
         const y = this.actualPiece.y;
 
-        console.log("tetro:" + this.actualPiece.id);
-
         for (let row = 0 ; row < this.actualPiece.width ; row++) {
             for (let col = 0; col < this.actualPiece.width ; col++) {
                 if (oldPiece) {
-                    if (oldPiece[oldPiece.y - row][oldPiece.x + col][0] === 1)
+                    if (oldPiece.tetromino[row][col][0] === 1) {
                         this.board[oldPiece.y - row][oldPiece.x + col] = [0, colors.empty];
+                    }
                 }
-                console.log("y: " + y);
-                console.log("row: " + row);
-                console.log("x: " + x);
-                console.log("col: " + col);
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
                     if (this.board[y - row][x + col][0] != 0) {
                         console.log(`Game Over`); // TODO add function 
@@ -105,7 +100,6 @@ class Player {
                 }
             }
         }
-        // console.log(allColsFull);
         return shadow;
     }
 
@@ -117,7 +111,7 @@ class Player {
             if (this.board[y - i][x + width][0] + this.piece[y - i][x + width - 1][0] > 1)
                 return;
         }
-        const oldPiece = this.actualPiece;
+        const oldPiece = this.actualPiece.copy();
         this.actualPiece.y++;
         this.updateBoard(oldPiece);
     }
@@ -128,15 +122,32 @@ class Player {
     }
 
     rotateRight() {
+        // TODO CHANGER
         const rotated = this.actualPiece.rotate('right');
         updateBoard();
     }
+
+    directBottom() {
+        const oldPiece = this.actualPiece.copy();
+        while (this.actualPiece.y + 1 < ROWS) {
+            for (let col = 0 ; col < this.actualPiece.width ; col++) {
+                if (this.board[this.actualPiece.y + 1][this.actualPiece.x + col][0] != 0) {
+                    this.updateBoard(oldPiece)
+                    return;
+                }   
+            }
+            this.actualPiece.y++;
+        }
+        this.updateBoard(oldPiece);
+    }
+
 
     printBoard() {
         for (let row = 0; row < player.board.length; row++) {
             const rowValues = player.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
             console.log(`${rowValues.join()}`);
         }
+        console.log(`\n-------\n`);
     }
 }
 
@@ -144,8 +155,11 @@ class Player {
 
 const player = new Player(1, 2, 3);
 player.printBoard();
-console.log('Bloup');
+
 player.generateNewPiece();
+player.printBoard();
+
+player.directBottom();
 player.printBoard();
 
 
