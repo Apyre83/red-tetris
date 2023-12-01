@@ -1,4 +1,4 @@
-const { ROWS, COLS }    = require('../constants/numbers');
+const { ROWS, COLS, BORDER_WIDTH }    = require('../constants/numbers');
 const colors            = require('../constants/colors');
 const Piece             = require('./Piece');
 // const ROWS = 4;
@@ -18,7 +18,7 @@ class Player {
         this.isinRoom = false;
         this.isDead = false;
         // this.idActualPiece = undefined;
-        this.idActualPiece = 0;
+        this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0;
         this.board = this.createBoard();
@@ -32,23 +32,30 @@ class Player {
     }
 
     createBoard() {
-        // Board est sous forme Board[y][x]
         const board = [];
-        for (let i = 0; i < ROWS + 1; i++) {
-            const row = [];
-            for (let j = 0; j < COLS + 2; j++) {
-                if (i === ROWS) {
-                    row.push([1, colors.border]);
-                } else {
-                    if (j === 0 || j === COLS + 1) {
-                        row.push([1, colors.border]);
-                    } else {
-                        row.push([0, colors.empty]);
-                    }
-                }
+    
+        const createEmptyRow = () => {
+            const emptyRow = [];
+            for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+                emptyRow.push([1, colors.border]);
             }
-            board.push(row);
+            for (let i = 0 ; i < COLS ; i++) {
+                emptyRow.push([0, colors.empty]);
+            }
+            for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+                emptyRow.push([1, colors.border]);
+            }
+            return emptyRow;
         }
+    
+        for (let i = 0 ; i < ROWS ; i++) {
+            board.push(createEmptyRow());
+        }
+
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
+        }
+    
         return board;
     }
 
@@ -57,7 +64,9 @@ class Player {
             this.idActualPiece = 0;
         else 
             this.idActualPiece++;
-        this.actualPiece = new Piece(this.idActualPiece);
+        console.log(`id`+ this.listOfPieces[this.idActualPiece]);
+        this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
+        // TODO checker si game over 
         this.updateBoard();
     }
 
@@ -70,21 +79,20 @@ class Player {
             for (let col = 0; col < this.actualPiece.width ; col++) {
                 if (oldPiece) {
                     if (oldPiece.tetromino[row][col][0] === 1) {
-                        this.board[oldPiece.y - row][oldPiece.x + col] = [0, colors.empty];
+                        this.board[oldPiece.y + row][oldPiece.x + col] = [0, colors.empty];
                     }
                 }
+            }
+            for (let col = 0; col < this.actualPiece.width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    if (this.board[y - row][x + col][0] != 0) {
-                        console.log(`Game Over`); // TODO add function 
-                        return;
-                    }
-                    this.board[y - row][x + col] = this.actualPiece.tetromino[row][col];
+                    this.board[y + row][x + col] = this.actualPiece.tetromino[row][col];
                 }
             }
         }
         // this.io.emit('updateBoard', this);
     }
 
+    // VERIFIER
     makeShadow() {
         let shadow = this.createBoard();
         const allColsFull = {};
@@ -103,22 +111,28 @@ class Player {
         return shadow;
     }
 
-    moveRigth() {
+    moveRight() {
         const width = this.actualPiece.width;
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        for (let i = 0 ; i < width ; i++) {
-            if (this.board[y - i][x + width][0] + this.piece[y - i][x + width - 1][0] > 1)
-                return;
+        let isOne = false;
+
+        for (let col = width - 1 ; col >= 0 ; col--) {
+            for (let row = 0 ; row < width ; row++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    isOne = true;
+                    if (this.board[y + row][x + col + 1][0] > 0) {
+                        console.log(`Can't move right`);
+                        return;
+                    }
+                }
+            } 
+            if (isOne === true) 
+                break;
         }
         const oldPiece = this.actualPiece.copy();
-        this.actualPiece.y++;
+        this.actualPiece.x++;
         this.updateBoard(oldPiece);
-    }
-    
-    rotateLeft() {
-        this.actualPiece = this.actualPiece.rotate('left');
-        updateBoard();
     }
 
     rotateRight() {
@@ -159,7 +173,16 @@ player.printBoard();
 player.generateNewPiece();
 player.printBoard();
 
-player.directBottom();
+player.moveRight();
+player.moveRight();
+player.moveRight();
+player.moveRight();
+player.printBoard();
+
+player.moveRight();
+// player.moveRight();
+// player.moveRight();
+// player.moveRight();
 player.printBoard();
 
 
