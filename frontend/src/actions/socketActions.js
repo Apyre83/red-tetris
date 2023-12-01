@@ -9,7 +9,8 @@ export const connectWebSocket = () => {
     return (dispatch) => {
         let socket = null;
         try {
-            socket = new WebSocket('ws://<your_server_address>');
+            socket = new WebSocket('localhost:3000', 'echo-protocol');
+			console.log("socket", socket);
         } catch (err) {
             dispatch({type: SOCKET_ERROR, payload: err});
             return;

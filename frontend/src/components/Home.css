@@ -70,23 +70,28 @@ html, body {
 }
 
 @keyframes fallLikeTetromino {
-    0%, 19% { transform: translateY(-93vh); opacity: 1; }
-    20%, 39% { transform: translateY(-80vh); opacity: 1; }
-    40%, 59% { transform: translateY(-60vh); opacity: 1; }
-    60%, 79% { transform: translateY(-40vh); opacity: 1; }
-    80%, 99% { transform: translateY(-20vh); opacity: 1; }
+    0%, 19% { transform: translateY(-85vh); opacity: 1; }
+    20%, 39% { transform: translateY(-65vh); opacity: 1; }
+    40%, 59% { transform: translateY(-46vh); opacity: 1; }
+    60%, 79% { transform: translateY(-31vh); opacity: 1; }
+    80%, 99% { transform: translateY(-16vh); opacity: 1; }
     100% { transform: translateY(0); opacity: 1; }
 }
 
 
 .error-message {
-    color: #ff3860;
-    background-color: rgba(0, 0, 0, 0.7);
+    color: #000860;
+    background-color: rgba(200, 0, 0, 1);
     padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    width: 300px;
+    border-radius: 10px;
+	border: 10px solid #000000;
+    margin-bottom: 31px;
+    width: 260px;
+	height: 40px;
     text-align: center;
+	font-size: 20px;
+	display: flex;
+	align-items: center;
     box-shadow: 0 0 10px 0 rgba(255, 56, 96, 0.5);
     border: 1px solid #ff3860;
     font-weight: bold;
