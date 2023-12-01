@@ -1,5 +1,6 @@
 const { ROWS, COLS }    = require('../constants/numbers');
 const colors            = require('../constants/colors');
+const Piece             = require('./Piece');
 // const ROWS = 4;
 // const COLS = 4;
 
@@ -12,10 +13,12 @@ class Player {
         this.ranking = 0;
         this.allTimeScores = 0;
 
-        this.listOfPieces = undefined;
+        // this.listOfPieces = undefined;
+        this.listOfPieces = [2,1,5,6,6,0,3,4];
         this.isinRoom = false;
         this.isDead = false;
-        this.idActualPiece = undefined;
+        // this.idActualPiece = undefined;
+        this.idActualPiece = 0;
         this.actualPiece = undefined;
         this.actualScore = 0;
         this.board = this.createBoard();
@@ -31,31 +34,60 @@ class Player {
     createBoard() {
         // Board est sous forme Board[y][x]
         const board = [];
-        for (let i = 0; i < ROWS; i++) {
+        for (let i = 0; i < ROWS + 1; i++) {
             const row = [];
-            for (let j = 0; j < COLS; j++) {
-                row.push([0, colors.empty]);
+            for (let j = 0; j < COLS + 2; j++) {
+                if (i === ROWS) {
+                    row.push([1, colors.border]);
+                } else {
+                    if (j === 0 || j === COLS + 1) {
+                        row.push([1, colors.border]);
+                    } else {
+                        row.push([0, colors.empty]);
+                    }
+                }
             }
             board.push(row);
         }
         return board;
     }
 
-    updateBoard(mvt) {
+    generateNewPiece() {
+        if (this.idActualPiece === this.listOfPieces.length - 1)
+            this.idActualPiece = 0;
+        else 
+            this.idActualPiece++;
+        this.actualPiece = new Piece(this.idActualPiece);
+        this.updateBoard();
+    }
+
+    updateBoard(oldPiece) {
         
-        const oldPiece = this.actualPiece;
-        switch (mvt) {
-            case 'right':
-                this.actualPiece.y++;
-        }
         const x = this.actualPiece.x;
         const y = this.actualPiece.y;
 
+        console.log("tetro:" + this.actualPiece.id);
+
         for (let row = 0 ; row < this.actualPiece.width ; row++) {
             for (let col = 0; col < this.actualPiece.width ; col++) {
-                this.board[]
+                if (oldPiece) {
+                    if (oldPiece[oldPiece.y - row][oldPiece.x + col][0] === 1)
+                        this.board[oldPiece.y - row][oldPiece.x + col] = [0, colors.empty];
+                }
+                console.log("y: " + y);
+                console.log("row: " + row);
+                console.log("x: " + x);
+                console.log("col: " + col);
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    if (this.board[y - row][x + col][0] != 0) {
+                        console.log(`Game Over`); // TODO add function 
+                        return;
+                    }
+                    this.board[y - row][x + col] = this.actualPiece.tetromino[row][col];
+                }
             }
         }
+        // this.io.emit('updateBoard', this);
     }
 
     makeShadow() {
@@ -73,7 +105,7 @@ class Player {
                 }
             }
         }
-        console.log(allColsFull);
+        // console.log(allColsFull);
         return shadow;
     }
 
@@ -85,8 +117,9 @@ class Player {
             if (this.board[y - i][x + width][0] + this.piece[y - i][x + width - 1][0] > 1)
                 return;
         }
-        // this.actualPiece.y++;
-        this.updateBoard('right');
+        const oldPiece = this.actualPiece;
+        this.actualPiece.y++;
+        this.updateBoard(oldPiece);
     }
     
     rotateLeft() {
@@ -96,13 +129,24 @@ class Player {
 
     rotateRight() {
         const rotated = this.actualPiece.rotate('right');
-
         updateBoard();
+    }
+
+    printBoard() {
+        for (let row = 0; row < player.board.length; row++) {
+            const rowValues = player.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+            console.log(`${rowValues.join()}`);
+        }
     }
 }
 
 // TESTS
+
 const player = new Player(1, 2, 3);
-console.log(player.board);
+player.printBoard();
 console.log('Bloup');
-console.log(player.shadow);
+player.generateNewPiece();
+player.printBoard();
+
+
+// console.log(player.shadow);
