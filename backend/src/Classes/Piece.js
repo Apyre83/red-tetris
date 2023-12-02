@@ -69,10 +69,10 @@ class Piece {
             return matrix;
         }
 
-        function copyMatrix(matrix) {
-            const newMatrix = matrix.map(row => [...row]);
-            return newMatrix;
-        }
+        // function copyMatrix(matrix) {
+        //     const newMatrix = matrix.map(row => [...row]);
+        //     return newMatrix;
+        // }
 
         function rotate90(matrix) {
             const newMatrix = createEmptyTetromino(rows, cols);
@@ -93,29 +93,15 @@ class Piece {
                 rotatedTetromino = rotate90(rotate90(rotate90(this.tetromino)));
                 break;
             default:
-                rotatedTetromino = copyMatrix(this.tetromino);
+                rotatedTetromino = JSON.parse(JSON.stringify(this.tetromino));
         }
         return rotatedTetromino;
     }
-
-    // Normalement useless
-    // copy () {
-    //     const copy = new Piece(this.id);
-    //     copy.id = this.id;
-    //     copy.data = this.data
-    //     copy.letter = this.letter;
-    //     copy.x = this.x;
-    //     copy.tetromino = this.tetromino;
-    //     copy.y = this.y;
-    //     copy.width = this.width;
-    //     copy.color = this.color;
-    //     return copy;
-    // }
 }
 
 module.exports = Piece;
 
-// const piece = new Piece(0);
+// const piece = new Piece(2);
 // console.log(piece.tetromino);
 // console.log(`\n\n\n`)
 // console.log(piece.rotate('right'));

@@ -126,65 +126,131 @@ class Player {
         return shadow;
     }
 
+    moveLeft() {
+        const width = this.actualPiece.width;
+        const x     = this.actualPiece.x;
+        const y     = this.actualPiece.y;
+        let isTile = false;
+
+        for (let col = 0 ; col < width ; col++) {
+            for (let row = 0 ; row < width ; row++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    isTile = true;
+                    if (this.board[y + row][x + col - 1][0] > 0) {
+                        console.log(`Can't move left`);
+                        return;
+                    }
+                }
+            } 
+            if (isTile === true) 
+                break;
+        }
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        this.actualPiece.x--;
+        this.updateBoard(oldPiece);
+    }
+
     moveRight() {
         const width = this.actualPiece.width;
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isOne = false;
+        let isTile = false;
 
         for (let col = width - 1 ; col >= 0 ; col--) {
             for (let row = 0 ; row < width ; row++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isOne = true;
+                    isTile = true;
                     if (this.board[y + row][x + col + 1][0] > 0) {
                         console.log(`Can't move right`);
                         return;
                     }
                 }
             } 
-            if (isOne === true) 
+            if (isTile === true) 
                 break;
         }
-        const oldPiece = {...this.actualPiece};
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         this.actualPiece.x++;
         this.updateBoard(oldPiece);
     }
 
-    moveDown(toBottom) {
+    moveDown(goToBottom) {
         const width = this.actualPiece.width;
-        const oldPiece = {...this.actualPiece};
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isOne = false;
+        let isTile = false;
 
         for (let row = width - 1 ; row >= 0 ; row--) {
             for (let col = 0 ; col < width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isOne = true;
+                    isTile = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
                         return true;
                     }
                 }
             } 
-            if (isOne === true) 
+            if (isTile === true) 
                 break;
         }
         this.actualPiece.y++;
-        if (toBottom)
+        if (goToBottom)
             return false;
         this.updateBoard(oldPiece);
     }
 
-    rotateRight() {
-        // TODO CHANGER
-        const rotated = this.actualPiece.rotate('right');
-        updateBoard();
+    canRotate(rotatedTetromino) {
+        const   width = this.actualPiece.width;
+        const   board = JSON.parse(JSON.stringify(this.board));
+        const   x     = this.actualPiece.x;
+        const   y     = this.actualPiece.y;
+
+        // replace all the 1 of the actual piece by zero in a copy of the board
+        for (let row = 0 ; row < width ; row++) {
+            for (let col = 0; col < width ; col++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    board[y + row][x + col] = [0, colors.empty];
+                }
+            }
+        }
+
+        // check if rotatedTetromino fits in the copy of the board
+        for (let row = 0 ; row < width ; row++) {   
+            for (let col = 0; col < width ; col++) {
+                    if (rotatedTetromino[row][col][0] === 1) {
+                        if (board[y + row][x + col][0] === 1) {
+                            console.log(`Can't rotate`);
+                            return false;
+                        }
+                    }
+            }
+        }
+        return true;
     }
 
-    // TODO change
+    rotateRight() {
+        const   oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const   rotatedTetromino = this.actualPiece.rotate('right');
+
+        if (this.canRotate(rotatedTetromino) === true) {
+            this.actualPiece.tetromino = rotatedTetromino;
+            this.updateBoard(oldPiece);
+        }
+    }
+
+    rotateLeft() {
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const   rotatedTetromino = this.actualPiece.rotate('left');
+
+        if (this.canRotate(rotatedTetromino) === true) {
+            this.actualPiece.tetromino = rotatedTetromino;
+            this.updateBoard(oldPiece);
+        }
+    }
+
     directBottom() {
-        const oldPiece = {...this.actualPiece};
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         let isAtBottom = false;
         while (isAtBottom === false) {
             isAtBottom = this.moveDown(true);
@@ -192,31 +258,6 @@ class Player {
         console.log(`At bottom`);
         this.updateBoard(oldPiece);
     }
-
-
-        // directBottom() {
-    //     const piece = this.actualPiece;
-    //     const isOne = false;
-    //     const oldPiece = {...piece};
-    //     while (piece.y + 1 < ROWS) {
-    //         for (let row = piece.width - 1 ; row >= 0 ; row--) {
-    //             for (let col = 0 ; col < piece.width ; col++) {
-    //                 if (piece.tetromino[row][col] === 1) {
-    //                     isOne = true;
-    //                     console.log("x:" + piece.x + " y: " + piece.y);
-    //                     if (this.board[piece.y + row + 1][piece.x + col][0] > 0) {
-    //                         this.updateBoard(oldPiece)
-    //                         console.log(`En bas`);
-    //                         return;
-    //                     }  
-    //                 } 
-    //             }
-    //         }
-    //         piece.y++;
-    //     }
-    //     this.updateBoard(oldPiece);
-    // }
-
 
     printBoard() {
         for (let row = 0; row < player.board.length; row++) {
@@ -235,7 +276,7 @@ player.printBoard();
 player.generateNewPiece();
 player.printBoard();
 
-player.directBottom();
+player.rotateLeft();
 player.printBoard();
 
 
