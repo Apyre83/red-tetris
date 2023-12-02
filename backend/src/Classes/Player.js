@@ -1,8 +1,6 @@
 const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
 const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
-// const ROWS = 4;
-// const COLS = 4;
 
 class Player {
     constructor(io, id, socket, name) {
@@ -20,40 +18,34 @@ class Player {
         this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0;
-        this.board = this.createBoard();
-        // this.board = [
-        //     [[0, colors.empty], [0, colors.empty],  [1, colors.cyan],  [0, colors.empty]],
-        //     [[0, colors.empty], [1, colors.cyan],  [1, colors.cyan],  [0, colors.empty]],
-        //     [[1, colors.cyan],  [1, colors.cyan],  [1, colors.cyan],  [0, colors.empty]],
-        //     [[0, colors.empty], [0, colors.empty],  [0, colors.empty],  [0, colors.empty]],
-        // ]
+        this.board = this.createBoard(ROWS);
         this.shadow = this.makeShadow();
     }
 
-    createBoard() {
-        const board = [];
-    
-        const createEmptyRow = () => {
-            const emptyRow = [];
-            for (let i = 0 ; i < BORDER_WIDTH ; i++) {
-                emptyRow.push([1, colors.border]);
-            }
-            for (let i = 0 ; i < COLS ; i++) {
-                emptyRow.push([0, colors.empty]);
-            }
-            for (let i = 0 ; i < BORDER_WIDTH ; i++) {
-                emptyRow.push([1, colors.border]);
-            }
-            return emptyRow;
+    createEmptyRow() {
+        const emptyRow = [];
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            emptyRow.push([1, colors.border]);
         }
-    
-        for (let i = 0 ; i < ROWS ; i++) {
-            board.push(createEmptyRow());
+        for (let i = 0 ; i < COLS ; i++) {
+            emptyRow.push([0, colors.empty]);
         }
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            emptyRow.push([1, colors.border]);
+        }
+        return emptyRow;
+    }
 
+    createBoard(nbEmptyLines) {
+        const board = [];
+        
+        for (let i = 0 ; i < nbEmptyLines ; i++) {
+            board.push(this.createEmptyRow());
+        }
         for (let i = 0 ; i < BORDER_WIDTH ; i++) {
             board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
         }
+
     
         return board;
     }
@@ -82,6 +74,39 @@ class Player {
         this.updateBoard();
     }
 
+    supprLines(completeLines) {
+        // TODO io.emit('LignesAFaireClignoter');
+        console.log(completeLines.length);
+        for (let i = completeLines.length - 1 ; i >= 0 ; i--) {
+            const rowToSuppr = completeLines[i];
+            if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
+                this.board.splice(rowToSuppr, 1);
+            }
+        }
+        for (let i = 0 ; i < completeLines.length ; i++) {
+            this.board.unshift(this.createEmptyRow());
+        }
+    }
+
+    checkCompleteLines() {
+        let oneLineComplete = true;
+        let completeLines = [];
+        for (let row = ROWS - BORDER_WIDTH - 1 ; row >= 0 ; row--) {
+            for (let col = BORDER_WIDTH ; col < COLS ; col++) {
+                if (this.board[row][col][0] !== 1) {
+                    oneLineComplete = false;
+                    break;
+                }
+            }
+            if (oneLineComplete) {
+                completeLines.push(row);
+                oneLineComplete = true;
+            }
+        }
+        this.supprLines(completeLines);
+        // TODO io.emit('lineDone', completeLines.lenght);
+    }
+
     updateBoard(oldPiece) {
         
         const x = this.actualPiece.x;
@@ -103,14 +128,14 @@ class Player {
                     }
             }
         }
+        this.checkCompleteLines();
         this.makeShadow();
         // this.io.emit('updateBoard', this);
     }
 
     makeShadow() {
-        console.log(`This board`)
         this.printBoard();
-        let shadow = this.createBoard();
+        let shadow = this.createBoard(ROWS);
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
             for (let j = BORDER_WIDTH; j < COLS ; j++) {
@@ -296,5 +321,9 @@ player.moveLeft();
 player.moveLeft()
 player.moveDown();
 player.printBoard();
+player.generateNewPiece();
 
-player.printShadow();
+const toSuppr = [2,20,21];
+console.log("Ici" + toSuppr.length);
+player.supprLines(toSuppr);
+player.printBoard();
