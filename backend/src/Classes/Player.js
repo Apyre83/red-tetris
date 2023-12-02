@@ -1,8 +1,6 @@
 const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
 const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
-// const ROWS = 4;
-// const COLS = 4;
 
 class Player {
     constructor(io, id, socket, name) {
@@ -20,41 +18,37 @@ class Player {
         this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0;
-        this.board = this.createBoard();
-        // this.board = [
-        //     [[0, colors.empty], [0, colors.empty],  [1, colors.cyan],  [0, colors.empty]],
-        //     [[0, colors.empty], [1, colors.cyan],  [1, colors.cyan],  [0, colors.empty]],
-        //     [[1, colors.cyan],  [1, colors.cyan],  [1, colors.cyan],  [0, colors.empty]],
-        //     [[0, colors.empty], [0, colors.empty],  [0, colors.empty],  [0, colors.empty]],
-        // ]
+        this.board = this.createBoard(ROWS);
         this.shadow = this.makeShadow();
     }
 
-    createBoard() {
-        const board = [];
-    
-        const createEmptyRow = () => {
-            const emptyRow = [];
-            for (let i = 0 ; i < BORDER_WIDTH ; i++) {
-                emptyRow.push([1, colors.border]);
-            }
-            for (let i = 0 ; i < COLS ; i++) {
-                emptyRow.push([0, colors.empty]);
-            }
-            for (let i = 0 ; i < BORDER_WIDTH ; i++) {
-                emptyRow.push([1, colors.border]);
-            }
-            return emptyRow;
+    createEmptyRow() {
+        const emptyRow = [];
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            emptyRow.push([1, colors.border]);
         }
-    
-        for (let i = 0 ; i < ROWS ; i++) {
-            board.push(createEmptyRow());
+        for (let i = 0 ; i < COLS ; i++) {
+            emptyRow.push([0, colors.empty]);
         }
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            emptyRow.push([1, colors.border]);
+        }
+        return emptyRow;
+    }
 
+    addBottomBorder(board) {
         for (let i = 0 ; i < BORDER_WIDTH ; i++) {
             board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
         }
-    
+    }
+
+    createBoard(nbEmptyLines) {
+        const board = [];
+        
+        for (let i = 0 ; i < nbEmptyLines ; i++) {
+            board.push(this.createEmptyRow());
+        }
+        this.addBottomBorder(board);    
         return board;
     }
 
@@ -82,6 +76,53 @@ class Player {
         this.updateBoard();
     }
 
+    oneLinePenaly(nbLines) {
+        for (let i = 0 ; i < nbLines ; i++) {
+            this.board.shift();
+            this.addBottomBorder(this.board);
+        }
+        this.updateBoard();
+    }
+
+    supprLines(completeLines) {
+        // TODO io.emit('LignesAFaireClignoter');
+        console.log(completeLines);
+        for (let i = 0 ; i < completeLines.length ; i++) {
+            const rowToSuppr = completeLines[i];
+            if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
+                console.log(`rowtosuppr: ` + rowToSuppr);
+                this.board.splice(rowToSuppr, 1);
+            }
+        }
+        for (let i = 0 ; i < completeLines.length ; i++) {
+            this.board.unshift(this.createEmptyRow());
+        }
+    }
+
+    checkCompleteLines() {
+        console.log(`Board length: ` + this.board.length);
+        let oneLineComplete = true;
+        let completeLines = [];
+        for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
+            for (let col = BORDER_WIDTH ; col < COLS ; col++) {
+                // TODO VERIFIER SI C'EST BORDER
+                if (this.board[row][col][0] !== 1) {
+                    oneLineComplete = false;
+                    break;
+                }
+            }
+            if (oneLineComplete === true) {
+                completeLines.push(row);
+            } else {
+                oneLineComplete = true;
+            }
+        }
+        this.printBoard();
+        this.supprLines(completeLines);
+        console.log(`Complete lines: ` + completeLines);
+        // TODO io.emit('lineDone', completeLines.lenght);
+    }
+
     updateBoard(oldPiece) {
         
         const x = this.actualPiece.x;
@@ -103,14 +144,13 @@ class Player {
                     }
             }
         }
+        this.checkCompleteLines();
         this.makeShadow();
         // this.io.emit('updateBoard', this);
     }
 
     makeShadow() {
-        console.log(`This board`)
-        this.printBoard();
-        let shadow = this.createBoard();
+        let shadow = this.createBoard(ROWS);
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
             for (let j = BORDER_WIDTH; j < COLS ; j++) {
@@ -280,21 +320,18 @@ class Player {
 // TESTS
 
 const player = new Player(1, 2, 3);
-player.printBoard();
 
 player.generateNewPiece();
 player.directBottom();
-player.printBoard();
-
 player.rotateLeft();
-player.printBoard();
-console.log(`Shadow`);
-player.printShadow();
-
 player.generateNewPiece();
 player.moveLeft();
 player.moveLeft()
 player.moveDown();
+player.generateNewPiece();
+
 player.printBoard();
 
-player.printShadow();
+console.log(`Bloup`);
+player.oneLinePenaly(5);
+player.printBoard();
