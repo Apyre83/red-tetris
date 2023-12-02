@@ -1,4 +1,4 @@
-const ROWS = 20;
+const ROWS = 22;
 const COLS = 10;
 const BORDER_WIDTH = 1;
 

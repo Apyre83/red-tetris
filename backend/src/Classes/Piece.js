@@ -26,9 +26,9 @@ class Piece {
                 [[1, colors.yellow], [1, colors.yellow]]]},
 
             { id: 2, letter: 'T', x: 3 + BORDER_WIDTH, color: colors.purple, tetromino: [
+                [[0, colors.empty],  [0, colors.empty],  [0, colors.empty]],
                 [[1, colors.purple], [1, colors.purple], [1, colors.purple]],
-                [[0, colors.empty],  [1, colors.purple], [0, colors.empty]],
-                [[0, colors.empty],  [0, colors.empty],  [0, colors.empty]]]},
+                [[0, colors.empty],  [1, colors.purple], [0, colors.empty]]]},
 
             { id: 3, letter: 'L', x: 3 + BORDER_WIDTH, color: colors.orange, tetromino: [
                 [[0, colors.empty], [1, colors.orange], [0, colors.empty]],
@@ -41,14 +41,14 @@ class Piece {
                 [[1, colors.blue],  [1, colors.blue], [0, colors.empty]]]},
 
             { id: 5, letter: 'Z', x: 3 + BORDER_WIDTH, color: colors.red, tetromino: [
+                [[0, colors.empty], [0, colors.empty], [0, colors.empty]],
                 [[1, colors.red],   [1, colors.red],   [0, colors.empty]],
-                [[0, colors.empty], [1, colors.red],   [1, colors.red]],
-                [[0, colors.empty], [0, colors.empty], [0, colors.empty]]]},
+                [[0, colors.empty], [1, colors.red],   [1, colors.red]]]},
             
             { id: 6, letter: 'S', x: 3 + BORDER_WIDTH, color: colors.green, tetromino: [
+                [[0, colors.empty], [0, colors.empty], [0, colors.empty]],
                 [[0, colors.empty], [1, colors.green], [1, colors.green]],
-                [[1, colors.green], [1, colors.green], [0, colors.empty]],
-                [[0, colors.empty], [0, colors.empty], [0, colors.empty]]]},
+                [[1, colors.green], [1, colors.green], [0, colors.empty]]]},
         ]
         return data[this.id];
     }
@@ -69,10 +69,10 @@ class Piece {
             return matrix;
         }
 
-        function copyMatrix(matrix) {
-            const newMatrix = matrix.map(row => [...row]);
-            return newMatrix;
-        }
+        // function copyMatrix(matrix) {
+        //     const newMatrix = matrix.map(row => [...row]);
+        //     return newMatrix;
+        // }
 
         function rotate90(matrix) {
             const newMatrix = createEmptyTetromino(rows, cols);
@@ -93,28 +93,15 @@ class Piece {
                 rotatedTetromino = rotate90(rotate90(rotate90(this.tetromino)));
                 break;
             default:
-                rotatedTetromino = copyMatrix(this.tetromino);
+                rotatedTetromino = JSON.parse(JSON.stringify(this.tetromino));
         }
         return rotatedTetromino;
-    }
-
-    copy () {
-        const copy = new Piece(this.id);
-        copy.id = this.id;
-        copy.data = this.data
-        copy.letter = this.letter;
-        copy.x = this.x;
-        copy.tetromino = this.tetromino;
-        copy.y = this.y;
-        copy.width = this.width;
-        copy.color = this.color;
-        return copy;
     }
 }
 
 module.exports = Piece;
 
-// const piece = new Piece(0);
+// const piece = new Piece(2);
 // console.log(piece.tetromino);
 // console.log(`\n\n\n`)
 // console.log(piece.rotate('right'));

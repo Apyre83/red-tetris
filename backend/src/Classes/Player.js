@@ -1,6 +1,6 @@
-const { ROWS, COLS, BORDER_WIDTH }    = require('../constants/numbers');
-const colors            = require('../constants/colors');
-const Piece             = require('./Piece');
+const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
+const colors                            = require('../constants/colors');
+const Piece                             = require('./Piece');
 // const ROWS = 4;
 // const COLS = 4;
 
@@ -12,9 +12,8 @@ class Player {
         this.name = name;
         this.ranking = 0;
         this.allTimeScores = 0;
-
         // this.listOfPieces = undefined;
-        this.listOfPieces = [2,1,5,6,6,0,3,4];
+        this.listOfPieces = [6,1,5,6,6,0,3,4];
         this.isinRoom = false;
         this.isDead = false;
         // this.idActualPiece = undefined;
@@ -66,6 +65,19 @@ class Player {
             this.idActualPiece++;
         console.log(`id`+ this.listOfPieces[this.idActualPiece]);
         this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
+
+        for (let row = 0 ; row < this.actualPiece.width ; row++) {
+            for (let col = 0; col < this.actualPiece.width ; col++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    if (this.board[this.actualPiece.y + row][this.actualPiece.x + col][0] != 0) {
+                        console.log(`Game Over`);
+                        // TODO faire fonction Game Over
+                        return;
+                    }
+                    this.board[this.actualPiece.y + row][this.actualPiece.x + col] = this.actualPiece.tetromino[row][col];
+                }
+            }
+        }
         // TODO checker si game over 
         this.updateBoard();
     }
@@ -83,82 +95,182 @@ class Player {
                     }
                 }
             }
+        }
+        for (let row = 0 ; row < this.actualPiece.width ; row++) {   
             for (let col = 0; col < this.actualPiece.width ; col++) {
-                if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    this.board[y + row][x + col] = this.actualPiece.tetromino[row][col];
-                }
+                    if (this.actualPiece.tetromino[row][col][0] === 1) {
+                        this.board[y + row][x + col] = this.actualPiece.tetromino[row][col];
+                    }
             }
         }
+        this.makeShadow();
         // this.io.emit('updateBoard', this);
     }
 
-    // VERIFIER
     makeShadow() {
+        console.log(`This board`)
+        this.printBoard();
         let shadow = this.createBoard();
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
-            for (let j = 0; j < COLS; j++) {
+            for (let j = BORDER_WIDTH; j < COLS ; j++) {
                 if (allColsFull[j]) {
                     shadow[i][j] = [1, colors.full];
                 } else {
-                    if (this.board[i][j][0] != 0) {
+                    if (this.board[i][j][0] !== 0) {
                         allColsFull[j] = true;
                         shadow[i][j] = [1, colors.full];
                     } 
                 }
             }
         }
-        return shadow;
+        this.shadow = shadow;
+    }
+
+    moveLeft() {
+        const width = this.actualPiece.width;
+        const x     = this.actualPiece.x;
+        const y     = this.actualPiece.y;
+        let isTile = false;
+
+        for (let col = 0 ; col < width ; col++) {
+            for (let row = 0 ; row < width ; row++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    isTile = true;
+                    if (this.board[y + row][x + col - 1][0] > 0) {
+                        console.log(`Can't move left`);
+                        return;
+                    }
+                }
+            } 
+            if (isTile === true) 
+                break;
+        }
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        this.actualPiece.x--;
+        this.updateBoard(oldPiece);
     }
 
     moveRight() {
         const width = this.actualPiece.width;
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isOne = false;
+        let isTile = false;
 
         for (let col = width - 1 ; col >= 0 ; col--) {
             for (let row = 0 ; row < width ; row++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isOne = true;
+                    isTile = true;
                     if (this.board[y + row][x + col + 1][0] > 0) {
                         console.log(`Can't move right`);
                         return;
                     }
                 }
             } 
-            if (isOne === true) 
+            if (isTile === true) 
                 break;
         }
-        const oldPiece = this.actualPiece.copy();
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         this.actualPiece.x++;
         this.updateBoard(oldPiece);
     }
 
-    rotateRight() {
-        // TODO CHANGER
-        const rotated = this.actualPiece.rotate('right');
-        updateBoard();
-    }
+    moveDown(goToBottom) {
+        const width = this.actualPiece.width;
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const x     = this.actualPiece.x;
+        const y     = this.actualPiece.y;
+        let isTile = false;
 
-    directBottom() {
-        const oldPiece = this.actualPiece.copy();
-        while (this.actualPiece.y + 1 < ROWS) {
-            for (let col = 0 ; col < this.actualPiece.width ; col++) {
-                if (this.board[this.actualPiece.y + 1][this.actualPiece.x + col][0] != 0) {
-                    this.updateBoard(oldPiece)
-                    return;
-                }   
-            }
-            this.actualPiece.y++;
+        for (let row = width - 1 ; row >= 0 ; row--) {
+            for (let col = 0 ; col < width ; col++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    isTile = true;
+                    if (this.board[y + row + 1][x + col][0] > 0) {
+                        console.log(`Can't move down`);
+                        return true;
+                    }
+                }
+            } 
+            if (isTile === true) 
+                break;
         }
+        this.actualPiece.y++;
+        if (goToBottom)
+            return false;
         this.updateBoard(oldPiece);
     }
 
+    canRotate(rotatedTetromino) {
+        const   width = this.actualPiece.width;
+        const   board = JSON.parse(JSON.stringify(this.board));
+        const   x     = this.actualPiece.x;
+        const   y     = this.actualPiece.y;
+
+        // replace all the 1 of the actual piece by zero in a copy of the board
+        for (let row = 0 ; row < width ; row++) {
+            for (let col = 0; col < width ; col++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    board[y + row][x + col] = [0, colors.empty];
+                }
+            }
+        }
+
+        // check if rotatedTetromino fits in the copy of the board
+        for (let row = 0 ; row < width ; row++) {   
+            for (let col = 0; col < width ; col++) {
+                    if (rotatedTetromino[row][col][0] === 1) {
+                        if (board[y + row][x + col][0] === 1) {
+                            console.log(`Can't rotate`);
+                            return false;
+                        }
+                    }
+            }
+        }
+        return true;
+    }
+
+    rotateRight() {
+        const   oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const   rotatedTetromino = this.actualPiece.rotate('right');
+
+        if (this.canRotate(rotatedTetromino) === true) {
+            this.actualPiece.tetromino = rotatedTetromino;
+            this.updateBoard(oldPiece);
+        }
+    }
+
+    rotateLeft() {
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const   rotatedTetromino = this.actualPiece.rotate('left');
+
+        if (this.canRotate(rotatedTetromino) === true) {
+            this.actualPiece.tetromino = rotatedTetromino;
+            this.updateBoard(oldPiece);
+        }
+    }
+
+    directBottom() {
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        let isAtBottom = false;
+        while (isAtBottom === false) {
+            isAtBottom = this.moveDown(true);
+        }
+        console.log(`At bottom`);
+        this.updateBoard(oldPiece);
+    }
 
     printBoard() {
-        for (let row = 0; row < player.board.length; row++) {
-            const rowValues = player.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+        for (let row = 0; row < this.board.length; row++) {
+            const rowValues = this.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+            console.log(`${rowValues.join()}`);
+        }
+        console.log(`\n-------\n`);
+    }
+
+    printShadow() {
+        for (let row = 0; row < this.shadow.length; row++) {
+            const rowValues = this.shadow[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
             console.log(`${rowValues.join()}`);
         }
         console.log(`\n-------\n`);
@@ -171,19 +283,18 @@ const player = new Player(1, 2, 3);
 player.printBoard();
 
 player.generateNewPiece();
+player.directBottom();
 player.printBoard();
 
-player.moveRight();
-player.moveRight();
-player.moveRight();
-player.moveRight();
+player.rotateLeft();
+player.printBoard();
+console.log(`Shadow`);
+player.printShadow();
+
+player.generateNewPiece();
+player.moveLeft();
+player.moveLeft()
+player.moveDown();
 player.printBoard();
 
-player.moveRight();
-// player.moveRight();
-// player.moveRight();
-// player.moveRight();
-player.printBoard();
-
-
-// console.log(player.shadow);
+player.printShadow();
