@@ -36,17 +36,19 @@ class Player {
         return emptyRow;
     }
 
+    addBottomBorder(board) {
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
+        }
+    }
+
     createBoard(nbEmptyLines) {
         const board = [];
         
         for (let i = 0 ; i < nbEmptyLines ; i++) {
             board.push(this.createEmptyRow());
         }
-        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
-            board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
-        }
-
-    
+        this.addBottomBorder(board);    
         return board;
     }
 
@@ -74,12 +76,21 @@ class Player {
         this.updateBoard();
     }
 
+    oneLinePenaly(nbLines) {
+        for (let i = 0 ; i < nbLines ; i++) {
+            this.board.shift();
+            this.addBottomBorder(this.board);
+        }
+        this.updateBoard();
+    }
+
     supprLines(completeLines) {
         // TODO io.emit('LignesAFaireClignoter');
-        console.log(completeLines.length);
-        for (let i = completeLines.length - 1 ; i >= 0 ; i--) {
+        console.log(completeLines);
+        for (let i = 0 ; i < completeLines.length ; i++) {
             const rowToSuppr = completeLines[i];
             if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
+                console.log(`rowtosuppr: ` + rowToSuppr);
                 this.board.splice(rowToSuppr, 1);
             }
         }
@@ -89,21 +100,26 @@ class Player {
     }
 
     checkCompleteLines() {
+        console.log(`Board length: ` + this.board.length);
         let oneLineComplete = true;
         let completeLines = [];
-        for (let row = ROWS - BORDER_WIDTH - 1 ; row >= 0 ; row--) {
+        for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
             for (let col = BORDER_WIDTH ; col < COLS ; col++) {
+                // TODO VERIFIER SI C'EST BORDER
                 if (this.board[row][col][0] !== 1) {
                     oneLineComplete = false;
                     break;
                 }
             }
-            if (oneLineComplete) {
+            if (oneLineComplete === true) {
                 completeLines.push(row);
+            } else {
                 oneLineComplete = true;
             }
         }
+        this.printBoard();
         this.supprLines(completeLines);
+        console.log(`Complete lines: ` + completeLines);
         // TODO io.emit('lineDone', completeLines.lenght);
     }
 
@@ -134,7 +150,6 @@ class Player {
     }
 
     makeShadow() {
-        this.printBoard();
         let shadow = this.createBoard(ROWS);
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
@@ -305,25 +320,18 @@ class Player {
 // TESTS
 
 const player = new Player(1, 2, 3);
-player.printBoard();
 
 player.generateNewPiece();
 player.directBottom();
-player.printBoard();
-
 player.rotateLeft();
-player.printBoard();
-console.log(`Shadow`);
-player.printShadow();
-
 player.generateNewPiece();
 player.moveLeft();
 player.moveLeft()
 player.moveDown();
-player.printBoard();
 player.generateNewPiece();
 
-const toSuppr = [2,20,21];
-console.log("Ici" + toSuppr.length);
-player.supprLines(toSuppr);
+player.printBoard();
+
+console.log(`Bloup`);
+player.oneLinePenaly(5);
 player.printBoard();
