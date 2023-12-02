@@ -66,6 +66,19 @@ class Player {
             this.idActualPiece++;
         console.log(`id`+ this.listOfPieces[this.idActualPiece]);
         this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
+
+        for (let row = 0 ; row < this.actualPiece.width ; row++) {
+            for (let col = 0; col < this.actualPiece.width ; col++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    if (this.board[this.actualPiece.y + row][this.actualPiece.x + col][0] != 0) {
+                        console.log(`Game Over`);
+                        // TODO faire fonction Game Over
+                        return;
+                    }
+                    this.board[this.actualPiece.y + row][this.actualPiece.x + col] = this.actualPiece.tetromino[row][col];
+                }
+            }
+        }
         // TODO checker si game over 
         this.updateBoard();
     }
@@ -83,10 +96,12 @@ class Player {
                     }
                 }
             }
+        }
+        for (let row = 0 ; row < this.actualPiece.width ; row++) {   
             for (let col = 0; col < this.actualPiece.width ; col++) {
-                if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    this.board[y + row][x + col] = this.actualPiece.tetromino[row][col];
-                }
+                    if (this.actualPiece.tetromino[row][col][0] === 1) {
+                        this.board[y + row][x + col] = this.actualPiece.tetromino[row][col];
+                    }
             }
         }
         // this.io.emit('updateBoard', this);
@@ -130,8 +145,32 @@ class Player {
             if (isOne === true) 
                 break;
         }
-        const oldPiece = this.actualPiece.copy();
+        const oldPiece = {...this.actualPiece};
         this.actualPiece.x++;
+        this.updateBoard(oldPiece);
+    }
+
+    moveDown() {
+        const width = this.actualPiece.width;
+        const x     = this.actualPiece.x;
+        const y     = this.actualPiece.y;
+        let isOne = false;
+
+        for (let row = width - 1 ; row >= 0 ; row--) {
+            for (let col = 0 ; col < width ; col++) {
+                if (this.actualPiece.tetromino[row][col][0] === 1) {
+                    isOne = true;
+                    if (this.board[y + row + 1][x + col][0] > 0) {
+                        console.log(`Can't move down`);
+                        return;
+                    }
+                }
+            } 
+            if (isOne === true) 
+                break;
+        }
+        const oldPiece = {...this.actualPiece};
+        this.actualPiece.y++;
         this.updateBoard(oldPiece);
     }
 
@@ -141,19 +180,46 @@ class Player {
         updateBoard();
     }
 
+    // TODO change
     directBottom() {
-        const oldPiece = this.actualPiece.copy();
+        const oldPiece = {...this.actualPiece};
         while (this.actualPiece.y + 1 < ROWS) {
             for (let col = 0 ; col < this.actualPiece.width ; col++) {
-                if (this.board[this.actualPiece.y + 1][this.actualPiece.x + col][0] != 0) {
+                if (this.board[this.actualPiece.y + this.actualPiece.width][this.actualPiece.x + col][0] != 0) {
                     this.updateBoard(oldPiece)
+                    console.log(`En bas`)
                     return;
                 }   
             }
             this.actualPiece.y++;
         }
+        // Rajouter juste pour decaler d'un mouvement, surement juste move Down
         this.updateBoard(oldPiece);
     }
+
+
+        // directBottom() {
+    //     const piece = this.actualPiece;
+    //     const isOne = false;
+    //     const oldPiece = {...piece};
+    //     while (piece.y + 1 < ROWS) {
+    //         for (let row = piece.width - 1 ; row >= 0 ; row--) {
+    //             for (let col = 0 ; col < piece.width ; col++) {
+    //                 if (piece.tetromino[row][col] === 1) {
+    //                     isOne = true;
+    //                     console.log("x:" + piece.x + " y: " + piece.y);
+    //                     if (this.board[piece.y + row + 1][piece.x + col][0] > 0) {
+    //                         this.updateBoard(oldPiece)
+    //                         console.log(`En bas`);
+    //                         return;
+    //                     }  
+    //                 } 
+    //             }
+    //         }
+    //         piece.y++;
+    //     }
+    //     this.updateBoard(oldPiece);
+    // }
 
 
     printBoard() {
@@ -173,16 +239,9 @@ player.printBoard();
 player.generateNewPiece();
 player.printBoard();
 
-player.moveRight();
-player.moveRight();
-player.moveRight();
-player.moveRight();
+player.moveDown();
 player.printBoard();
-
-player.moveRight();
-// player.moveRight();
-// player.moveRight();
-// player.moveRight();
+player.moveDown();
 player.printBoard();
 
 

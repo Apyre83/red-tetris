@@ -98,18 +98,19 @@ class Piece {
         return rotatedTetromino;
     }
 
-    copy () {
-        const copy = new Piece(this.id);
-        copy.id = this.id;
-        copy.data = this.data
-        copy.letter = this.letter;
-        copy.x = this.x;
-        copy.tetromino = this.tetromino;
-        copy.y = this.y;
-        copy.width = this.width;
-        copy.color = this.color;
-        return copy;
-    }
+    // Normalement useless
+    // copy () {
+    //     const copy = new Piece(this.id);
+    //     copy.id = this.id;
+    //     copy.data = this.data
+    //     copy.letter = this.letter;
+    //     copy.x = this.x;
+    //     copy.tetromino = this.tetromino;
+    //     copy.y = this.y;
+    //     copy.width = this.width;
+    //     copy.color = this.color;
+    //     return copy;
+    // }
 }
 
 module.exports = Piece;
