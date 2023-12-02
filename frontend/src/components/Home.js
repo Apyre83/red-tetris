@@ -14,18 +14,29 @@ function Home() {
     useEffect(() => {
         console.log("Socket: ", socket);
         if (socket) {
-            socket.on('GAME_CREATED_OK', (data) => {
-                console.log("Game created successfully: ", data);
-                // TODO
-            });
-
             return () => {
-                if (socket) socket.off('GAME_CREATED_OK');
             };
         }
     }, [socket]);
 
+    const socketJoinGame = (room, playerName, callback) => {
+        socket.emit('JOIN_GAME', {
+            room,
+            playerName
+        }, (data) => {
+            if (data.code !== 0) {
+                setError(data.error);
+                setErrorCount(prev => prev + 1);
+                return;
+            }
+            console.log("Game joined successfully: ", data);
+            window.location.href = `#${data.room}[${data.playerName}]`;
+        });
+    }
+
     const handleJoinGame = (e) => {
+        if (!socket) { console.error('Socket not connected'); return; }
+
         e.preventDefault();
         if (!playerName) {
             setError('Veuillez saisir un nom.');
@@ -38,10 +49,12 @@ function Home() {
             return;
         }
         setError('');
-        window.location.href = `#${room}[${playerName}]`;
+        socketJoinGame(room, playerName);
     };
 
     const handleCreateGame = (e) => {
+        if (!socket) { console.error('Socket not connected'); return; }
+
         e.preventDefault();
         if (!playerName) {
             setError('Veuillez saisir un nom.');
@@ -50,16 +63,20 @@ function Home() {
         setError('');
         const uniqueRoomName = generateUniqueRoomName();
 
-        if (socket) {
-            socket.emit('CREATE_GAME',{
-                room: uniqueRoomName,
-                playerName
-            });
-        } else {
-            console.error('Socket not connected');
-        }
-
-        window.location.href = `#${uniqueRoomName}[${playerName}]`;
+        socket.emit('CREATE_GAME',{
+            room: uniqueRoomName,
+            playerName
+        }, (data) => {
+            console.log("Game created successfully: ", data);
+            if (data.code !== 0) {
+                setError(data.error);
+                setErrorCount(prev => prev + 1);
+                return;
+            }
+            else {
+                socketJoinGame(uniqueRoomName, playerName);
+            }
+        });
     };
 
     function generateUniqueRoomName() {

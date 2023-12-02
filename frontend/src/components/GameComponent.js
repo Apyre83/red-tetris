@@ -16,35 +16,31 @@ function getPlayerNameFromHash() {
 function GameComponent() {
     const socket = useSelector(state => state.socket.socket);
     const navigate = useNavigate();
+
+
+    while (!socket) console.error('Socket not connected');
+
     const room = getRoomFromHash();
     const playerName = getPlayerNameFromHash();
-    const isCreator = true; // TODO: Mettre à jour en fonction de la logique de votre jeu
+
+    const [isCreator, setIsCreator] = useState(false);
+    const [players, setPlayers] = useState([]);
 
     const [responseMessage, setResponseMessage] = useState('');
 
+
     useEffect(() => {
-        // ...autres configurations d'écouteurs d'événements
-
-        if (socket) {
-            socket.on('GAME_STARTED_OK', (data) => {
-                setResponseMessage("La partie a commencé !");
-                console.log("Game started successfully: ", data);
-                // Naviguez vers l'écran de jeu ou effectuez d'autres actions
-            });
-
-            socket.on('GAME_STARTED_KO', (error) => {
-                setResponseMessage("Échec du lancement de la partie : " + error);
-                console.error("Failed to start game: ", error);
-            });
-        }
-
-        return () => {
-            if (socket) {
-                socket.off('GAME_STARTED_OK');
-                socket.off('GAME_STARTED_KO');
+        socket.emit('WHO_IS_CREATOR', room, (data) => {
+            if (data.players[0] === playerName) {
+                console.log("You are the creator");
             }
-        };
-    }, [socket, navigate]);
+            setPlayers(data.players);
+            setIsCreator(data.players[0] === playerName);
+        });
+        return () => {
+            socket.off('WHO_IS_CREATOR');
+        }
+    }, [socket, room, playerName]);
 
     const handleGoHome = () => {
         navigate('/');
@@ -64,7 +60,13 @@ function GameComponent() {
     return (
         <div className="game-container">
             <h1 className="game-title">Room: {room}</h1>
-            <h2 className="game-subtitle">Player Name: {playerName}</h2>
+            <h2 className="game-subtitle">You are: {playerName}</h2>
+            {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
+            <h3 className="game-subtitle">Players:</h3>
+            <ul className="game-players-list">
+                {players.map((player, index) => <li key={index}>{player}</li>)}
+            </ul>
+
             {responseMessage && <p className="game-response-message">{responseMessage}</p>}
             <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
             {isCreator && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
