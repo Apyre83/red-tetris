@@ -26,9 +26,9 @@ class Piece {
                 [[1, colors.yellow], [1, colors.yellow]]]},
 
             { id: 2, letter: 'T', x: 3 + BORDER_WIDTH, color: colors.purple, tetromino: [
+                [[0, colors.empty],  [0, colors.empty],  [0, colors.empty]],
                 [[1, colors.purple], [1, colors.purple], [1, colors.purple]],
-                [[0, colors.empty],  [1, colors.purple], [0, colors.empty]],
-                [[0, colors.empty],  [0, colors.empty],  [0, colors.empty]]]},
+                [[0, colors.empty],  [1, colors.purple], [0, colors.empty]]]},
 
             { id: 3, letter: 'L', x: 3 + BORDER_WIDTH, color: colors.orange, tetromino: [
                 [[0, colors.empty], [1, colors.orange], [0, colors.empty]],
@@ -41,14 +41,14 @@ class Piece {
                 [[1, colors.blue],  [1, colors.blue], [0, colors.empty]]]},
 
             { id: 5, letter: 'Z', x: 3 + BORDER_WIDTH, color: colors.red, tetromino: [
+                [[0, colors.empty], [0, colors.empty], [0, colors.empty]],
                 [[1, colors.red],   [1, colors.red],   [0, colors.empty]],
-                [[0, colors.empty], [1, colors.red],   [1, colors.red]],
-                [[0, colors.empty], [0, colors.empty], [0, colors.empty]]]},
+                [[0, colors.empty], [1, colors.red],   [1, colors.red]]]},
             
             { id: 6, letter: 'S', x: 3 + BORDER_WIDTH, color: colors.green, tetromino: [
+                [[0, colors.empty], [0, colors.empty], [0, colors.empty]],
                 [[0, colors.empty], [1, colors.green], [1, colors.green]],
-                [[1, colors.green], [1, colors.green], [0, colors.empty]],
-                [[0, colors.empty], [0, colors.empty], [0, colors.empty]]]},
+                [[1, colors.green], [1, colors.green], [0, colors.empty]]]},
         ]
         return data[this.id];
     }

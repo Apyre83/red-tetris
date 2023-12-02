@@ -1,6 +1,6 @@
-const { ROWS, COLS, BORDER_WIDTH }    = require('../constants/numbers');
-const colors            = require('../constants/colors');
-const Piece             = require('./Piece');
+const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
+const colors                            = require('../constants/colors');
+const Piece                             = require('./Piece');
 // const ROWS = 4;
 // const COLS = 4;
 
@@ -12,9 +12,8 @@ class Player {
         this.name = name;
         this.ranking = 0;
         this.allTimeScores = 0;
-
         // this.listOfPieces = undefined;
-        this.listOfPieces = [2,1,5,6,6,0,3,4];
+        this.listOfPieces = [6,1,5,6,6,0,3,4];
         this.isinRoom = false;
         this.isDead = false;
         // this.idActualPiece = undefined;
@@ -104,26 +103,28 @@ class Player {
                     }
             }
         }
+        this.makeShadow();
         // this.io.emit('updateBoard', this);
     }
 
-    // VERIFIER
     makeShadow() {
+        console.log(`This board`)
+        this.printBoard();
         let shadow = this.createBoard();
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
-            for (let j = 0; j < COLS; j++) {
+            for (let j = BORDER_WIDTH; j < COLS ; j++) {
                 if (allColsFull[j]) {
                     shadow[i][j] = [1, colors.full];
                 } else {
-                    if (this.board[i][j][0] != 0) {
+                    if (this.board[i][j][0] !== 0) {
                         allColsFull[j] = true;
                         shadow[i][j] = [1, colors.full];
                     } 
                 }
             }
         }
-        return shadow;
+        this.shadow = shadow;
     }
 
     moveLeft() {
@@ -260,8 +261,16 @@ class Player {
     }
 
     printBoard() {
-        for (let row = 0; row < player.board.length; row++) {
-            const rowValues = player.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+        for (let row = 0; row < this.board.length; row++) {
+            const rowValues = this.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+            console.log(`${rowValues.join()}`);
+        }
+        console.log(`\n-------\n`);
+    }
+
+    printShadow() {
+        for (let row = 0; row < this.shadow.length; row++) {
+            const rowValues = this.shadow[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
             console.log(`${rowValues.join()}`);
         }
         console.log(`\n-------\n`);
@@ -274,10 +283,18 @@ const player = new Player(1, 2, 3);
 player.printBoard();
 
 player.generateNewPiece();
+player.directBottom();
 player.printBoard();
 
 player.rotateLeft();
 player.printBoard();
+console.log(`Shadow`);
+player.printShadow();
 
+player.generateNewPiece();
+player.moveLeft();
+player.moveLeft()
+player.moveDown();
+player.printBoard();
 
-// console.log(player.shadow);
+player.printShadow();
