@@ -150,8 +150,9 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
-    moveDown() {
+    moveDown(toBottom) {
         const width = this.actualPiece.width;
+        const oldPiece = {...this.actualPiece};
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
         let isOne = false;
@@ -162,15 +163,16 @@ class Player {
                     isOne = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
-                        return;
+                        return true;
                     }
                 }
             } 
             if (isOne === true) 
                 break;
         }
-        const oldPiece = {...this.actualPiece};
         this.actualPiece.y++;
+        if (toBottom)
+            return false;
         this.updateBoard(oldPiece);
     }
 
@@ -183,17 +185,11 @@ class Player {
     // TODO change
     directBottom() {
         const oldPiece = {...this.actualPiece};
-        while (this.actualPiece.y + 1 < ROWS) {
-            for (let col = 0 ; col < this.actualPiece.width ; col++) {
-                if (this.board[this.actualPiece.y + this.actualPiece.width][this.actualPiece.x + col][0] != 0) {
-                    this.updateBoard(oldPiece)
-                    console.log(`En bas`)
-                    return;
-                }   
-            }
-            this.actualPiece.y++;
+        let isAtBottom = false;
+        while (isAtBottom === false) {
+            isAtBottom = this.moveDown(true);
         }
-        // Rajouter juste pour decaler d'un mouvement, surement juste move Down
+        console.log(`At bottom`);
         this.updateBoard(oldPiece);
     }
 
@@ -239,9 +235,7 @@ player.printBoard();
 player.generateNewPiece();
 player.printBoard();
 
-player.moveDown();
-player.printBoard();
-player.moveDown();
+player.directBottom();
 player.printBoard();
 
 
