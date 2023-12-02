@@ -18,7 +18,6 @@ function GameComponent() {
     const navigate = useNavigate();
 
 
-    while (!socket) console.error('Socket not connected');
 
     const room = getRoomFromHash();
     const playerName = getPlayerNameFromHash();
@@ -30,6 +29,8 @@ function GameComponent() {
 
 
     useEffect(() => {
+        if (!socket) { console.error('Socket not connected'); return; }
+
         socket.emit('WHO_IS_CREATOR', room, (data) => {
             if (data.players[0] === playerName) {
                 console.log("You are the creator");

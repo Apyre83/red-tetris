@@ -1,0 +1,109 @@
+/* Modal Container */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.6); /* Fond semi-transparent */
+    z-index: 1000; /* Assurez-vous que le modal est au-dessus des autres éléments */
+}
+
+/* Contenu du Modal */
+.modal-content {
+    background-color: #222; /* Fond sombre */
+    color: #4caf50; /* Texte en vert */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    width: 400px; /* ou une largeur de votre choix */
+}
+
+/* Titre du Modal */
+.modal-title {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+/* Champs de saisie dans le Modal */
+.modal-input {
+    background-color: #222;
+    color: #4caf50;
+    border: 2px solid #333;
+    border-radius: 5px;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Boutons dans le Modal */
+.modal-button {
+    background-color: #333;
+    color: white;
+    border: 1px solid #4caf50;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s;
+}
+
+.modal-button:hover {
+    background-color: #4caf50;
+    color: black;
+}
+
+/* Vous pouvez ajouter plus de styles personnalisés selon vos besoins */
+.form-container {
+    background-color: rgba(0, 0, 0, 0.6); /* Fond semi-transparent */
+    padding: 8%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    margin: 20px;
+    color: #4caf50;
+}
+
+.form-container h2 {
+    color: #4caf50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: #4caf50;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+    box-sizing: border-box; /* Inclut padding et border dans la largeur totale */
+    width: calc(100% - 20px); /* Ajustez en fonction du padding et de la border */
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #222;
+    color: #4caf50;
+    border: 2px solid #333;
+    border-radius: 5px;
+}
+
+.form-container button {
+    width: 94%;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.form-container button:hover {
+    background-color: #4caf50;
+    color: black;
+}
+/* Vous pouvez ajuster ou ajouter plus de styles selon vos préférences */

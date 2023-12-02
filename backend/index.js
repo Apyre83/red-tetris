@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const { Server } = require('socket.io');
 
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,11 +15,13 @@ const io = new Server(server, {
     }
 });
 
+app.use(express.json());
+
+
 app.use(cors({
     origin: "http://localhost:3000", /* TODO: Change localhost for the future frontend URL */
     methods: ["GET", "POST"]
 }));
-
 
 
 app.get('/', (req, res) => {
@@ -29,8 +32,50 @@ rooms = {
     /* name: [players], first player is the creator */
 };
 
+
+const DATABASE_FILE = './databases/database.json';
+
+function readDatabase() {
+    const data = fs.readFileSync(DATABASE_FILE, 'utf8');
+    return JSON.parse(data);
+}
+function writeDatabase(data) {
+    fs.writeFileSync(DATABASE_FILE, JSON.stringify(data, null, 2), 'utf8');
+}
+
 io.on('connection', (socket) => {
     //console.log('a user connected');
+
+    socket.on('LOGIN', (data, callback) => {
+        if (data.username === '') { callback({...data, code: 1, error: "Username cannot be empty"}); return; }
+        if (data.password === '') { callback({...data, code: 2, error: "Password cannot be empty"}); return; }
+
+        const database = readDatabase();
+        if (!database[data.username]) { callback({...data, code: 1, error: "Username does not exist"}); return; }
+        if (database[data.username].password !== data.password) { callback({...data, code: 2, error: "Wrong password"}); return; }
+
+        callback({...data, code: 0});
+    });
+
+    socket.on('SIGNUP', (data, callback) => {
+        console.log('SIGNUP', data);
+        const database = readDatabase();
+        if (database[data.username]) { callback({...data, code: 1, error: "Username already exists"}); return; }
+        if (database[data.email]) { callback({...data, code: 2, error: "Email already exists"}); return; }
+
+        if (data.username === '') { callback({...data, code: 3, error: "Username cannot be empty"}); return; }
+        if (data.email === '') { callback({...data, code: 4, error: "Email cannot be empty"}); return; }
+        if (data.password === '') { callback({...data, code: 5, error: "Password cannot be empty"}); return; }
+
+        // TODO: password hashing
+        database[data.username] = {
+            password: data.password,
+            email: data.email
+        };
+        writeDatabase(database);
+
+        callback({...data, code: 0});
+    });
 
     socket.on('CREATE_GAME', (data, callback) => {
         console.log('CREATE GAME', data);

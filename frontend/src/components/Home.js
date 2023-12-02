@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import Modal from './Modal';
+import LoginForm from './LoginForm';
+import SignUpForm from './SignUpForm';
 import './Home.css';
 
-function Home() {
-    const socket = useSelector(state => state.socket.socket); // Assurez-vous que le chemin est correct
 
+function Home() {
+    const socket = useSelector(state => state.socket.socket);
+
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [showLogin, setShowLogin] = useState(true);
 
     const [room, setRoom] = useState('');
     const [playerName, setPlayerName] = useState('');
@@ -12,12 +18,14 @@ function Home() {
     const [errorCount, setErrorCount] = useState(0);
 
     useEffect(() => {
-        console.log("Socket: ", socket);
-        if (socket) {
-            return () => {
-            };
+        if (!socket) { /*console.error('Socket not connected'); */return; }
+
+        return () => {
         }
     }, [socket]);
+
+    const toggleForms = () => { setShowLogin(!showLogin); };
+    // const handleAuthentication = (authStatus) => { setIsAuthenticated(authStatus); };
 
     const socketJoinGame = (room, playerName, callback) => {
         socket.emit('JOIN_GAME', {
@@ -85,26 +93,45 @@ function Home() {
 
     return (
         <div className="home-container">
-          {error && <div key={errorCount} className="error-message">{error}</div>}
-            <h1 className="title">Tetris Game</h1>
-            <form className="home-form">
-                <input
-                    className="input-field"
-                    type="text"
-                    placeholder="Nom de la salle"
-                    value={room}
-                    onChange={(e) => setRoom(e.target.value)}
-                />
-                <input
-                    className="input-field"
-                    type="text"
-                    placeholder="Votre nom"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                />
-                <button className="home-button" onClick={handleJoinGame}>Rejoindre</button>
-                <button className="home-button" onClick={handleCreateGame}>Créer une partie</button>
-            </form>
+            {!isAuthenticated && (
+                <Modal>
+                    {showLogin ? (
+                        <>
+                            <LoginForm onAuthentication={(status) => setIsAuthenticated(status)} />
+                            <button onClick={toggleForms} className="modal-button">S'inscrire</button>
+                        </>
+                    ) : (
+                        <>
+                            <SignUpForm onSignUp={(status) => setIsAuthenticated(status)} />
+                            <button onClick={toggleForms} className="modal-button">Se connecter</button>
+                        </>
+                    )}
+                </Modal>
+            )}
+            {isAuthenticated && (
+                <div className="home-container">
+                    {error && <div key={errorCount} className="error-message">{error}</div>}
+                    <h1 className="title">Tetris Game</h1>
+                    <form className="home-form">
+                        <input
+                            className="input-field"
+                            type="text"
+                            placeholder="Nom de la salle"
+                            value={room}
+                            onChange={(e) => setRoom(e.target.value)}
+                        />
+                        <input
+                            className="input-field"
+                            type="text"
+                            placeholder="Votre nom"
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                        />
+                        <button className="home-button" onClick={handleJoinGame}>Rejoindre</button>
+                        <button className="home-button" onClick={handleCreateGame}>Créer une partie</button>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }
