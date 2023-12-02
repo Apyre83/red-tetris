@@ -1,0 +1,45 @@
+/* GameComponent.css */
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #222; /* Fond sombre */
+    color: #fff; /* Texte blanc */
+    font-family: 'Tetris', sans-serif; /* Utilisez une police appropriée */
+}
+
+.game-title, .game-subtitle {
+    margin: 10px 0;
+    color: #4caf50; /* Couleur verte de Tetris */
+}
+
+.game-title {
+    font-size: 2.5em; /* Taille de police plus grande pour le titre */
+}
+
+.game-subtitle {
+    font-size: 1.5em; /* Taille de police pour le sous-titre */
+}
+
+.game-button {
+    margin: 10px;
+    padding: 10px 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.game-button:hover {
+    background-color: #4caf50; /* Effet au survol */
+}
+
+.game-response-message {
+    color: #ff3860; /* rouge pour les erreurs, vert pour succès */
+    margin: 20px;
+}
