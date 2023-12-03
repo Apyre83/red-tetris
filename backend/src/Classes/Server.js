@@ -105,6 +105,7 @@ class Server {
                 callback({...data, code: 0, players: this.games[data.game]}); /* TODO: replace game by class Game */
             });
 
+            // TODO ajouter a la classe Game dans addPlayer ? 
             socket.on('JOIN_GAME', (data, callback) => {
                 console.log("JOIN GAME", data);
                 if (!this.games[data.game]) { callback({...data, code: 1, error: "Game does not exist"}); return; } /* TODO: replace game by class Game */
@@ -130,19 +131,25 @@ class Server {
                 callback({...data, code: 0, players: this.games[data.game], creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
             });
 
-            socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
-                console.log('PLAYER LEFT GAME PAGE', data);
-                if (!this.games[data.game]) { return; } /* TODO: replace game by class Game */
-                this.games[data.game] = this.games[data.game].filter(player => player !== data.playerName); /* TODO: replace game by class Game */
-                if (this.games[data.game].length === 0) { delete this.games[data.game]; return; } /* TODO: replace game by class Game */
+            // GERE DANS LA CLASSE PLAYER ? 
+            // socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
+            //     console.log('PLAYER LEFT GAME PAGE', data);
+            //     if (!this.games[data.game]) { return; } /* TODO: replace game by class Game */
+            //     this.games[data.game] = this.games[data.game].filter(player => player !== data.playerName); /* TODO: replace game by class Game */
+            //     if (this.games[data.game].length === 0) { delete this.games[data.game]; return; } /* TODO: replace game by class Game */
 
-                for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
-                    const playerSocket = this.players.find(p => p.username === player).socket;
-                    playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
-                }
-            });
+            //     for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
+            //         const playerSocket = this.players.find(p => p.username === player).socket;
+            //         playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
+            //     }
+            // });
 
         });
+    }
+
+    closeGame(gameId) {
+        const newGamesList = this.games.filter(game => game.gameId !== gameId);
+        this.games = newGamesList;
     }
 
     readDatabase() {
