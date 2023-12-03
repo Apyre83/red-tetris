@@ -15,11 +15,12 @@ class Player {
         this.isinRoom = false;
         this.isDead = false;
         // this.idActualPiece = undefined;
+        this.idRowBorder = ROWS;
         this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0;
         this.board = this.createBoard(ROWS);
-        this.shadow = this.makeShadow();
+        this.spectrum = this.makeSpectrum();
     }
 
     createEmptyRow() {
@@ -36,19 +37,15 @@ class Player {
         return emptyRow;
     }
 
-    addBottomBorder(board) {
-        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
-            board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
-        }
-    }
-
     createBoard(nbEmptyLines) {
         const board = [];
         
         for (let i = 0 ; i < nbEmptyLines ; i++) {
             board.push(this.createEmptyRow());
         }
-        this.addBottomBorder(board);    
+        for (let i = 0 ; i < BORDER_WIDTH ; i++) {
+            board.push(Array(COLS + 2 * BORDER_WIDTH).fill([1, colors.border]));
+        }   
         return board;
     }
 
@@ -64,8 +61,7 @@ class Player {
             for (let col = 0; col < this.actualPiece.width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
                     if (this.board[this.actualPiece.y + row][this.actualPiece.x + col][0] != 0) {
-                        console.log(`Game Over`);
-                        // TODO faire fonction Game Over
+                        this.gameOver();
                         return;
                     }
                     this.board[this.actualPiece.y + row][this.actualPiece.x + col] = this.actualPiece.tetromino[row][col];
@@ -78,8 +74,14 @@ class Player {
 
     oneLinePenaly(nbLines) {
         for (let i = 0 ; i < nbLines ; i++) {
-            this.board.shift();
-            this.addBottomBorder(this.board);
+            this.idRowBorder--;
+            if (this.idRowBorder === 0) {
+                this.gameOver();
+                return;
+            }
+            for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH; col++) {
+                this.board[this.idRowBorder][col] = [1, colors.border];
+            }
         }
         this.updateBoard();
     }
@@ -106,7 +108,8 @@ class Player {
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
             for (let col = BORDER_WIDTH ; col < COLS ; col++) {
                 // TODO VERIFIER SI C'EST BORDER
-                if (this.board[row][col][0] !== 1) {
+                const tile = this.board[row][col];
+                if (tile[0] !== 1 || tile[1] === colors.border) {
                     oneLineComplete = false;
                     break;
                 }
@@ -117,9 +120,10 @@ class Player {
                 oneLineComplete = true;
             }
         }
-        this.printBoard();
         this.supprLines(completeLines);
         console.log(`Complete lines: ` + completeLines);
+        if (completeLines.length > 1)
+            console.log(`TODO emit`);
         // TODO io.emit('lineDone', completeLines.lenght);
     }
 
@@ -145,26 +149,26 @@ class Player {
             }
         }
         this.checkCompleteLines();
-        this.makeShadow();
+        this.makeSpectrum();
         // this.io.emit('updateBoard', this);
     }
 
-    makeShadow() {
-        let shadow = this.createBoard(ROWS);
+    makeSpectrum() {
+        let spectrum = this.createBoard(ROWS);
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
             for (let j = BORDER_WIDTH; j < COLS ; j++) {
                 if (allColsFull[j]) {
-                    shadow[i][j] = [1, colors.full];
+                    spectrum[i][j] = [1, colors.full];
                 } else {
                     if (this.board[i][j][0] !== 0) {
                         allColsFull[j] = true;
-                        shadow[i][j] = [1, colors.full];
+                        spectrum[i][j] = [1, colors.full];
                     } 
                 }
             }
         }
-        this.shadow = shadow;
+        this.spectrum = spectrum;
     }
 
     moveLeft() {
@@ -300,6 +304,11 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
+    gameOver() {
+        console.log(`Game Over`);
+        // TODO io.emit('Game Over');
+    }
+
     printBoard() {
         for (let row = 0; row < this.board.length; row++) {
             const rowValues = this.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
@@ -308,9 +317,9 @@ class Player {
         console.log(`\n-------\n`);
     }
 
-    printShadow() {
-        for (let row = 0; row < this.shadow.length; row++) {
-            const rowValues = this.shadow[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+    printSpectrum() {
+        for (let row = 0; row < this.spectrum.length; row++) {
+            const rowValues = this.spectrum[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
             console.log(`${rowValues.join()}`);
         }
         console.log(`\n-------\n`);
