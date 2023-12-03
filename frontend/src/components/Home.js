@@ -12,7 +12,7 @@ function Home() {
 
     const [showLogin, setShowLogin] = useState(true);
 
-    const [room, setRoom] = useState('');
+    const [game, setGame] = useState('');
 
     const user = useSelector(state => state.auth);
     const playerName = user.isAuthenticated ? user.user : '';
@@ -27,9 +27,9 @@ function Home() {
         }
     }, [socket]);
 
-    const socketJoinGame = (room, playerName, callback) => {
+    const socketJoinGame = (game, playerName, callback) => {
         socket.emit('JOIN_GAME', {
-            room,
+            game,
             playerName
         }, (data) => {
             if (data.code !== 0) {
@@ -38,7 +38,7 @@ function Home() {
                 return;
             }
             console.log("Game joined successfully: ", data);
-            window.location.href = `#${data.room}[${data.playerName}]`;
+            window.location.href = `#${data.game}[${data.playerName}]`;
         });
     }
 
@@ -51,13 +51,13 @@ function Home() {
             setErrorCount(prev => prev + 1);
             return;
         }
-        if (!room) {
+        if (!game) {
             setError('Veuillez choisir une salle pour rejoindre.');
             setErrorCount(prev => prev + 1);
             return;
         }
         setError('');
-        socketJoinGame(room, playerName);
+        socketJoinGame(game, playerName);
     };
 
     const handleCreateGame = (e) => {
@@ -69,10 +69,10 @@ function Home() {
             return;
         }
         setError('');
-        const uniqueRoomName = generateUniqueRoomName();
+        const uniqueGameName = generateUniqueGameName();
 
         socket.emit('CREATE_GAME',{
-            room: uniqueRoomName,
+            game: uniqueGameName,
             playerName
         }, (data) => {
             console.log("Game created successfully: ", data);
@@ -82,12 +82,12 @@ function Home() {
                 return;
             }
             else {
-                socketJoinGame(uniqueRoomName, playerName);
+                socketJoinGame(uniqueGameName, playerName);
             }
         });
     };
 
-    function generateUniqueRoomName() {
+    function generateUniqueGameName() {
         return Math.random().toString(36).substr(2, 9);
     }
 
@@ -126,9 +126,9 @@ function Home() {
                             <input
                                 className="input-field"
                                 type="text"
-                                placeholder="Room name"
-                                value={room}
-                                onChange={(e) => setRoom(e.target.value)}
+                                placeholder="Game name"
+                                value={game}
+                                onChange={(e) => setGame(e.target.value)}
                             />
                             <button className="home-button" onClick={handleJoinGame}>Join</button>
                             <button className="home-button" onClick={handleCreateGame}>Create game</button>

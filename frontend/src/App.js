@@ -18,7 +18,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/:roomId" element={<GameComponent />} />
+          <Route path="/:gameId" element={<GameComponent />} />
           {/* autres routes */}
         </Routes>
       </Router>

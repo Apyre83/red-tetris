@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './GameComponent.css';
 
-function getRoomFromHash() {
+function getGameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
     return match?.[1];
 }
@@ -20,7 +20,7 @@ function GameComponent() {
     const navigate = useNavigate();
 
 
-    const room = getRoomFromHash();
+    const game = getGameFromHash();
     const playerName = getPlayerNameFromHash();
 
     const [isCreator, setIsCreator] = useState(false);
@@ -34,7 +34,7 @@ function GameComponent() {
         if (!isAuthenticated) { navigate('/'); }
 
         const handleLeavePage = (event) => {
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { room, playerName });
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { game, playerName });
             event.returnValue = "Are you sure you want to leave the game page?";
         };
         window.addEventListener("beforeunload", handleLeavePage);
@@ -49,16 +49,16 @@ function GameComponent() {
             setPlayers(prev => [...prev, data.playerName]);
         });
 
-        socket.emit('ASK_INFORMATIONS_GAME_PAGE', { room, playerName }, (data) => {
+        socket.emit('ASK_INFORMATIONS_GAME_PAGE', { game, playerName }, (data) => {
             console.log(data);
             setIsCreator(data.creator === playerName);
             setPlayers(data.players);
         });
         return () => {
             window.removeEventListener("beforeunload", handleLeavePage);
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { room, playerName });
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { game, playerName });
         }
-    }, [socket, room, playerName, isAuthenticated, navigate]);
+    }, [socket, game, playerName, isAuthenticated, navigate]);
 
     const handleGoHome = () => {
         navigate('/');
@@ -66,7 +66,7 @@ function GameComponent() {
 
     const handleStartGame = () => {
         if (socket && isCreator) {
-            socket.emit('START_GAME', { room });
+            socket.emit('START_GAME', { game });
             setResponseMessage("Tentative de lancement de la partie...");
         }
         else {
@@ -81,7 +81,7 @@ function GameComponent() {
                 <h2 className="header-title">Authenticated as {playerName}</h2>
             </header>
             <div className="game-container">
-                <h1 className="game-title">Room: {room}</h1>
+                <h1 className="game-title">Game: {game}</h1>
                 {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
                 <h3 className="game-subtitle">Players:</h3>
                 <ul className="game-players-list">

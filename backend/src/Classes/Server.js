@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const Player = require('./Player');
+const Game = require('./Game');
 
 class Server {
     constructor(port) {
@@ -19,7 +20,7 @@ class Server {
             }
         });
         this.port = port;
-        this.rooms = {}; /* TODO */
+        this.games = {}; /* TODO */
         /* this.players is a list of Players from Player.js */
         this.players = [];
 
@@ -80,6 +81,7 @@ class Server {
                 if (data.email === '') { callback({...data, code: 4, error: "Email cannot be empty"}); return; }
                 if (data.password === '') { callback({...data, code: 5, error: "Password cannot be empty"}); return; }
 
+                // const player = new Player; ?
                 for (const player of this.players) {
                     if (player.socket.id === socket.id) { player.username = data.username; }
                 }
@@ -96,46 +98,47 @@ class Server {
 
             socket.on('CREATE_GAME', (data, callback) => {
                 console.log('CREATE GAME', data);
-                if (this.rooms[data.room]) { callback({...data, code: 1, error: "Room already exists"}); return; } /* TODO: replace room by class Room */
+                if (this.games[data.game]) { callback({...data, code: 1, error: "Game already exists"}); return; } /* TODO: replace game by class Game */
 
-                this.rooms[data.room] = []; /* TODO: replace room by class Room */
-                callback({...data, code: 0, players: this.rooms[data.room]}); /* TODO: replace room by class Room */
+                // TODO const game = new Game; ?
+                this.games[data.game] = []; /* TODO: replace game by class Game */
+                callback({...data, code: 0, players: this.games[data.game]}); /* TODO: replace game by class Game */
             });
 
             socket.on('JOIN_GAME', (data, callback) => {
                 console.log("JOIN GAME", data);
-                if (!this.rooms[data.room]) { callback({...data, code: 1, error: "Room does not exist"}); return; } /* TODO: replace room by class Room */
-                for (const room in this.rooms) { /* TODO: replace room by class Room */
-                    if (this.rooms[room].includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a room"}); return; }
+                if (!this.games[data.game]) { callback({...data, code: 1, error: "Game does not exist"}); return; } /* TODO: replace game by class Game */
+                for (const game in this.games) { /* TODO: replace game by class Game */
+                    if (this.games[game].includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
                 }
 
-                this.rooms[data.room].push(data.playerName); /* TODO: replace room by class Room */
-                callback({...data, code: 0, players: this.rooms[data.room]}); /* TODO: replace room by class Room */
+                this.games[data.game].push(data.playerName); /* TODO: replace game by class Game */
+                callback({...data, code: 0, players: this.games[data.game]}); /* TODO: replace game by class Game */
             });
 
             socket.on('ASK_INFORMATIONS_GAME_PAGE', (data, callback) => {
                 console.log("ASK INFORMATIONS GAME PAGE", data);
-                if (!this.rooms[data.room]) { callback({...data, code: 1, error: "Room does not exist"}); return; } /* TODO: replace room by class Room */
-                if (!this.rooms[data.room].includes(data.playerName)) { callback({...data, code: 2, error: "Player not in the room"}); return; } /* TODO: replace room by class Room */
+                if (!this.games[data.game]) { callback({...data, code: 1, error: "Game does not exist"}); return; } /* TODO: replace game by class Game */
+                if (!this.games[data.game].includes(data.playerName)) { callback({...data, code: 2, error: "Player not in the game"}); return; } /* TODO: replace game by class Game */
 
                 /* Pour chaque user, envoyer l'event USER_JOIN_ROOM */
-                for (const player of this.rooms[data.room]) { /* TODO: replace room by class Room */
+                for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
                     const playerSocket = this.players.find(p => p.username === player).socket;
-                    playerSocket.emit('USER_JOIN_ROOM', {...data, players: this.rooms[data.room], creator: this.rooms[data.room][0]}); /* TODO: replace room by class Room */
+                    playerSocket.emit('USER_JOIN_ROOM', {...data, players: this.games[data.game], creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
                 }
 
-                callback({...data, code: 0, players: this.rooms[data.room], creator: this.rooms[data.room][0]}); /* TODO: replace room by class Room */
+                callback({...data, code: 0, players: this.games[data.game], creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
             });
 
             socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
                 console.log('PLAYER LEFT GAME PAGE', data);
-                if (!this.rooms[data.room]) { return; } /* TODO: replace room by class Room */
-                this.rooms[data.room] = this.rooms[data.room].filter(player => player !== data.playerName); /* TODO: replace room by class Room */
-                if (this.rooms[data.room].length === 0) { delete this.rooms[data.room]; return; } /* TODO: replace room by class Room */
+                if (!this.games[data.game]) { return; } /* TODO: replace game by class Game */
+                this.games[data.game] = this.games[data.game].filter(player => player !== data.playerName); /* TODO: replace game by class Game */
+                if (this.games[data.game].length === 0) { delete this.games[data.game]; return; } /* TODO: replace game by class Game */
 
-                for (const player of this.rooms[data.room]) { /* TODO: replace room by class Room */
+                for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
                     const playerSocket = this.players.find(p => p.username === player).socket;
-                    playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.rooms[data.room][0]}); /* TODO: replace room by class Room */
+                    playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
                 }
             });
 
