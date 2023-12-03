@@ -1,4 +1,4 @@
-const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
+const { ROWS, COLS, BORDER_WIDTH }      = require('shadow../constants/numbers');
 const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
@@ -10,9 +10,9 @@ class Player {
         this.name = name;
         this.ranking = 0;
         this.allTimeScores = 0;
-        // this.listOfPieces = undefined;
+        // this.listOfPieces = [];
         this.listOfPieces = [6,1,5,6,6,0,3,4];
-        this.isinRoom = false;
+        this.isInGame = false;
         this.isDead = false;
         // this.idActualPiece = undefined;
         this.idRowBorder = ROWS;
@@ -21,6 +21,33 @@ class Player {
         this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
+    }
+
+    resetPlayer() {
+        this.listOfPieces = [];
+        this.isInGame = false;
+        this.isDead = false;
+        this.idRowBorder = ROWS;
+        this.idActualPiece = -1;
+        this.actualPiece = undefined;
+        this.actualScore = 0;
+        this.board = this.createBoard(ROWS);
+        this.spectrum = this.makeSpectrum();
+    }
+
+    startGame(listOfPieces, gameId) {
+        this.listOfPieces = listOfPieces;
+        this.isInGame = gameId;
+
+        setInterval()
+
+    }
+
+    leaveGame() {
+        this.socket.on('LEAVE_GAME', () => {
+            console.log(`The user ${this.name} left the room ${this.gameId}`);
+            this.resetPlayer();
+        })
     }
 
     createEmptyRow() {
@@ -72,7 +99,7 @@ class Player {
         this.updateBoard();
     }
 
-    oneLinePenaly(nbLines) {
+    penalty(nbLines) {
         for (let i = 0 ; i < nbLines ; i++) {
             this.idRowBorder--;
             if (this.idRowBorder === 0) {
@@ -103,21 +130,21 @@ class Player {
 
     checkCompleteLines() {
         console.log(`Board length: ` + this.board.length);
-        let oneLineComplete = true;
+        let linesComplete = true;
         let completeLines = [];
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
             for (let col = BORDER_WIDTH ; col < COLS ; col++) {
                 // TODO VERIFIER SI C'EST BORDER
                 const tile = this.board[row][col];
                 if (tile[0] !== 1 || tile[1] === colors.border) {
-                    oneLineComplete = false;
+                    linesComplete = false;
                     break;
                 }
             }
-            if (oneLineComplete === true) {
+            if (linesComplete === true) {
                 completeLines.push(row);
             } else {
-                oneLineComplete = true;
+                linesComplete = true;
             }
         }
         this.supprLines(completeLines);
@@ -305,6 +332,7 @@ class Player {
     }
 
     gameOver() {
+        this.isDead = true;
         console.log(`Game Over`);
         // TODO io.emit('Game Over');
     }
@@ -326,6 +354,8 @@ class Player {
     }
 }
 
+module.exports = Player;
+
 // TESTS
 
 const player = new Player(1, 2, 3);
@@ -342,5 +372,5 @@ player.generateNewPiece();
 player.printBoard();
 
 console.log(`Bloup`);
-player.oneLinePenaly(5);
+player.penalty(5);
 player.printBoard();

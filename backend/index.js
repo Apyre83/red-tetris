@@ -1,8 +1,10 @@
-const http = require('http');
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const { Server } = require('socket.io');
+const http          = require('http');
+const express       = require('express');
+const cors          = require('cors');
+const path          = require('path');
+const { Server }    = require('socket.io');
+const Player        = require('./src/Classes/Player');
+const Game          = require('./src/Classes/Game');
 
 const fs = require('fs');
 
