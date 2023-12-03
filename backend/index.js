@@ -32,17 +32,6 @@ rooms = {
 
 };
 
-
-const DATABASE_FILE = './databases/database.json';
-
-function readDatabase() {
-    const data = fs.readFileSync(DATABASE_FILE, 'utf8');
-    return JSON.parse(data);
-}
-function writeDatabase(data) {
-    fs.writeFileSync(DATABASE_FILE, JSON.stringify(data, null, 2), 'utf8');
-}
-
 io.on('connection', (socket) => {
     //console.log('a user connected');
 
@@ -63,16 +52,6 @@ io.on('connection', (socket) => {
         //socket.emit('GAME_STARTED_OK', data);
     });
 
-    socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
-        console.log('PLAYER LEFT GAME PAGE', data);
-        if (!rooms[data.room]) { return; }
-        rooms[data.room] = rooms[data.room].filter(player => player !== data.playerName);
-        if (rooms[data.room].length === 0) { delete rooms[data.room]; return; }
-
-        for (const user of io.sockets.adapter.rooms.get(data.room)) {
-            io.to(user).emit('PLAYER_LEFT_GAME_PAGE', data);
-        }
-    });
 
     socket.on('disconnect', () => {
         //console.log('user disconnected');

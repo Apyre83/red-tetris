@@ -40,17 +40,16 @@ function GameComponent() {
         window.addEventListener("beforeunload", handleLeavePage);
 
         socket.on('USER_LEAVE_ROOM', (data) => {
-            console.log('USER_LEAVE_ROOM', data);
             setPlayers(prev => prev.filter(player => player !== data.playerName));
             setIsCreator(data.creator === playerName);
         });
         socket.on('USER_JOIN_ROOM', (data) => {
-            console.log('USER_JOIN_ROOM', data);
             setPlayers(prev => [...prev, data.playerName]);
         });
 
         socket.emit('ASK_INFORMATIONS_GAME_PAGE', { room, playerName }, (data) => {
-            console.log(data);
+            if (data.code !== 0) { console.error(data.error); navigate('/'); return; }
+
             setIsCreator(data.creator === playerName);
             setPlayers(data.players);
         });
