@@ -113,23 +113,29 @@ function Home() {
                 </Modal>
             )}
             {isAuthenticated && (
-                <div className="home-container">
-                    {error && <div key={errorCount} className="error-message">{error}</div>}
-                    <h2 className="connectedAs">Connecté en tant que {playerName}</h2>
-                    <h1 className="title">Tetris Game</h1>
-                    <form className="home-form">
-                        <input
-                            className="input-field"
-                            type="text"
-                            placeholder="Nom de la salle"
-                            value={room}
-                            onChange={(e) => setRoom(e.target.value)}
-                        />
-                        <button className="home-button" onClick={handleJoinGame}>Rejoindre</button>
-                        <button className="home-button" onClick={handleCreateGame}>Créer une partie</button>
-                        <button className="home-button" onClick={() => onAuthentication(false)}>Déconnexion</button>
-                    </form>
-                </div>
+                <>
+                    <header className="home-header">
+                        <h2 className="header-title">Authenticated as {playerName}</h2>
+                    </header>
+                    <div className="home-container">
+
+                        {error && <div key={errorCount} className="error-message">{error}</div>}
+                        {/*<h2 className="connectedAs">Connecté en tant que {playerName}</h2>*/}
+                        <h1 className="title">Tetris Game</h1>
+                        <form className="home-form">
+                            <input
+                                className="input-field"
+                                type="text"
+                                placeholder="Room name"
+                                value={room}
+                                onChange={(e) => setRoom(e.target.value)}
+                            />
+                            <button className="home-button" onClick={handleJoinGame}>Join</button>
+                            <button className="home-button" onClick={handleCreateGame}>Create game</button>
+                            <button className="home-button" onClick={() => onAuthentication(false)}>Logout</button>
+                        </form>
+                    </div>
+                </>
             )}
         </div>
     );

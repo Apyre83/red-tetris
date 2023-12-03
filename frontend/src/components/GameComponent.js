@@ -33,15 +33,30 @@ function GameComponent() {
         if (!socket) { console.error('Socket not connected'); return; }
         if (!isAuthenticated) { navigate('/'); }
 
-        socket.emit('WHO_IS_CREATOR', room, (data) => {
-            if (data.players[0] === playerName) {
-                console.log("You are the creator");
-            }
+        const handleLeavePage = (event) => {
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { room, playerName });
+            event.returnValue = "Are you sure you want to leave the game page?";
+        };
+        window.addEventListener("beforeunload", handleLeavePage);
+
+        socket.on('USER_LEAVE_ROOM', (data) => {
+            console.log('USER_LEAVE_ROOM', data);
+            setPlayers(prev => prev.filter(player => player !== data.playerName));
+            setIsCreator(data.creator === playerName);
+        });
+        socket.on('USER_JOIN_ROOM', (data) => {
+            console.log('USER_JOIN_ROOM', data);
+            setPlayers(prev => [...prev, data.playerName]);
+        });
+
+        socket.emit('ASK_INFORMATIONS_GAME_PAGE', { room, playerName }, (data) => {
+            console.log(data);
+            setIsCreator(data.creator === playerName);
             setPlayers(data.players);
-            setIsCreator(data.players[0] === playerName);
         });
         return () => {
-            socket.off('WHO_IS_CREATOR');
+            window.removeEventListener("beforeunload", handleLeavePage);
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { room, playerName });
         }
     }, [socket, room, playerName, isAuthenticated, navigate]);
 
@@ -61,19 +76,23 @@ function GameComponent() {
     };
 
     return (
-        <div className="game-container">
-            <h1 className="game-title">Room: {room}</h1>
-            <h2 className="game-subtitle">You are: {playerName}</h2>
-            {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
-            <h3 className="game-subtitle">Players:</h3>
-            <ul className="game-players-list">
-                {players.map((player, index) => <li key={index}>{player}</li>)}
-            </ul>
+        <>
+            <header className="home-header">
+                <h2 className="header-title">Authenticated as {playerName}</h2>
+            </header>
+            <div className="game-container">
+                <h1 className="game-title">Room: {room}</h1>
+                {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
+                <h3 className="game-subtitle">Players:</h3>
+                <ul className="game-players-list">
+                    {players.map((player, index) => <li key={index}>{player}</li>)}
+                </ul>
 
-            {responseMessage && <p className="game-response-message">{responseMessage}</p>}
-            <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
-            {isCreator && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
-        </div>
+                {responseMessage && <p className="game-response-message">{responseMessage}</p>}
+                <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
+                {isCreator && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
+            </div>
+        </>
     );
 }
 

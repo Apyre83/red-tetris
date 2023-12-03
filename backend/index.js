@@ -1,4 +1,4 @@
-const http = require('http');
+/*const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -10,7 +10,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000", /* TODO: Change localhost for the future frontend URL */
+        origin: "http://localhost:3000",
         methods: ["GET", "POST"]
     }
 });
@@ -19,7 +19,7 @@ app.use(express.json());
 
 
 app.use(cors({
-    origin: "http://localhost:3000", /* TODO: Change localhost for the future frontend URL */
+    origin: "http://localhost:3000",
     methods: ["GET", "POST"]
 }));
 
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 });
 
 rooms = {
-    /* name: [players], first player is the creator */
+
 };
 
 
@@ -46,57 +46,6 @@ function writeDatabase(data) {
 io.on('connection', (socket) => {
     //console.log('a user connected');
 
-    socket.on('LOGIN', (data, callback) => {
-        if (data.username === '') { callback({...data, code: 1, error: "Username cannot be empty"}); return; }
-        if (data.password === '') { callback({...data, code: 2, error: "Password cannot be empty"}); return; }
-
-        const database = readDatabase();
-        if (!database[data.username]) { callback({...data, code: 1, error: "Username does not exist"}); return; }
-        if (database[data.username].password !== data.password) { callback({...data, code: 2, error: "Wrong password"}); return; }
-
-        callback({...data, code: 0});
-    });
-
-    socket.on('SIGNUP', (data, callback) => {
-        console.log('SIGNUP', data);
-        const database = readDatabase();
-        if (database[data.username]) { callback({...data, code: 1, error: "Username already exists"}); return; }
-        if (database[data.email]) { callback({...data, code: 2, error: "Email already exists"}); return; }
-
-        if (data.username === '') { callback({...data, code: 3, error: "Username cannot be empty"}); return; }
-        if (data.email === '') { callback({...data, code: 4, error: "Email cannot be empty"}); return; }
-        if (data.password === '') { callback({...data, code: 5, error: "Password cannot be empty"}); return; }
-
-        // TODO: password hashing
-        database[data.username] = {
-            password: data.password,
-            email: data.email
-        };
-        writeDatabase(database);
-
-        callback({...data, code: 0});
-    });
-
-    socket.on('CREATE_GAME', (data, callback) => {
-        console.log('CREATE GAME', data);
-        if (rooms[data.room]) { callback({...data, code: 1, error: "Room already exists"}); return; }
-
-        rooms[data.room] = [];
-        callback({...data, code: 0, players: rooms[data.room]});
-    });
-
-    socket.on('JOIN_GAME', (data, callback) => {
-        console.log("JOIN GAME", data);
-        if (!rooms[data.room]) { callback({...data, code: 1, error: "Room does not exist"}); return; }
-        for (const room in rooms) {
-            if (rooms[room].includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a room"}); return; }
-        }
-
-        /* TODO: check if room is full */
-        rooms[data.room].push(data.playerName);
-        callback({...data, code: 0, players: rooms[data.room]});
-    });
-
     socket.on('START_GAME', (data) => {
         console.log(data);
         if (!rooms[data.room]) {
@@ -112,16 +61,18 @@ io.on('connection', (socket) => {
             return;
         }
         //socket.emit('GAME_STARTED_OK', data);
-        /* TODO: start the game */
     });
 
-    socket.on('WHO_IS_CREATOR', (room, callback) => {
-        console.log('WHO IS CREATOR', room);
-        if (!rooms[room]) { callback({room, players: [], creator: null}); return; }
+    socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
+        console.log('PLAYER LEFT GAME PAGE', data);
+        if (!rooms[data.room]) { return; }
+        rooms[data.room] = rooms[data.room].filter(player => player !== data.playerName);
+        if (rooms[data.room].length === 0) { delete rooms[data.room]; return; }
 
-        callback({room, players: rooms[room], creator: rooms[room][0]});
+        for (const user of io.sockets.adapter.rooms.get(data.room)) {
+            io.to(user).emit('PLAYER_LEFT_GAME_PAGE', data);
+        }
     });
-
 
     socket.on('disconnect', () => {
         //console.log('user disconnected');
@@ -130,4 +81,9 @@ io.on('connection', (socket) => {
 
 server.listen(8080, () => {
   console.log('server running at http://localhost:8080');
-});
+});*/
+
+const Server = require('./src/Classes/Server');
+
+const server = new Server(8080);
+server.start();

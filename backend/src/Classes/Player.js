@@ -3,9 +3,8 @@ const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
 class Player {
-    constructor(io, id, socket, name) {
+    constructor(io, socket, name) {
         this.io = io;
-        this.id = id;
         this.socket = socket;
         this.name = name;
         this.ranking = 0;
@@ -328,7 +327,7 @@ class Player {
 
 // TESTS
 
-const player = new Player(1, 2, 3);
+/*const player = new Player(1, 2, 3);
 
 player.generateNewPiece();
 player.directBottom();
@@ -343,4 +342,6 @@ player.printBoard();
 
 console.log(`Bloup`);
 player.oneLinePenaly(5);
-player.printBoard();
+player.printBoard();*/
+
+module.exports = Player;

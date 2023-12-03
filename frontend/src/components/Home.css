@@ -6,6 +6,21 @@ html, body {
     overflow: hidden;
 }
 
+.home-header {
+    background-color: #444; /* Un peu plus foncé que le background du container */
+    padding: 10px;
+    text-align: left;
+    width: 100%; /* S'étend sur toute la largeur de l'écran */
+    box-sizing: border-box; /* Assure que le padding ne déborde pas */
+}
+
+.header-title {
+    margin: 0;
+    color: #f0f0f0; /* Couleur claire pour le texte */
+    font-size: 20px;
+}
+
+
 .home-container {
     display: flex;
     flex-direction: column;
@@ -58,11 +73,15 @@ html, body {
     background-color: #333;
     border: 1px solid #4caf50;
     color: white;
-    padding: 10px 15px;
+    padding: 5px 5px; /* Ajustez le padding si nécessaire */
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s;
+    width: 300px; /* Largeur fixe pour tous les boutons */
+    height: 40px; /* Hauteur fixe pour tous les boutons */
+    margin: 1px 0; /* Espacement entre les boutons */
+    display: block; /* Assure que les boutons prennent toute la largeur disponible */
 }
 
 .home-button:hover {
