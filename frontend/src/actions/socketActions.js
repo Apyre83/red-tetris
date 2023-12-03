@@ -10,7 +10,6 @@ export const connectWebSocket = () => {
         const socket = io('http://localhost:8080');
 
         socket.on('connect', () => {
-            console.log("Connected to Socket.IO server");
             dispatch({ type: 'SET_SOCKET_REFERENCE', payload: socket });
         });
 
