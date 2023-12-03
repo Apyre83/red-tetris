@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import './Modal.css';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux"; // Importez useDispatch
 
-const LoginForm = ({ onAuthentication }) => {
+
+const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const socket = useSelector(state => state.socket.socket);
+    const dispatch = useDispatch();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -18,8 +20,7 @@ const LoginForm = ({ onAuthentication }) => {
                 setError(data.error || 'Erreur de connexion. Veuillez réessayer.');
                 return;
             }
-            console.log("Logged in successfully: ", data);
-            onAuthentication(true);
+            dispatch({ type: "LOGIN_SUCCESS", payload: data.username });
         });
     };
 

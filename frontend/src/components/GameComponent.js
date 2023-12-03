@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './GameComponent.css';
 
@@ -15,8 +16,8 @@ function getPlayerNameFromHash() {
 
 function GameComponent() {
     const socket = useSelector(state => state.socket.socket);
+    const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
     const navigate = useNavigate();
-
 
 
     const room = getRoomFromHash();
@@ -30,6 +31,7 @@ function GameComponent() {
 
     useEffect(() => {
         if (!socket) { console.error('Socket not connected'); return; }
+        if (!isAuthenticated) { navigate('/'); }
 
         socket.emit('WHO_IS_CREATOR', room, (data) => {
             if (data.players[0] === playerName) {
@@ -41,7 +43,7 @@ function GameComponent() {
         return () => {
             socket.off('WHO_IS_CREATOR');
         }
-    }, [socket, room, playerName]);
+    }, [socket, room, playerName, isAuthenticated, navigate]);
 
     const handleGoHome = () => {
         navigate('/');

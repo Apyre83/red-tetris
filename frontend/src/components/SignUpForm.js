@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import './Modal.css';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
-const SignUpForm = ({ onSignUp }) => {
+const SignUpForm = () => {
     const socket = useSelector(state => state.socket.socket);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const dispatch = useDispatch();
+
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -21,7 +23,7 @@ const SignUpForm = ({ onSignUp }) => {
                 return;
             }
             console.log("Signed up successfully: ", data);
-            onSignUp(true);
+            dispatch({ type: "LOGIN_SUCCESS", payload: data.user });
         });
     };
 

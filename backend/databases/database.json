@@ -2,5 +2,17 @@
   "rrtyui": {
     "password": "rtyuui",
     "email": "rr@re.com"
+  },
+  "apyre": {
+    "password": "apyre",
+    "email": "test@test.com"
+  },
+  "apyre2": {
+    "password": "apyre2",
+    "email": "apyre2@gmail.com"
+  },
+  "apyre3": {
+    "password": "apyre",
+    "email": "apyre3@t.e"
   }
 }

@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Modal from './Modal';
 import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import './Home.css';
 
-
 function Home() {
     const socket = useSelector(state => state.socket.socket);
+    const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+    const dispatch = useDispatch();
 
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showLogin, setShowLogin] = useState(true);
 
     const [room, setRoom] = useState('');
-    const [playerName, setPlayerName] = useState('');
+
+    const user = useSelector(state => state.auth);
+    const playerName = user.isAuthenticated ? user.user : '';
+
     const [error, setError] = useState('');
     const [errorCount, setErrorCount] = useState(0);
 
@@ -23,9 +26,6 @@ function Home() {
         return () => {
         }
     }, [socket]);
-
-    const toggleForms = () => { setShowLogin(!showLogin); };
-    // const handleAuthentication = (authStatus) => { setIsAuthenticated(authStatus); };
 
     const socketJoinGame = (room, playerName, callback) => {
         socket.emit('JOIN_GAME', {
@@ -91,19 +91,23 @@ function Home() {
         return Math.random().toString(36).substr(2, 9);
     }
 
+    const onAuthentication = (status) => {
+        dispatch({ type: 'LOGOUT', payload: status });
+    }
+
     return (
         <div className="home-container">
             {!isAuthenticated && (
                 <Modal>
                     {showLogin ? (
                         <>
-                            <LoginForm onAuthentication={(status) => setIsAuthenticated(status)} />
-                            <button onClick={toggleForms} className="modal-button">S'inscrire</button>
+                            <LoginForm />
+                            <button onClick={() => setShowLogin(false)} className="modal-button">S'inscrire</button>
                         </>
                     ) : (
                         <>
-                            <SignUpForm onSignUp={(status) => setIsAuthenticated(status)} />
-                            <button onClick={toggleForms} className="modal-button">Se connecter</button>
+                            <SignUpForm />
+                            <button onClick={() => setShowLogin(true)} className="modal-button">Se connecter</button>
                         </>
                     )}
                 </Modal>
@@ -111,6 +115,7 @@ function Home() {
             {isAuthenticated && (
                 <div className="home-container">
                     {error && <div key={errorCount} className="error-message">{error}</div>}
+                    <h2 className="connectedAs">Connecté en tant que {playerName}</h2>
                     <h1 className="title">Tetris Game</h1>
                     <form className="home-form">
                         <input
@@ -120,15 +125,9 @@ function Home() {
                             value={room}
                             onChange={(e) => setRoom(e.target.value)}
                         />
-                        <input
-                            className="input-field"
-                            type="text"
-                            placeholder="Votre nom"
-                            value={playerName}
-                            onChange={(e) => setPlayerName(e.target.value)}
-                        />
                         <button className="home-button" onClick={handleJoinGame}>Rejoindre</button>
                         <button className="home-button" onClick={handleCreateGame}>Créer une partie</button>
+                        <button className="home-button" onClick={() => onAuthentication(false)}>Déconnexion</button>
                     </form>
                 </div>
             )}
