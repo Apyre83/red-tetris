@@ -9,17 +9,34 @@ class Player {
         this.name = name;
         this.ranking = 0;
         this.allTimeScores = 0;
-        // this.listOfPieces = undefined;
+        // this.listOfPieces = [];
         this.listOfPieces = [6,1,5,6,6,0,3,4];
-        this.isinRoom = false;
-        this.isDead = false;
+        this.isInGame = false;
+        this.isDead = false; // TODO est-ce que ce truc est utile?
         // this.idActualPiece = undefined;
+        this.idRowBorder = ROWS;
+        this.idActualPiece = -1;
+        this.actualPiece = undefined;
+        this.actualScore = 0; // TODO mettre un systeme de scores
+        this.board = this.createBoard(ROWS);
+        this.spectrum = this.makeSpectrum();
+    }
+
+    resetPlayer() {
+        this.listOfPieces = [];
+        this.isInGame = false;
+        this.isDead = false;
         this.idRowBorder = ROWS;
         this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
+    }
+
+    startGame() {
+        setInterval();
+
     }
 
     createEmptyRow() {
@@ -67,11 +84,10 @@ class Player {
                 }
             }
         }
-        // TODO checker si game over 
         this.updateBoard();
     }
 
-    oneLinePenaly(nbLines) {
+    penalty(nbLines) {
         for (let i = 0 ; i < nbLines ; i++) {
             this.idRowBorder--;
             if (this.idRowBorder === 0) {
@@ -102,28 +118,27 @@ class Player {
 
     checkCompleteLines() {
         console.log(`Board length: ` + this.board.length);
-        let oneLineComplete = true;
+        let linesComplete = true;
         let completeLines = [];
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
             for (let col = BORDER_WIDTH ; col < COLS ; col++) {
                 // TODO VERIFIER SI C'EST BORDER
                 const tile = this.board[row][col];
                 if (tile[0] !== 1 || tile[1] === colors.border) {
-                    oneLineComplete = false;
+                    linesComplete = false;
                     break;
                 }
             }
-            if (oneLineComplete === true) {
+            if (linesComplete === true) {
                 completeLines.push(row);
             } else {
-                oneLineComplete = true;
+                linesComplete = true;
             }
         }
         this.supprLines(completeLines);
         console.log(`Complete lines: ` + completeLines);
         if (completeLines.length > 1)
-            console.log(`TODO emit`);
-        // TODO io.emit('lineDone', completeLines.lenght);
+            this.isInGame.penalty(this.name, completeLines.length - 1);
     }
 
     updateBoard(oldPiece) {
@@ -149,7 +164,7 @@ class Player {
         }
         this.checkCompleteLines();
         this.makeSpectrum();
-        // this.io.emit('updateBoard', this);
+        // this.isInGame.updateBoard(this.name);
     }
 
     makeSpectrum() {
@@ -303,9 +318,18 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
+    leaveGame() {
+        this.socket.on('LEAVE_ROOM', () => {
+            this.isInGame.leaveGame(this.name, 'left');
+            this.resetPlayer();
+        }) 
+    }
+
     gameOver() {
+        this.isDead = true;
         console.log(`Game Over`);
-        // TODO io.emit('Game Over');
+        this.isInGame.leaveGame(this.name, 'died');
+        // this.resetPlayer() A METTRE ? 
     }
 
     printBoard() {
@@ -325,9 +349,11 @@ class Player {
     }
 }
 
+module.exports = Player;
+
 // TESTS
 
-/*const player = new Player(1, 2, 3);
+const player = new Player(1, 2, 3);
 
 player.generateNewPiece();
 player.directBottom();
@@ -339,9 +365,8 @@ player.moveDown();
 player.generateNewPiece();
 
 player.printBoard();
+player.printSpectrum();
 
-console.log(`Bloup`);
-player.oneLinePenaly(5);
-player.printBoard();*/
-
-module.exports = Player;
+// console.log(`Bloup`);
+// player.penalty(5);
+// player.printBoard();
