@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './GameComponent.css';
 import TetrisGame from './TetrisGame';
 
-function getGameFromHash() {
+function getGameNameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
     return match?.[1];
 }
@@ -20,7 +20,7 @@ function GameComponent() {
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
     const navigate = useNavigate();
 
-    const game = getGameFromHash();
+    const gameName = getGameNameFromHash();
     const playerName = getPlayerNameFromHash();
 
     const [isCreator, setIsCreator] = useState(false);
@@ -35,7 +35,7 @@ function GameComponent() {
         if (!isAuthenticated) { navigate('/'); }
 
         const handleLeavePage = (event) => {
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { game, playerName });
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
             event.returnValue = "Are you sure you want to leave the game page?";
         };
         window.addEventListener("beforeunload", handleLeavePage);
@@ -50,7 +50,12 @@ function GameComponent() {
             setPlayers(prev => [...prev, data.playerName]);
         });
 
-        socket.emit('ASK_INFORMATIONS_GAME_PAGE', { game, playerName }, (data) => {
+        socket.on('GAME_STARTED', (data) => {
+            console.log('GAME_STARTED', data);
+            setGameIsPlaying(true);
+        });
+
+        socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) { console.error(data.error); navigate('/'); return; }
 
             setIsCreator(data.creator === playerName);
@@ -58,9 +63,9 @@ function GameComponent() {
         });
         return () => {
             window.removeEventListener("beforeunload", handleLeavePage);
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { game, playerName });
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
         }
-    }, [socket, game, playerName, isAuthenticated, navigate]);
+    }, [socket, gameName, playerName, isAuthenticated, navigate]);
 
     const handleGoHome = () => {
         navigate('/');
@@ -71,14 +76,13 @@ function GameComponent() {
         if (!socket) { console.error('Socket not connected'); return; }
         if (!isCreator) { console.error('Not creator'); return; }
 
-        socket.emit('START_GAME', { game }, (data) => {
-            console.log('START_GAME', data);
-            if (data.code !== 0) { console.error(data.error); return; }
-
-            setGameIsPlaying(true);
+        socket.emit('START_GAME', { gameName, playerName }, (data) => {
+            if (data.code !== 0) {
+                setResponseMessage(data.error);
+                return;
+            }
+            setResponseMessage('');
         });
-        /* Suppose that the server will send a positive response to the creator */
-
     };
 
     return (
@@ -89,7 +93,7 @@ function GameComponent() {
             {gameIsPlaying && <TetrisGame />}
             {!gameIsPlaying &&
                 <div className="game-container">
-                    <h1 className="game-title">Game: {game}</h1>
+                    <h1 className="game-title">Game: {gameName}</h1>
                     {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
                     <h3 className="game-subtitle">Players:</h3>
                     <ul className="game-players-list">

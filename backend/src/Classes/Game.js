@@ -1,12 +1,12 @@
 const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
 
 class Game {
-    constructor(server, name, gameMaster) {
+    constructor(server, gameName/*, gameMaster*/) {
         this.server = server;
-        this.name = name;
-        this.players = [gameMaster]; /* gameMaster is always the first player of the list */
+        this.gameName = gameName;
+        this.players = [/*gameMaster*/]; /* gameMaster is always the first player of the list */
         this.listOfPieces = this.generateListOfPieces();
-        this.alivePlayers = [gameMaster];
+        this.alivePlayers = [/*gameMaster*/];
     }
 
 
@@ -32,22 +32,22 @@ class Game {
 
     addPlayer(player) {
         this.players.push(player);
-        this.alivePlayers.push(player.name);
+        this.alivePlayers.push(player.playerName);
     }
 
     removePlayer(playerName) {
-        const player = this.players.find(player => player.name === playerName);
+        const player = this.players.find(player => player.playerName === playerName);
         if (player) {
             player.resetPlayer();
         }
-        this.players = this.players.filter(p => p.name !== playerName);
-        this.alivePlayers = this.alivePlayers.filter(p => p !== playerName);
+        this.players = this.players.filter(p => p.playerName !== playerName);
+        this.alivePlayers = this.alivePlayers.filter(p => p.playerName !== playerName);
     }
 
     // TODO no need ? A gerer dans le front ? Puisque c'est Player qui envoie updateBoard
     updateBoard(playerName) {
         for (let i = 0 ; i < this.players.length ; i++) {
-            if (this.players[i].name === playerName) {
+            if (this.players[i].playerName === playerName) {
                 // TODO socket.emit('UPDATE_BOARD');
             } else {
                 // TODO socket.emit('UPDATE_SPECTRUM')
@@ -55,34 +55,9 @@ class Game {
         }
     }
 
-    // leaveGame(playerName, wayOfLeaving) {
-    //     if (wayOfLeaving === 'left')
-    //         console.log(`The user ${playerName} left the game ${this.gameId}`);
-    //     else
-    //         console.log(`The user ${playerName} died in the game ${this.gameId}`);
-    //     // TODO socket.emit('SOMEONE_LEAVE')
-    //     if (this.gameMaster.name === playerName) {
-    //         this.players.shift();
-    //         if (this.players.length === 0) {
-    //             console.log(`The game ${this.gameId} is closed`);
-    //             // TODO this.server.closeGame(this.gameId);
-    //         } else {
-    //             this.gameMaster = this.players[0];
-    //             console.log(`New game master of the game ${this.gameId} is ${this.gameMaster.name}`);
-    //             // TODO socket.emit('NEW_GAMEMASTER' )
-    //         }
-    //     } else {
-    //         this.players = this.players.filter(player => player.name !== playerName);
-    //     }
-    //     this.alivePlayers = this.alivePlayers.filter(player => player !== playerName);
-    //     if (this.alivePlayers.length === 1) {
-    //         this.winner(this.alivePlayers[0]);
-    //     }
-    // }
-
     penalty(fromPlayerName, nbLines) {
         for (let i = 0 ; i < this.players.length ; i++) {
-            if (this.players.name !== fromPlayerName) {
+            if (this.players.playerName !== fromPlayerName) {
                 this.players[i].penalty(nbLines);
                 const info = `${nbLines} penalty row(s) from ${fromPlayerName}`;
                 // TODO socket.emit('PENALTY', info);
@@ -92,13 +67,13 @@ class Game {
 
     hasPlayer(playerName) {
         for (const player of this.players) {
-            if (player.name === playerName)
+            if (player.playerName === playerName)
                 return true;
         }
         return false;
     }
 
-    getNames() { return this.players.map(player => player.name); }
+    getNames() { return this.players.map(player => player.playerName); }
 
     winner(winnerName) {
         console.log(`${winnerName} wins the game ${`this.gameId`}`);
