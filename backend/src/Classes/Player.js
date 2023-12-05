@@ -1,17 +1,24 @@
-const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
+const { 
+    ROWS, 
+    COLS, 
+    BORDER_WIDTH, 
+    INIT_TIME_MS }                      = require('../constants/numbers');
 const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
 class Player {
-    constructor(io, socket, name) {
-        this.io = io;
+    constructor(socket, name) {
         this.socket = socket;
         this.name = name;
         this.ranking = 0;
         this.allTimeScores = 0;
         // this.listOfPieces = [];
-        this.listOfPieces = [6,1,5,6,6,0,3,4];
-        this.isInGame = false;
+        this.listOfPieces = [4, 2, 5,
+            2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
+            4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
+            4, 1, 0, 4];
+        // this.isInGame = false;
+        this.isInGame = true; // put on false if not in test
         this.isDead = false; // TODO est-ce que ce truc est utile?
         // this.idActualPiece = undefined;
         this.idRowBorder = ROWS;
@@ -22,20 +29,14 @@ class Player {
         this.spectrum = this.makeSpectrum();
     }
 
-    resetPlayer() {
-        this.listOfPieces = [];
-        this.isInGame = false;
-        this.isDead = false;
-        this.idRowBorder = ROWS;
-        this.idActualPiece = -1;
-        this.actualPiece = undefined;
-        this.actualScore = 0;
-        this.board = this.createBoard(ROWS);
-        this.spectrum = this.makeSpectrum();
-    }
-
     startGame() {
-        setInterval();
+        this.generateNewPiece();
+        var interval = setInterval(() => {
+            if (this.isInGame === false) {
+                clearInterval(interval);
+            }
+            this.moveDown();
+        }, INIT_TIME_MS );
 
     }
 
@@ -70,7 +71,6 @@ class Player {
             this.idActualPiece = 0;
         else 
             this.idActualPiece++;
-        console.log(`id`+ this.listOfPieces[this.idActualPiece]);
         this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
 
         for (let row = 0 ; row < this.actualPiece.width ; row++) {
@@ -102,12 +102,10 @@ class Player {
     }
 
     supprLines(completeLines) {
-        // TODO io.emit('LignesAFaireClignoter');
-        console.log(completeLines);
+        // TODO socket.emit('LignesAFaireClignoter');
         for (let i = 0 ; i < completeLines.length ; i++) {
             const rowToSuppr = completeLines[i];
             if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
-                console.log(`rowtosuppr: ` + rowToSuppr);
                 this.board.splice(rowToSuppr, 1);
             }
         }
@@ -117,7 +115,6 @@ class Player {
     }
 
     checkCompleteLines() {
-        console.log(`Board length: ` + this.board.length);
         let linesComplete = true;
         let completeLines = [];
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
@@ -136,9 +133,19 @@ class Player {
             }
         }
         this.supprLines(completeLines);
-        console.log(`Complete lines: ` + completeLines);
         if (completeLines.length > 1)
             this.isInGame.penalty(this.name, completeLines.length - 1);
+    }
+
+    convertBoardForDisplay(originalBoard) {
+        const rowsToShow = 20;
+        const borderSize = 1;
+    
+        const displayBoard = originalBoard.slice(-rowsToShow).map(row => 
+            row.slice(borderSize, -borderSize)
+        );
+    
+        return displayBoard;
     }
 
     updateBoard(oldPiece) {
@@ -164,7 +171,10 @@ class Player {
         }
         this.checkCompleteLines();
         this.makeSpectrum();
-        // this.isInGame.updateBoard(this.name);
+        if (this.isInGame !== false) {
+            this.printBoard(); // TODO suppr
+            // this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.name});
+        }
     }
 
     makeSpectrum() {
@@ -238,21 +248,45 @@ class Player {
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isTile = false;
+        // let isTile = false;
 
-        for (let row = width - 1 ; row >= 0 ; row--) {
-            for (let col = 0 ; col < width ; col++) {
+        // for (let row = width - 1 ; row >= 0 ; row--) {
+        //     for (let col = 0 ; col < width ; col++) {
+        //         if (this.actualPiece.tetromino[row][col][0] === 1) {
+        //             isTile = true;
+        //             if (this.board[y + row + 1][x + col][0] > 0) {
+        //                 console.log(`Can't move down`);
+        //                 // this.updateBoard(oldPiece);
+        //                 if (this.isInGame !== false) {
+        //                     this.generateNewPiece();
+        //                 }
+        //                 return true;
+        //             }
+        //         }
+        //     } 
+        //     if (isTile === true) 
+        //         break;
+        // }
+
+        for (let col = 0 ; col < width ; col++) {
+            for (let row = width - 1 ; row >= 0 ; row--) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isTile = true;
+                    // isTile = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
+                        // this.updateBoard(oldPiece);
+                        if (this.isInGame !== false) {
+                            this.generateNewPiece();
+                        }
                         return true;
                     }
+                    break;
                 }
             } 
-            if (isTile === true) 
-                break;
+            // if (isTile === true) 
+            //     break;
         }
+
         this.actualPiece.y++;
         if (goToBottom)
             return false;
@@ -314,22 +348,27 @@ class Player {
         while (isAtBottom === false) {
             isAtBottom = this.moveDown(true);
         }
-        console.log(`At bottom`);
-        this.updateBoard(oldPiece);
-    }
-
-    leaveGame() {
-        this.socket.on('LEAVE_ROOM', () => {
-            this.isInGame.leaveGame(this.name, 'left');
-            this.resetPlayer();
-        }) 
     }
 
     gameOver() {
         this.isDead = true;
+        this.isInGame = false;
         console.log(`Game Over`);
-        this.isInGame.leaveGame(this.name, 'died');
+        // TODO envoyer a Game
+        // this.isInGame.leaveGame(this.name, 'died');
         // this.resetPlayer() A METTRE ? 
+    }
+
+    resetPlayer() {
+        this.listOfPieces = [];
+        this.isInGame = false;
+        this.isDead = false;
+        this.idRowBorder = ROWS;
+        this.idActualPiece = -1;
+        this.actualPiece = undefined;
+        this.actualScore = 0;
+        this.board = this.createBoard(ROWS);
+        this.spectrum = this.makeSpectrum();
     }
 
     printBoard() {
@@ -353,7 +392,9 @@ module.exports = Player;
 
 // TESTS
 //
-// const player = new Player(1, 2, 3);
+const player = new Player(1, 2, 3);
+
+player.startGame();
 //
 // player.generateNewPiece();
 // player.directBottom();

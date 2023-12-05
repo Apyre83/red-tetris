@@ -1,12 +1,12 @@
 const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
 
 class Game {
-    constructor(server, name) {
+    constructor(server, name, gameMaster) {
         this.server = server;
         this.name = name;
-        this.players = []; /* gameMaster is always the first player of the list */
+        this.players = [gameMaster]; /* gameMaster is always the first player of the list */
         this.listOfPieces = this.generateListOfPieces();
-        this.alivePlayers = [];
+        this.alivePlayers = [gameMaster];
     }
 
 
@@ -34,18 +34,23 @@ class Game {
         this.players.push(player);
         this.alivePlayers.push(player.name);
     }
+
     removePlayer(playerName) {
+        const player = this.players.find(player => player.name === playerName);
+        if (player) {
+            player.resetPlayer();
+        }
         this.players = this.players.filter(p => p.name !== playerName);
         this.alivePlayers = this.alivePlayers.filter(p => p !== playerName);
     }
 
-
+    // TODO no need ? A gerer dans le front ? Puisque c'est Player qui envoie updateBoard
     updateBoard(playerName) {
         for (let i = 0 ; i < this.players.length ; i++) {
             if (this.players[i].name === playerName) {
-                // TODO io.emit('UPDATE_BOARD');
+                // TODO socket.emit('UPDATE_BOARD');
             } else {
-                // TODO io.emit('UPDATE_SPECTRUM')
+                // TODO socket.emit('UPDATE_SPECTRUM')
             }
         }
     }
@@ -55,7 +60,7 @@ class Game {
     //         console.log(`The user ${playerName} left the game ${this.gameId}`);
     //     else
     //         console.log(`The user ${playerName} died in the game ${this.gameId}`);
-    //     // TODO io.emit('SOMEONE_LEAVE')
+    //     // TODO socket.emit('SOMEONE_LEAVE')
     //     if (this.gameMaster.name === playerName) {
     //         this.players.shift();
     //         if (this.players.length === 0) {
@@ -64,7 +69,7 @@ class Game {
     //         } else {
     //             this.gameMaster = this.players[0];
     //             console.log(`New game master of the game ${this.gameId} is ${this.gameMaster.name}`);
-    //             // TODO io.emit('NEW_GAMEMASTER' )
+    //             // TODO socket.emit('NEW_GAMEMASTER' )
     //         }
     //     } else {
     //         this.players = this.players.filter(player => player.name !== playerName);
@@ -80,7 +85,7 @@ class Game {
             if (this.players.name !== fromPlayerName) {
                 this.players[i].penalty(nbLines);
                 const info = `${nbLines} penalty row(s) from ${fromPlayerName}`;
-                // TODO io.emit('PENALTY', info);
+                // TODO socket.emit('PENALTY', info);
             }
         }
     }
@@ -97,12 +102,13 @@ class Game {
 
     winner(winnerName) {
         console.log(`${winnerName} wins the game ${`this.gameId`}`);
-        // TODO io.emit('WINNER');
+        // TODO socket.emit('WINNER');
         // TODO this.server.closeGame(this.gameId);
     }
 }
 
+module.exports = Game;
+
 // const myGame = new Game(1, 1, 1);
 // console.log(myGame.listOfPieces);
 
-module.exports = Game;
