@@ -3,7 +3,6 @@ const express = require('express');
 const { Server: IOServer } = require('socket.io');
 const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
 const Player = require('./Player');
 const Game = require('./Game');
 
@@ -48,7 +47,7 @@ class Server {
     }
 
     handleSocketConnections() {
-        this.socket.on('connection', (socket) => {
+        this.io.on('connection', (socket) => {
             this.players.push(new Player(this.io, socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
 
             socket.on('disconnect', () => {
@@ -157,19 +156,6 @@ class Server {
                 // TODO movement has to be moveLeft || moveRight || moveDown ||  directBottom || rotateLeft || rotateRight
                 _player[data.movement]();
             })
-
-            // GERE DANS LA CLASSE PLAYER ? 
-            // socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
-            //     console.log('PLAYER LEFT GAME PAGE', data);
-            //     if (!this.games[data.game]) { return; } /* TODO: replace game by class Game */
-            //     this.games[data.game] = this.games[data.game].filter(player => player !== data.playerName); /* TODO: replace game by class Game */
-            //     if (this.games[data.game].length === 0) { delete this.games[data.game]; return; } /* TODO: replace game by class Game */
-
-            //     for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
-            //         const playerSocket = this.players.find(p => p.username === player).socket;
-            //         playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
-            //     }
-            // });
 
             socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
                 console.log('PLAYER LEFT GAME PAGE', data);

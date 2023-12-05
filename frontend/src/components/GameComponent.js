@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './GameComponent.css';
+import TetrisGame from './TetrisGame';
 
 function getGameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
@@ -19,7 +20,6 @@ function GameComponent() {
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
     const navigate = useNavigate();
 
-
     const game = getGameFromHash();
     const playerName = getPlayerNameFromHash();
 
@@ -27,6 +27,7 @@ function GameComponent() {
     const [players, setPlayers] = useState([]);
 
     const [responseMessage, setResponseMessage] = useState('');
+    const [gameIsPlaying, setGameIsPlaying] = useState(false);
 
 
     useEffect(() => {
@@ -66,14 +67,18 @@ function GameComponent() {
     };
 
     const handleStartGame = () => {
-        if (socket && isCreator) {
-            socket.emit('START_GAME', { game });
-            setResponseMessage("Tentative de lancement de la partie...");
-        }
-        else {
-            console.error('Socket not connected or not creator');
-            setResponseMessage("Échec du lancement de la partie : socket non connecté ou non créateur");
-        }
+        if (!isAuthenticated) { console.error('Not authenticated'); return; }
+        if (!socket) { console.error('Socket not connected'); return; }
+        if (!isCreator) { console.error('Not creator'); return; }
+
+        socket.emit('START_GAME', { game }, (data) => {
+            console.log('START_GAME', data);
+            if (data.code !== 0) { console.error(data.error); return; }
+
+            setGameIsPlaying(true);
+        });
+        /* Suppose that the server will send a positive response to the creator */
+
     };
 
     return (
@@ -81,18 +86,21 @@ function GameComponent() {
             <header className="home-header">
                 <h2 className="header-title">Authenticated as {playerName}</h2>
             </header>
-            <div className="game-container">
-                <h1 className="game-title">Game: {game}</h1>
-                {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
-                <h3 className="game-subtitle">Players:</h3>
-                <ul className="game-players-list">
-                    {players.map((player, index) => <li key={index}>{player}</li>)}
-                </ul>
+            {gameIsPlaying && <TetrisGame />}
+            {!gameIsPlaying &&
+                <div className="game-container">
+                    <h1 className="game-title">Game: {game}</h1>
+                    {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
+                    <h3 className="game-subtitle">Players:</h3>
+                    <ul className="game-players-list">
+                        {players.map((player, index) => <li key={index}>{player}</li>)}
+                    </ul>
 
-                {responseMessage && <p className="game-response-message">{responseMessage}</p>}
-                <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
-                {isCreator && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
-            </div>
+                    {responseMessage && <p className="game-response-message">{responseMessage}</p>}
+                    <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
+                    {isCreator && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
+                </div>
+            }
         </>
     );
 }
