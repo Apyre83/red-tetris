@@ -1,15 +1,12 @@
 const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
 
 class Game {
-    constructor(server, id, name, gameMaster) {
+    constructor(server, name) {
         this.server = server;
-        this.id = id;
         this.name = name;
-        this.gameMaster = gameMaster;
-        this.players = [gameMaster];
+        this.players = []; /* gameMaster is always the first player of the list */
         this.listOfPieces = this.generateListOfPieces();
-        this.alivePlayers = [gameMaster.name];
-        this.listOfPieces = createListOfPieces();
+        this.alivePlayers = [];
     }
 
 
@@ -33,10 +30,15 @@ class Game {
         }
     }
 
-    addPlayer(newPlayer) {
-        this.players.push(newPlayer);
-        this.alivePlayers.push(newPlayer.name);
+    addPlayer(player) {
+        this.players.push(player);
+        this.alivePlayers.push(player.name);
     }
+    removePlayer(playerName) {
+        this.players = this.players.filter(p => p.name !== playerName);
+        this.alivePlayers = this.alivePlayers.filter(p => p !== playerName);
+    }
+
 
     updateBoard(playerName) {
         for (let i = 0 ; i < this.players.length ; i++) {
@@ -48,30 +50,30 @@ class Game {
         }
     }
 
-    leaveGame(playerName, wayOfLeaving) {
-        if (wayOfLeaving === 'left')
-            console.log(`The user ${playerName} left the game ${this.gameId}`);
-        else 
-            console.log(`The user ${playerName} died in the game ${this.gameId}`);
-        // TODO io.emit('SOMEONE_LEAVE')
-        if (this.gameMaster.name === playerName) {
-            this.players.shift();
-            if (this.players.length === 0) {
-                console.log(`The game ${this.gameId} is closed`);
-                // TODO this.server.closeGame(this.gameId);
-            } else {
-                this.gameMaster = this.players[0];
-                console.log(`New game master of the game ${this.gameId} is ${this.gameMaster.name}`);
-                // TODO io.emit('NEW_GAMEMASTER' )
-            }
-        } else {
-            this.players = this.players.filter(player => player.name !== playerName);
-        }
-        this.alivePlayers = this.alivePlayers.filter(player => player !== playerName);
-        if (this.alivePlayers.length === 1) {
-            this.winner(this.alivePlayers[0]);
-        }
-    }
+    // leaveGame(playerName, wayOfLeaving) {
+    //     if (wayOfLeaving === 'left')
+    //         console.log(`The user ${playerName} left the game ${this.gameId}`);
+    //     else
+    //         console.log(`The user ${playerName} died in the game ${this.gameId}`);
+    //     // TODO io.emit('SOMEONE_LEAVE')
+    //     if (this.gameMaster.name === playerName) {
+    //         this.players.shift();
+    //         if (this.players.length === 0) {
+    //             console.log(`The game ${this.gameId} is closed`);
+    //             // TODO this.server.closeGame(this.gameId);
+    //         } else {
+    //             this.gameMaster = this.players[0];
+    //             console.log(`New game master of the game ${this.gameId} is ${this.gameMaster.name}`);
+    //             // TODO io.emit('NEW_GAMEMASTER' )
+    //         }
+    //     } else {
+    //         this.players = this.players.filter(player => player.name !== playerName);
+    //     }
+    //     this.alivePlayers = this.alivePlayers.filter(player => player !== playerName);
+    //     if (this.alivePlayers.length === 1) {
+    //         this.winner(this.alivePlayers[0]);
+    //     }
+    // }
 
     penalty(fromPlayerName, nbLines) {
         for (let i = 0 ; i < this.players.length ; i++) {
@@ -83,6 +85,16 @@ class Game {
         }
     }
 
+    hasPlayer(playerName) {
+        for (const player of this.players) {
+            if (player.name === playerName)
+                return true;
+        }
+        return false;
+    }
+
+    getNames() { return this.players.map(player => player.name); }
+
     winner(winnerName) {
         console.log(`${winnerName} wins the game ${`this.gameId`}`);
         // TODO io.emit('WINNER');
@@ -90,5 +102,7 @@ class Game {
     }
 }
 
-const myGame = new Game(1, 1, 1);
-console.log(myGame.listOfPieces);
+// const myGame = new Game(1, 1, 1);
+// console.log(myGame.listOfPieces);
+
+module.exports = Game;

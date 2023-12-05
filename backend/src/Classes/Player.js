@@ -352,20 +352,20 @@ class Player {
 module.exports = Player;
 
 // TESTS
-
-const player = new Player(1, 2, 3);
-
-player.generateNewPiece();
-player.directBottom();
-player.rotateLeft();
-player.generateNewPiece();
-player.moveLeft();
-player.moveLeft()
-player.moveDown();
-player.generateNewPiece();
-
-player.printBoard();
-player.printSpectrum();
+//
+// const player = new Player(1, 2, 3);
+//
+// player.generateNewPiece();
+// player.directBottom();
+// player.rotateLeft();
+// player.generateNewPiece();
+// player.moveLeft();
+// player.moveLeft()
+// player.moveDown();
+// player.generateNewPiece();
+//
+// player.printBoard();
+// player.printSpectrum();
 
 // console.log(`Bloup`);
 // player.penalty(5);

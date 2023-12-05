@@ -20,7 +20,7 @@ class Server {
             }
         });
         this.port = port;
-        this.games = {}; /* TODO */
+        this.games = []; /* TODO */
         /* this.players is a list of Players from Player.js */
         this.players = [];
 
@@ -53,6 +53,9 @@ class Server {
 
             socket.on('disconnect', () => {
                 this.players = this.players.filter(player => player.socket.id !== socket.id);
+                for (const _game of this.games) {
+
+                }
             });
 
             socket.on('LOGIN', (data, callback) => {
@@ -66,7 +69,7 @@ class Server {
 
                 /* Change the username of the player */
                 for (const player of this.players) {
-                    if (player.socket.id === socket.id) { player.username = data.username; }
+                    if (player.socket.id === socket.id) { player.name = data.username; }
                 }
                 callback({...data, code: 0});
             });
@@ -83,7 +86,7 @@ class Server {
 
                 // const player = new Player; ?
                 for (const player of this.players) {
-                    if (player.socket.id === socket.id) { player.username = data.username; }
+                    if (player.socket.id === socket.id) { player.name = data.username; }
                 }
 
                 // TODO: password hashing
@@ -98,37 +101,42 @@ class Server {
 
             socket.on('CREATE_GAME', (data, callback) => {
                 console.log('CREATE GAME', data);
-                if (this.games[data.game]) { callback({...data, code: 1, error: "Game already exists"}); return; } /* TODO: replace game by class Game */
 
-                // TODO const game = new Game; ?
-                this.games[data.game] = []; /* TODO: replace game by class Game */
-                callback({...data, code: 0, players: this.games[data.game]}); /* TODO: replace game by class Game */
-            });
-
-            // TODO ajouter a la classe Game dans addPlayer ? 
-            socket.on('JOIN_GAME', (data, callback) => {
-                console.log("JOIN GAME", data);
-                if (!this.games[data.game]) { callback({...data, code: 1, error: "Game does not exist"}); return; } /* TODO: replace game by class Game */
-                for (const game in this.games) { /* TODO: replace game by class Game */
-                    if (this.games[game].includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
+                for (const game of this.games) {
+                    if (game.name === data.game) { callback({...data, code: 1, error: "Game already exists"}); return; }
+                    if (game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
                 }
 
-                this.games[data.game].push(data.playerName); /* TODO: replace game by class Game */
-                callback({...data, code: 0, players: this.games[data.game]}); /* TODO: replace game by class Game */
+                const newGame = new Game(this, data.game, data.playerName);
+                this.games.push(newGame);
+
+                callback({...data, code: 0});
+            });
+
+            socket.on('JOIN_GAME', (data, callback) => {
+                console.log('JOIN_GAME', data);
+                const _game = this.games.find(game => game.name === data.game);
+                if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
+                if (_game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
+
+                const _player = this.players.find(player => player.name === data.playerName);
+                if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
+
+                _game.addPlayer(_player)
+                callback({...data, code: 0});
             });
 
             socket.on('ASK_INFORMATIONS_GAME_PAGE', (data, callback) => {
                 console.log("ASK INFORMATIONS GAME PAGE", data);
-                if (!this.games[data.game]) { callback({...data, code: 1, error: "Game does not exist"}); return; } /* TODO: replace game by class Game */
-                if (!this.games[data.game].includes(data.playerName)) { callback({...data, code: 2, error: "Player not in the game"}); return; } /* TODO: replace game by class Game */
 
-                /* Pour chaque user, envoyer l'event USER_JOIN_ROOM */
-                for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
-                    const playerSocket = this.players.find(p => p.username === player).socket;
-                    playerSocket.emit('USER_JOIN_ROOM', {...data, players: this.games[data.game], creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
+                const _game = this.games.find(game => game.name === data.game);
+                if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
+                if (!_game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Player not in the game"}); return; }
+
+                for (const player of _game.players) {
+                    player.socket.emit('USER_JOIN_ROOM', {...data, players: _game.getNames(), creator: _game.players[0].name});
                 }
-
-                callback({...data, code: 0, players: this.games[data.game], creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
+                callback({...data, code: 0, players: _game.getNames(), creator: _game.players[0].name});
             });
 
             // GERE DANS LA CLASSE PLAYER ? 
@@ -143,13 +151,24 @@ class Server {
             //         playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
             //     }
             // });
+            socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
+                console.log('PLAYER LEFT GAME PAGE', data);
+                const _game = this.games.find(game => game.name === data.game);
+                if (!_game) { return; }
+                _game.removePlayer(data.playerName);
+                if (_game.players.length === 0) { this.closeGame(_game.name); return; }
+
+                for (const player of _game.players) {
+                    console.log('PLAYER', player.name);
+                    player.socket.emit('USER_LEAVE_ROOM', {...data, creator: _game.players[0].name});
+                }
+            });
 
         });
     }
 
-    closeGame(gameId) {
-        const newGamesList = this.games.filter(game => game.gameId !== gameId);
-        this.games = newGamesList;
+    closeGame(gameName) {
+        this.games = this.games.filter(game => game.name !== gameName);
     }
 
     readDatabase() {
