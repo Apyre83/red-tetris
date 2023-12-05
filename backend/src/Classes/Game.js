@@ -44,7 +44,7 @@ class Game {
         this.alivePlayers = this.alivePlayers.filter(p => p !== playerName);
     }
 
-
+    // TODO no need ? A gerer dans le front ? Puisque c'est Player qui envoie updateBoard
     updateBoard(playerName) {
         for (let i = 0 ; i < this.players.length ; i++) {
             if (this.players[i].name === playerName) {
@@ -107,7 +107,8 @@ class Game {
     }
 }
 
+module.exports = Game;
+
 // const myGame = new Game(1, 1, 1);
 // console.log(myGame.listOfPieces);
 
-module.exports = Game;

@@ -21,7 +21,7 @@ class Piece {
                 [[0, colors.empty], [0, colors.empty],  [1, colors.cyan],  [0, colors.empty]],
                 [[0, colors.empty], [0, colors.empty],  [1, colors.cyan],  [0, colors.empty]]]},
 
-            { id: 1, letter: 'O', x: 3 + BORDER_WIDTH, color: colors.yellow, tetromino: [
+            { id: 1, letter: 'O', x: 4 + BORDER_WIDTH, color: colors.yellow, tetromino: [
                 [[1, colors.yellow], [1, colors.yellow]],
                 [[1, colors.yellow], [1, colors.yellow]]]},
 
@@ -30,12 +30,12 @@ class Piece {
                 [[1, colors.purple], [1, colors.purple], [1, colors.purple]],
                 [[0, colors.empty],  [1, colors.purple], [0, colors.empty]]]},
 
-            { id: 3, letter: 'L', x: 3 + BORDER_WIDTH, color: colors.orange, tetromino: [
+            { id: 3, letter: 'L', x: 4 + BORDER_WIDTH, color: colors.orange, tetromino: [
                 [[0, colors.empty], [1, colors.orange], [0, colors.empty]],
                 [[0, colors.empty], [1, colors.orange], [0, colors.empty]],
                 [[0, colors.empty], [1, colors.orange], [1, colors.orange]]]},
 
-            { id: 4, letter: 'J', x: 3 + BORDER_WIDTH, color: colors.blue, tetromino: [
+            { id: 4, letter: 'J', x: 4 + BORDER_WIDTH, color: colors.blue, tetromino: [
                 [[0, colors.empty], [1, colors.blue], [0, colors.empty]],
                 [[0, colors.empty], [1, colors.blue], [0, colors.empty]],
                 [[1, colors.blue],  [1, colors.blue], [0, colors.empty]]]},

@@ -1,4 +1,8 @@
-const { ROWS, COLS, BORDER_WIDTH }      = require('../constants/numbers');
+const { 
+    ROWS, 
+    COLS, 
+    BORDER_WIDTH, 
+    INIT_TIME_MS }                      = require('../constants/numbers');
 const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
@@ -9,8 +13,12 @@ class Player {
         this.ranking = 0;
         this.allTimeScores = 0;
         // this.listOfPieces = [];
-        this.listOfPieces = [6,1,5,6,6,0,3,4];
-        this.isInGame = false;
+        this.listOfPieces = [4, 2, 0, 0, 5,
+            2, 6, 0, 3, 3, 5, 4, 2, 0, 6, 4, 5,
+            4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
+            4, 1, 0, 4];
+        // this.isInGame = false;
+        this.isInGame = true; // put on false if not in test
         this.isDead = false; // TODO est-ce que ce truc est utile?
         // this.idActualPiece = undefined;
         this.idRowBorder = ROWS;
@@ -22,7 +30,13 @@ class Player {
     }
 
     startGame() {
-        setInterval();
+        this.generateNewPiece();
+        var interval = setInterval(() => {
+            if (this.isInGame === false) {
+                clearInterval(interval);
+            }
+            this.moveDown();
+        }, INIT_TIME_MS );
 
     }
 
@@ -57,7 +71,6 @@ class Player {
             this.idActualPiece = 0;
         else 
             this.idActualPiece++;
-        console.log(`id`+ this.listOfPieces[this.idActualPiece]);
         this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
 
         for (let row = 0 ; row < this.actualPiece.width ; row++) {
@@ -90,11 +103,9 @@ class Player {
 
     supprLines(completeLines) {
         // TODO socket.emit('LignesAFaireClignoter');
-        console.log(completeLines);
         for (let i = 0 ; i < completeLines.length ; i++) {
             const rowToSuppr = completeLines[i];
             if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
-                console.log(`rowtosuppr: ` + rowToSuppr);
                 this.board.splice(rowToSuppr, 1);
             }
         }
@@ -104,7 +115,6 @@ class Player {
     }
 
     checkCompleteLines() {
-        console.log(`Board length: ` + this.board.length);
         let linesComplete = true;
         let completeLines = [];
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
@@ -123,35 +133,42 @@ class Player {
             }
         }
         this.supprLines(completeLines);
-        console.log(`Complete lines: ` + completeLines);
         if (completeLines.length > 1)
             this.isInGame.penalty(this.name, completeLines.length - 1);
+    }
+
+    convertBoardForDisplay(originalBoard) {
+        const rowsToShow = 20;
+        const borderSize = 1;
+    
+        const displayBoard = originalBoard.slice(-rowsToShow).map(row => 
+            row.slice(borderSize, -borderSize)
+        );
+    
+        return displayBoard;
     }
 
     updateBoard(oldPiece) {
         
         const x = this.actualPiece.x;
         const y = this.actualPiece.y;
+        let   newBoard = this.board;
 
-        for (let row = 0 ; row < this.actualPiece.width ; row++) {
-            for (let col = 0; col < this.actualPiece.width ; col++) {
-                if (oldPiece) {
-                    if (oldPiece.tetromino[row][col][0] === 1) {
-                        this.board[oldPiece.y + row][oldPiece.x + col] = [0, colors.empty];
-                    }
-                }
-            }
-        }
+        if (oldPiece) {newBoard = this.boardWithoutPiece(oldPiece);}
         for (let row = 0 ; row < this.actualPiece.width ; row++) {   
             for (let col = 0; col < this.actualPiece.width ; col++) {
                     if (this.actualPiece.tetromino[row][col][0] === 1) {
-                        this.board[y + row][x + col] = this.actualPiece.tetromino[row][col];
+                        newBoard[y + row][x + col] = this.actualPiece.tetromino[row][col];
                     }
             }
         }
+        this.board = newBoard;
         this.checkCompleteLines();
         this.makeSpectrum();
-        this.socket.emit('UPDATE_BOARD', {board: this.board, name: this.name});
+        if (this.isInGame !== false) {
+            this.printBoard(); // TODO suppr
+            // this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.name});
+        }
     }
 
     makeSpectrum() {
@@ -220,25 +237,43 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
+    boardWithoutPiece(piece) {
+        let newBoard = JSON.parse(JSON.stringify(this.board));
+
+        for (let row = 0 ; row < piece.width ; row++) {
+            for (let col = 0; col < piece.width ; col++) {
+                if (piece.tetromino[row][col][0] === 1) {
+                    newBoard[piece.y + row][piece.x + col] = [0, colors.empty];
+                }
+            }
+        }
+        return newBoard;
+    }   
+
     moveDown(goToBottom) {
         const width = this.actualPiece.width;
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isTile = false;
+        const newBoard = this.boardWithoutPiece(this.actualPiece);
+        // let isTile = false;
 
         for (let row = width - 1 ; row >= 0 ; row--) {
             for (let col = 0 ; col < width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isTile = true;
-                    if (this.board[y + row + 1][x + col][0] > 0) {
+                    // isTile = true;
+                    if (newBoard[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
+                        this.updateBoard(oldPiece);
+                        if (this.isInGame !== false) {
+                            this.generateNewPiece();
+                        }
                         return true;
                     }
                 }
             } 
-            if (isTile === true) 
-                break;
+            // if (isTile === true) 
+            //     break;
         }
         this.actualPiece.y++;
         if (goToBottom)
@@ -301,14 +336,14 @@ class Player {
         while (isAtBottom === false) {
             isAtBottom = this.moveDown(true);
         }
-        console.log(`At bottom`);
-        this.updateBoard(oldPiece);
     }
 
     gameOver() {
         this.isDead = true;
+        this.isInGame = false;
         console.log(`Game Over`);
-        this.isInGame.leaveGame(this.name, 'died');
+        // TODO envoyer a Game
+        // this.isInGame.leaveGame(this.name, 'died');
         // this.resetPlayer() A METTRE ? 
     }
 
@@ -346,9 +381,8 @@ module.exports = Player;
 // TESTS
 //
 const player = new Player(1, 2, 3);
-console.log(player.board);
 
-player.printBoard();
+player.startGame();
 //
 // player.generateNewPiece();
 // player.directBottom();
