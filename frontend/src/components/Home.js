@@ -72,7 +72,7 @@ function Home() {
         const uniqueGameName = generateUniqueGameName();
 
         socket.emit('CREATE_GAME',{
-            game: uniqueGameName,
+            gameName: uniqueGameName,
             playerName
         }, (data) => {
             console.log("Game created successfully: ", data);

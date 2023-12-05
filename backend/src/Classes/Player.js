@@ -3,8 +3,7 @@ const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
 class Player {
-    constructor(io, socket, name) {
-        this.io = io;
+    constructor(socket, name) {
         this.socket = socket;
         this.name = name;
         this.ranking = 0;
@@ -18,18 +17,6 @@ class Player {
         this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0; // TODO mettre un systeme de scores
-        this.board = this.createBoard(ROWS);
-        this.spectrum = this.makeSpectrum();
-    }
-
-    resetPlayer() {
-        this.listOfPieces = [];
-        this.isInGame = false;
-        this.isDead = false;
-        this.idRowBorder = ROWS;
-        this.idActualPiece = -1;
-        this.actualPiece = undefined;
-        this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
     }
@@ -102,7 +89,7 @@ class Player {
     }
 
     supprLines(completeLines) {
-        // TODO io.emit('LignesAFaireClignoter');
+        // TODO socket.emit('LignesAFaireClignoter');
         console.log(completeLines);
         for (let i = 0 ; i < completeLines.length ; i++) {
             const rowToSuppr = completeLines[i];
@@ -318,18 +305,23 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
-    leaveGame() {
-        this.socket.on('LEAVE_ROOM', () => {
-            this.isInGame.leaveGame(this.name, 'left');
-            this.resetPlayer();
-        }) 
-    }
-
     gameOver() {
         this.isDead = true;
         console.log(`Game Over`);
         this.isInGame.leaveGame(this.name, 'died');
         // this.resetPlayer() A METTRE ? 
+    }
+
+    resetPlayer() {
+        this.listOfPieces = [];
+        this.isInGame = false;
+        this.isDead = false;
+        this.idRowBorder = ROWS;
+        this.idActualPiece = -1;
+        this.actualPiece = undefined;
+        this.actualScore = 0;
+        this.board = this.createBoard(ROWS);
+        this.spectrum = this.makeSpectrum();
     }
 
     printBoard() {

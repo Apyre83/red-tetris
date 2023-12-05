@@ -48,7 +48,7 @@ class Server {
     }
 
     handleSocketConnections() {
-        this.io.on('connection', (socket) => {
+        this.socket.on('connection', (socket) => {
             this.players.push(new Player(this.io, socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
 
             socket.on('disconnect', () => {
@@ -107,7 +107,9 @@ class Server {
                     if (game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
                 }
 
-                const newGame = new Game(this, data.game, data.playerName);
+                const gameMaster = this.players.find(player => player.name === data.playerName);
+
+                const newGame = new Game(this, data.gameName, gameMaster);
                 this.games.push(newGame);
 
                 callback({...data, code: 0});
@@ -139,6 +141,15 @@ class Server {
                 callback({...data, code: 0, players: _game.getNames(), creator: _game.players[0].name});
             });
 
+            socket.on('START_GAME', (data) => {
+                const _game = this.games.find(game => game.name === data.game);
+                if (!_game) { return; }
+
+                for (player of _game.players) {
+                    player.startGame();
+                }
+            })
+
             // GERE DANS LA CLASSE PLAYER ? 
             // socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
             //     console.log('PLAYER LEFT GAME PAGE', data);
@@ -151,6 +162,7 @@ class Server {
             //         playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
             //     }
             // });
+
             socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
                 console.log('PLAYER LEFT GAME PAGE', data);
                 const _game = this.games.find(game => game.name === data.game);
