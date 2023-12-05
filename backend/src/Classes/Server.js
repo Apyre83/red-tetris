@@ -150,6 +150,14 @@ class Server {
                 }
             })
 
+            socket.on('MOVEMENT', (data) => {
+                const _player = this.players.find(player => player.name === data.playerName);
+                if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
+                if (!_player.isInGame) { callback({...data, code: 4, error: "Player not playing"}); return;}
+                // TODO movement has to be moveLeft || moveRight || moveDown ||  directBottom || rotateLeft || rotateRight
+                _player[data.movement]();
+            })
+
             // GERE DANS LA CLASSE PLAYER ? 
             // socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
             //     console.log('PLAYER LEFT GAME PAGE', data);

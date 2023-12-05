@@ -151,7 +151,7 @@ class Player {
         }
         this.checkCompleteLines();
         this.makeSpectrum();
-        // this.isInGame.updateBoard(this.name);
+        this.socket.emit('UPDATE_BOARD', {board: this.board, name: this.name});
     }
 
     makeSpectrum() {
@@ -345,7 +345,10 @@ module.exports = Player;
 
 // TESTS
 //
-// const player = new Player(1, 2, 3);
+const player = new Player(1, 2, 3);
+console.log(player.board);
+
+player.printBoard();
 //
 // player.generateNewPiece();
 // player.directBottom();
