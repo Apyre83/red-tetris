@@ -13,8 +13,8 @@ class Player {
         this.ranking = 0;
         this.allTimeScores = 0;
         // this.listOfPieces = [];
-        this.listOfPieces = [4, 2, 0, 0, 5,
-            2, 6, 0, 3, 3, 5, 4, 2, 0, 6, 4, 5,
+        this.listOfPieces = [4, 2, 5,
+            2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
             4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
             4, 1, 0, 4];
         // this.isInGame = false;
@@ -248,25 +248,45 @@ class Player {
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isTile = false;
+        // let isTile = false;
 
-        for (let row = width - 1 ; row >= 0 ; row--) {
-            for (let col = 0 ; col < width ; col++) {
+        // for (let row = width - 1 ; row >= 0 ; row--) {
+        //     for (let col = 0 ; col < width ; col++) {
+        //         if (this.actualPiece.tetromino[row][col][0] === 1) {
+        //             isTile = true;
+        //             if (this.board[y + row + 1][x + col][0] > 0) {
+        //                 console.log(`Can't move down`);
+        //                 // this.updateBoard(oldPiece);
+        //                 if (this.isInGame !== false) {
+        //                     this.generateNewPiece();
+        //                 }
+        //                 return true;
+        //             }
+        //         }
+        //     } 
+        //     if (isTile === true) 
+        //         break;
+        // }
+
+        for (let col = 0 ; col < width ; col++) {
+            for (let row = width - 1 ; row >= 0 ; row--) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isTile = true;
+                    // isTile = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
-                        this.updateBoard(oldPiece);
+                        // this.updateBoard(oldPiece);
                         if (this.isInGame !== false) {
                             this.generateNewPiece();
                         }
                         return true;
                     }
+                    break;
                 }
             } 
-            if (isTile === true) 
-                break;
+            // if (isTile === true) 
+            //     break;
         }
+
         this.actualPiece.y++;
         if (goToBottom)
             return false;
