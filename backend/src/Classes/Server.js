@@ -3,7 +3,6 @@ const express = require('express');
 const { Server: IOServer } = require('socket.io');
 const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
 const Player = require('./Player');
 const Game = require('./Game');
 
@@ -139,18 +138,6 @@ class Server {
                 callback({...data, code: 0, players: _game.getNames(), creator: _game.players[0].name});
             });
 
-            // GERE DANS LA CLASSE PLAYER ? 
-            // socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
-            //     console.log('PLAYER LEFT GAME PAGE', data);
-            //     if (!this.games[data.game]) { return; } /* TODO: replace game by class Game */
-            //     this.games[data.game] = this.games[data.game].filter(player => player !== data.playerName); /* TODO: replace game by class Game */
-            //     if (this.games[data.game].length === 0) { delete this.games[data.game]; return; } /* TODO: replace game by class Game */
-
-            //     for (const player of this.games[data.game]) { /* TODO: replace game by class Game */
-            //         const playerSocket = this.players.find(p => p.username === player).socket;
-            //         playerSocket.emit('USER_LEAVE_ROOM', {...data, creator: this.games[data.game][0]}); /* TODO: replace game by class Game */
-            //     }
-            // });
             socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
                 console.log('PLAYER LEFT GAME PAGE', data);
                 const _game = this.games.find(game => game.name === data.game);
@@ -163,7 +150,10 @@ class Server {
                     player.socket.emit('USER_LEAVE_ROOM', {...data, creator: _game.players[0].name});
                 }
             });
-
+            socket.on('START_GAME', (data, callback) => {
+                // TODO
+                callback({...data, code: 0});
+            });
         });
     }
 

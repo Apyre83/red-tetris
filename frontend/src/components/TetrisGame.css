@@ -1,0 +1,22 @@
+/* TetrisGame.css */
+.tetris-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.tetris-row {
+    display: flex;
+}
+
+.tetris-cell {
+    width: 20px; /* ajustez la taille selon vos besoins */
+    height: 20px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.tetris-cell.filled {
+    background-color: blue; /* ou toute autre couleur visible */
+}
