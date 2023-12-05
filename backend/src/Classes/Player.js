@@ -13,7 +13,7 @@ class Player {
         this.ranking = 0;
         this.allTimeScores = 0;
         // this.listOfPieces = [];
-        this.listOfPieces = [4, 2, 5,
+        this.listOfPieces = [1, 4, 2, 5,
             2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
             4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
             4, 1, 0, 4];
@@ -274,15 +274,19 @@ class Player {
                     // isTile = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
-                        // this.updateBoard(oldPiece);
-                        if (this.isInGame !== false) {
-                            this.generateNewPiece();
-                        }
+
+                        // this.updateBoard(oldPiece); // A SUPPRIMER
+
+                        // TODO remettre ces 3 lignes
+                        // if (this.isInGame !== false) {
+                        //     this.generateNewPiece();
+                        // }
                         return true;
                     }
                     break;
                 }
             } 
+            // TODO SUPPRIMER CES 2 lignes 
             // if (isTile === true) 
             //     break;
         }
@@ -290,6 +294,16 @@ class Player {
         this.actualPiece.y++;
         if (goToBottom)
             return false;
+        this.updateBoard(oldPiece);
+    }
+
+    directBottom() {
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        let isAtBottom = false;
+        while (isAtBottom === false) {
+            isAtBottom = this.moveDown(true);
+        }
+        console.log(`At bottom`);
         this.updateBoard(oldPiece);
     }
 
@@ -342,14 +356,6 @@ class Player {
         }
     }
 
-    directBottom() {
-        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
-        let isAtBottom = false;
-        while (isAtBottom === false) {
-            isAtBottom = this.moveDown(true);
-        }
-    }
-
     gameOver() {
         this.isDead = true;
         this.isInGame = false;
@@ -394,10 +400,35 @@ module.exports = Player;
 //
 const player = new Player(1, 2, 3);
 
-player.startGame();
-//
-// player.generateNewPiece();
-// player.directBottom();
+// player.startGame();
+player.generateNewPiece();
+player.moveLeft();
+player.moveLeft();
+player.directBottom();
+
+
+player.generateNewPiece();
+// player.printBoard();
+player.moveLeft();
+player.rotateRight();
+player.moveLeft();
+player.moveLeft();
+// player.printBoard();
+player.moveDown();
+player.moveDown();
+player.directBottom();
+// player.printBoard();
+
+player.generateNewPiece();
+player.rotateRight();
+player.moveRight();
+player.moveDown();
+player.moveDown();
+player.moveDown();
+player.moveLeft();
+
+// ATTENTION DEVRAIT PAS MARCHER
+player.moveLeft();
 // player.rotateLeft();
 // player.generateNewPiece();
 // player.moveLeft();
