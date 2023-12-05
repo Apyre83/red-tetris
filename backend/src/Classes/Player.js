@@ -29,6 +29,8 @@ class Player {
         this.spectrum = this.makeSpectrum();
     }
 
+    // ================= METHODS BEFORE GAME =================
+
     startGame() {
         this.generateNewPiece();
         var interval = setInterval(() => {
@@ -66,6 +68,8 @@ class Player {
         return board;
     }
 
+    // ================= METHODS DURING GAME =================
+
     generateNewPiece() {
         if (this.idActualPiece === this.listOfPieces.length - 1)
             this.idActualPiece = 0;
@@ -101,19 +105,6 @@ class Player {
         this.updateBoard();
     }
 
-    supprLines(completeLines) {
-        // TODO socket.emit('LignesAFaireClignoter');
-        for (let i = 0 ; i < completeLines.length ; i++) {
-            const rowToSuppr = completeLines[i];
-            if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
-                this.board.splice(rowToSuppr, 1);
-            }
-        }
-        for (let i = 0 ; i < completeLines.length ; i++) {
-            this.board.unshift(this.createEmptyRow());
-        }
-    }
-
     checkCompleteLines() {
         let linesComplete = true;
         let completeLines = [];
@@ -137,15 +128,17 @@ class Player {
             this.isInGame.penalty(this.name, completeLines.length - 1);
     }
 
-    convertBoardForDisplay(originalBoard) {
-        const rowsToShow = 20;
-        const borderSize = 1;
-    
-        const displayBoard = originalBoard.slice(-rowsToShow).map(row => 
-            row.slice(borderSize, -borderSize)
-        );
-    
-        return displayBoard;
+    supprLines(completeLines) {
+        // TODO socket.emit('LignesAFaireClignoter');
+        for (let i = 0 ; i < completeLines.length ; i++) {
+            const rowToSuppr = completeLines[i];
+            if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
+                this.board.splice(rowToSuppr, 1);
+            }
+        }
+        for (let i = 0 ; i < completeLines.length ; i++) {
+            this.board.unshift(this.createEmptyRow());
+        }
     }
 
     updateBoard(oldPiece) {
@@ -171,23 +164,7 @@ class Player {
         }
     }
 
-    makeSpectrum() {
-        let spectrum = this.createBoard(ROWS);
-        const allColsFull = {};
-        for (let i = 0; i < ROWS; i++) {
-            for (let j = BORDER_WIDTH; j < COLS ; j++) {
-                if (allColsFull[j]) {
-                    spectrum[i][j] = [1, colors.full];
-                } else {
-                    if (this.board[i][j][0] !== 0) {
-                        allColsFull[j] = true;
-                        spectrum[i][j] = [1, colors.full];
-                    } 
-                }
-            }
-        }
-        this.spectrum = spectrum;
-    }
+    // ================= MOVEMENTS =================
 
     moveLeft() {
         const width = this.actualPiece.width;
@@ -237,19 +214,6 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
-    boardWithoutPiece(piece) {
-        let newBoard = JSON.parse(JSON.stringify(this.board));
-
-        for (let row = 0 ; row < piece.width ; row++) {
-            for (let col = 0; col < piece.width ; col++) {
-                if (piece.tetromino[row][col][0] === 1) {
-                    newBoard[piece.y + row][piece.x + col] = [0, colors.empty];
-                }
-            }
-        }
-        return newBoard;
-    }   
-
     moveDown(goToBottom) {
         const width = this.actualPiece.width;
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
@@ -281,6 +245,84 @@ class Player {
         this.updateBoard(oldPiece);
     }
 
+    rotateRight() {
+        const   oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const   rotatedTetromino = this.actualPiece.rotate('right');
+
+        if (this.canRotate(rotatedTetromino) === true) {
+            this.actualPiece.tetromino = rotatedTetromino;
+            this.updateBoard(oldPiece);
+        }
+    }
+
+    rotateLeft() {
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        const   rotatedTetromino = this.actualPiece.rotate('left');
+
+        if (this.canRotate(rotatedTetromino) === true) {
+            this.actualPiece.tetromino = rotatedTetromino;
+            this.updateBoard(oldPiece);
+        }
+    }
+
+    directBottom() {
+        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+        let isAtBottom = false;
+        while (isAtBottom === false) {
+            isAtBottom = this.moveDown(true);
+        }
+    }
+
+    //================= METHODS END OF GAME =================
+
+    gameOver() {
+        this.isDead = true;
+        this.isInGame = false;
+        console.log(`Game Over`);
+        // TODO envoyer a Game
+        // this.isInGame.leaveGame(this.name, 'died');
+        // this.resetPlayer() A METTRE ? 
+    }
+
+    resetPlayer() {
+        this.listOfPieces = [];
+        this.isInGame = false;
+        this.isDead = false;
+        this.idRowBorder = ROWS;
+        this.idActualPiece = -1;
+        this.actualPiece = undefined;
+        this.actualScore = 0;
+        this.board = this.createBoard(ROWS);
+        this.spectrum = this.makeSpectrum();
+    }
+
+    //================= UTILS =================
+
+    convertBoardForDisplay(originalBoard) {
+        const rowsToShow = 20;
+        const borderSize = 1;
+    
+        const displayBoard = originalBoard.slice(-rowsToShow).map(row => 
+            row.slice(borderSize, -borderSize)
+        );
+    
+        return displayBoard;
+    }
+
+
+    boardWithoutPiece(piece) {
+        let newBoard = JSON.parse(JSON.stringify(this.board));
+
+        for (let row = 0 ; row < piece.width ; row++) {
+            for (let col = 0; col < piece.width ; col++) {
+                if (piece.tetromino[row][col][0] === 1) {
+                    newBoard[piece.y + row][piece.x + col] = [0, colors.empty];
+                }
+            }
+        }
+        return newBoard;
+    }   
+
     canRotate(rotatedTetromino) {
         const   width = this.actualPiece.width;
         const   board = JSON.parse(JSON.stringify(this.board));
@@ -310,53 +352,22 @@ class Player {
         return true;
     }
 
-    rotateRight() {
-        const   oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
-        const   rotatedTetromino = this.actualPiece.rotate('right');
-
-        if (this.canRotate(rotatedTetromino) === true) {
-            this.actualPiece.tetromino = rotatedTetromino;
-            this.updateBoard(oldPiece);
+    makeSpectrum() {
+        let spectrum = this.createBoard(ROWS);
+        const allColsFull = {};
+        for (let i = 0; i < ROWS; i++) {
+            for (let j = BORDER_WIDTH; j < COLS ; j++) {
+                if (allColsFull[j]) {
+                    spectrum[i][j] = [1, colors.full];
+                } else {
+                    if (this.board[i][j][0] !== 0) {
+                        allColsFull[j] = true;
+                        spectrum[i][j] = [1, colors.full];
+                    } 
+                }
+            }
         }
-    }
-
-    rotateLeft() {
-        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
-        const   rotatedTetromino = this.actualPiece.rotate('left');
-
-        if (this.canRotate(rotatedTetromino) === true) {
-            this.actualPiece.tetromino = rotatedTetromino;
-            this.updateBoard(oldPiece);
-        }
-    }
-
-    directBottom() {
-        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
-        let isAtBottom = false;
-        while (isAtBottom === false) {
-            isAtBottom = this.moveDown(true);
-        }
-    }
-
-    gameOver() {
-        this.isDead = true;
-        this.isInGame = false;
-        console.log(`Game Over`);
-        // TODO envoyer a Game
-        // this.isInGame.leaveGame(this.name, 'died');
-        // this.resetPlayer() A METTRE ? 
-    }
-
-    resetPlayer() {
-        this.listOfPieces = [];
-        this.isInGame = false;
-        this.isDead = false;
-        this.idRowBorder = ROWS;
-        this.idActualPiece = -1;
-        this.actualPiece = undefined;
-        this.actualScore = 0;
-        this.board = this.createBoard(ROWS);
-        this.spectrum = this.makeSpectrum();
+        this.spectrum = spectrum;
     }
 
     printBoard() {
