@@ -9,8 +9,8 @@ function TetrisGame() {
     const [grid, setGrid] = useState(createEmptyGrid());
 
     useEffect(() => {
-        socket.on('UPDATE_BOARD', newGrid => {
-            setGrid(newGrid);
+        socket.on('UPDATE_BOARD', (data) => {
+            setGrid(data.board);
         });
 
         // Nettoyage des listeners lors du démontage du composant

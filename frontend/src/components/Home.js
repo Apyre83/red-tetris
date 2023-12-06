@@ -27,18 +27,19 @@ function Home() {
         }
     }, [socket]);
 
-    const socketJoinGame = (game, playerName, callback) => {
+    const socketJoinGame = (gameName, playerName, callback) => {
         socket.emit('JOIN_GAME', {
-            game,
-            playerName
+            gameName: gameName,
+            playerName: playerName
         }, (data) => {
+            console.log("JOIN_GAME", data);
             if (data.code !== 0) {
                 setError(data.error);
                 setErrorCount(prev => prev + 1);
                 return;
             }
             console.log("Game joined successfully: ", data);
-            window.location.href = `#${data.game}[${data.playerName}]`;
+            window.location.href = `#${data.gameName}[${data.playerName}]`;
         });
     }
 
@@ -73,7 +74,7 @@ function Home() {
 
         socket.emit('CREATE_GAME',{
             gameName: uniqueGameName,
-            playerName
+            playerName: playerName
         }, (data) => {
             console.log("Game created successfully: ", data);
             if (data.code !== 0) {
@@ -81,9 +82,7 @@ function Home() {
                 setErrorCount(prev => prev + 1);
                 return;
             }
-            else {
-                socketJoinGame(uniqueGameName, playerName);
-            }
+            socketJoinGame(uniqueGameName, playerName);
         });
     };
 

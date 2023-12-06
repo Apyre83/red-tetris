@@ -7,9 +7,9 @@ const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
 class Player {
-    constructor(socket, name) {
+    constructor(socket, playerName) {
         this.socket = socket;
-        this.name = name;
+        this.playerName = playerName;
         this.ranking = 0;
         this.allTimeScores = 0;
         // this.listOfPieces = [];
@@ -134,7 +134,7 @@ class Player {
         }
         this.supprLines(completeLines);
         if (completeLines.length > 1)
-            this.isInGame.penalty(this.name, completeLines.length - 1);
+            this.isInGame.penalty(this.playerName, completeLines.length - 1);
     }
 
     convertBoardForDisplay(originalBoard) {
@@ -173,7 +173,7 @@ class Player {
         this.makeSpectrum();
         if (this.isInGame !== false) {
             this.printBoard(); // TODO suppr
-            // this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.name});
+            // this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), playerName: this.playerName});
         }
     }
 
@@ -331,7 +331,7 @@ class Player {
         this.isInGame = false;
         console.log(`Game Over`);
         // TODO envoyer a Game
-        // this.isInGame.leaveGame(this.name, 'died');
+        // this.isInGame.leaveGame(this.playerName, 'died');
         // this.resetPlayer() A METTRE ? 
     }
 
@@ -368,7 +368,7 @@ module.exports = Player;
 
 // TESTS
 //
-const player = new Player(1, 2, 3);
+/*const player = new Player(1, 2, 3);
 
 // player.startGame();
 player.generateNewPiece();
@@ -421,3 +421,4 @@ player.moveLeft();
 // console.log(`Bloup`);
 // player.penalty(5);
 // player.printBoard();
+*/

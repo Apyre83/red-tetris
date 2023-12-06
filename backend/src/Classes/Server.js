@@ -48,7 +48,7 @@ class Server {
 
     handleSocketConnections() {
         this.io.on('connection', (socket) => {
-            this.players.push(new Player(this.io, socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
+            this.players.push(new Player(socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
 
             socket.on('disconnect', () => {
                 this.players = this.players.filter(player => player.socket.id !== socket.id);
@@ -68,7 +68,9 @@ class Server {
 
                 /* Change the username of the player */
                 for (const player of this.players) {
-                    if (player.socket.id === socket.id) { player.name = data.username; }
+                    if (player.socket.id === socket.id) {
+                        player.playerName = data.username;
+                    }
                 }
                 callback({...data, code: 0});
             });
@@ -85,7 +87,7 @@ class Server {
 
                 // const player = new Player; ?
                 for (const player of this.players) {
-                    if (player.socket.id === socket.id) { player.name = data.username; }
+                    if (player.socket.id === socket.id) { player.playerName = data.username; }
                 }
 
                 // TODO: password hashing
@@ -102,13 +104,10 @@ class Server {
                 console.log('CREATE GAME', data);
 
                 for (const game of this.games) {
-                    if (game.name === data.game) { callback({...data, code: 1, error: "Game already exists"}); return; }
-                    if (game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
+                    if (game.gameName === data.gameName) { callback({...data, code: 1, error: "Game already exists"}); return; }
+                    if (game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
                 }
-
-                const gameMaster = this.players.find(player => player.name === data.playerName);
-
-                const newGame = new Game(this, data.gameName, gameMaster);
+                const newGame = new Game(this, data.gameName);
                 this.games.push(newGame);
 
                 callback({...data, code: 0});
@@ -116,11 +115,11 @@ class Server {
 
             socket.on('JOIN_GAME', (data, callback) => {
                 console.log('JOIN_GAME', data);
-                const _game = this.games.find(game => game.name === data.game);
+                const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
                 if (_game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
-
-                const _player = this.players.find(player => player.name === data.playerName);
+                console.log(typeof this.players[0].playerName);
+                const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
 
                 _game.addPlayer(_player)
@@ -130,27 +129,30 @@ class Server {
             socket.on('ASK_INFORMATIONS_GAME_PAGE', (data, callback) => {
                 console.log("ASK INFORMATIONS GAME PAGE", data);
 
-                const _game = this.games.find(game => game.name === data.game);
+                const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
                 if (!_game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Player not in the game"}); return; }
 
                 for (const player of _game.players) {
-                    player.socket.emit('USER_JOIN_ROOM', {...data, players: _game.getNames(), creator: _game.players[0].name});
+                    player.socket.emit('USER_JOIN_ROOM', {...data, players: _game.getNames(), creator: _game.players[0].playerName});
                 }
-                callback({...data, code: 0, players: _game.getNames(), creator: _game.players[0].name});
+                callback({...data, code: 0, players: _game.getNames(), creator: _game.players[0].playerName});
             });
 
-            socket.on('START_GAME', (data) => {
-                const _game = this.games.find(game => game.name === data.game);
-                if (!_game) { return; }
+            socket.on('START_GAME', (data, callback) => {
+                const _game = this.games.find(game => game.gameName === data.gameName);
+                if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
+                if (_game.players[0].playerName !== data.playerName) { callback({...data, code: 2, error: "Only the creator can start the game"}); return; }
 
-                for (player of _game.players) {
+                for (const player of _game.players) {
                     player.startGame();
+                    socket.emit('GAME_STARTED', data);
                 }
+                callback({...data, code: 0});
             })
 
-            socket.on('MOVEMENT', (data) => {
-                const _player = this.players.find(player => player.name === data.playerName);
+            socket.on('MOVEMENT', (data, callback) => {
+                const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
                 if (!_player.isInGame) { callback({...data, code: 4, error: "Player not playing"}); return;}
                 // TODO movement has to be moveLeft || moveRight || moveDown ||  directBottom || rotateLeft || rotateRight
@@ -159,14 +161,14 @@ class Server {
 
             socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
                 console.log('PLAYER LEFT GAME PAGE', data);
-                const _game = this.games.find(game => game.name === data.game);
+                const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { return; }
                 _game.removePlayer(data.playerName);
-                if (_game.players.length === 0) { this.closeGame(_game.name); return; }
+                if (_game.players.length === 0) { this.closeGame(_game.gameName); return; }
 
                 for (const player of _game.players) {
-                    console.log('PLAYER', player.name);
-                    player.socket.emit('USER_LEAVE_ROOM', {...data, creator: _game.players[0].name});
+                    console.log('PLAYER', player.playerName);
+                    player.socket.emit('USER_LEAVE_ROOM', {...data, creator: _game.players[0].playerName});
                 }
             });
 
