@@ -7,7 +7,7 @@ const red = '#ee2733';
 const green = '#4eb748';
 const empty = '#ffffff';
 const full = '#000000';
-const border = '0b6623';
+const border = '#222';
 
 module.exports = {
     cyan,

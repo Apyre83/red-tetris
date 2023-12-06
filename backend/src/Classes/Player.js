@@ -138,13 +138,9 @@ class Player {
     }
 
     convertBoardForDisplay(originalBoard) {
-        const rowsToShow = 20;
-        const borderSize = 1;
-    
-        const displayBoard = originalBoard.slice(-rowsToShow).map(row => 
-            row.slice(borderSize, -borderSize)
-        );
-    
+        const rowsToShow = 21;
+
+        const displayBoard = originalBoard.slice(-rowsToShow);
         return displayBoard;
     }
 
@@ -174,6 +170,8 @@ class Player {
         if (this.isInGame !== false) {
             // TODO pour test unitaire decommenter printBoard et commenter socket.emit
             // this.printBoard(); // TODO suppr
+            // console.log('BOARD', this.board);
+            // console.log(`UPDATE_BOARD`, this.convertBoardForDisplay(this.board));
             this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
         }
     }
@@ -249,8 +247,8 @@ class Player {
                 for (let row = width - 1 ; row >= 0 ; row--) {
                     if (this.actualPiece.tetromino[row][col][0] === 1) {
                         if (this.board[y + row + 1][x + col][0] > 0) {
-                            this.printBoard();
-                            console.log(this.actualPiece.tetromino);
+                            //this.printBoard();
+                            //console.log(this.actualPiece.tetromino);
                             console.log(`Can't move down`);
 
                             // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)

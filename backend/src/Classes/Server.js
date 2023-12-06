@@ -154,6 +154,7 @@ class Server {
             })
 
             socket.on('MOVEMENT', (data, callback) => {
+                console.log('MOVEMENT', data);
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
                 if (!_player.isInGame) { callback({...data, code: 4, error: "Player not playing"}); return;}

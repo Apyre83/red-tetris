@@ -11,9 +11,9 @@
 }
 
 .tetris-cell {
-    width: 20px; /* ajustez la taille selon vos besoins */
+    width: 20px;  /* ou la taille souhaitée */
     height: 20px;
-    border: 1px solid #ddd;
+    border: 1px solid #ddd; /* ou le style de bordure souhaité */
     box-sizing: border-box;
 }
 
