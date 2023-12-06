@@ -45,15 +45,15 @@ class Game {
     }
 
     // TODO no need ? A gerer dans le front ? Puisque c'est Player qui envoie updateBoard
-    updateBoard(playerName) {
-        for (let i = 0 ; i < this.players.length ; i++) {
-            if (this.players[i].playerName === playerName) {
-                // TODO socket.emit('UPDATE_BOARD');
-            } else {
-                // TODO socket.emit('UPDATE_SPECTRUM')
-            }
-        }
-    }
+    // updateBoard(playerName) {
+    //     for (let i = 0 ; i < this.players.length ; i++) {
+    //         if (this.players[i].playerName === playerName) {
+    //             // TODO socket.emit('UPDATE_BOARD');
+    //         } else {
+    //             // TODO socket.emit('UPDATE_SPECTRUM')
+    //         }
+    //     }
+    // }
 
     penalty(fromPlayerName, nbLines) {
         for (let i = 0 ; i < this.players.length ; i++) {
