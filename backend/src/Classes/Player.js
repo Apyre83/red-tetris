@@ -134,7 +134,7 @@ class Player {
         }
         this.supprLines(completeLines);
         if (completeLines.length > 1)
-            this.isInGame.penalty(this.playerName, completeLines.length - 1);
+            this.game.penalty(this.playerName, completeLines.length - 1);
     }
 
     convertBoardForDisplay(originalBoard) {
@@ -165,7 +165,7 @@ class Player {
                     }
             }
         }
-        this.checkCompleteLines();
+        // this.checkCompleteLines();
         this.makeSpectrum();
         if (this.isInGame !== false) {
             // TODO pour test unitaire decommenter printBoard et commenter socket.emit
@@ -250,7 +250,7 @@ class Player {
                             //this.printBoard();
                             //console.log(this.actualPiece.tetromino);
                             console.log(`Can't move down`);
-
+                            this.checkCompleteLines();
                             // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
                             if (this.isInGame !== false) {
                                 this.generateNewPiece();

@@ -157,7 +157,7 @@ class Server {
                 console.log('MOVEMENT', data);
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
-                if (!_player.isInGame) { callback({...data, code: 4, error: "Player not playing"}); return;}
+                if (_player.isInGame === false) { callback({...data, code: 4, error: "Player not playing"}); return;}
                 // TODO movement has to be moveLeft || moveRight || moveDown ||  directBottom || rotateLeft || rotateRight
                 _player[data.movement]();
             })

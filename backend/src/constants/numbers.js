@@ -4,7 +4,7 @@ const COLS = 10;
 const BORDER_WIDTH = 1;
 const NB_PIECES = 7;
 const LIST_OF_PIECES_SIZE = 200;
-const INIT_TIME_MS = 150;
+const INIT_TIME_MS = 300;
 
 module.exports = {
     ROWS,

@@ -57,10 +57,9 @@ class Game {
 
     penalty(fromPlayerName, nbLines) {
         for (let i = 0 ; i < this.players.length ; i++) {
-            if (this.players.playerName !== fromPlayerName) {
+            if (this.players[i].playerName !== fromPlayerName) {
                 this.players[i].penalty(nbLines);
-                const info = `${nbLines} penalty row(s) from ${fromPlayerName}`;
-                // TODO socket.emit('PENALTY', info);
+            //    TODO socket.emit('PENALTY', {info: `${nbLines} penalty row(s) from ${fromPlayerName}`};
             }
         }
     }
