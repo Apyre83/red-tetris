@@ -12,15 +12,14 @@ class Player {
         this.playerName = playerName;
         this.ranking = 0;
         this.allTimeScores = 0;
-        // this.listOfPieces = [];
-        this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
-            2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
-            4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
-            4, 1, 0, 4];
-        // this.isInGame = false;
-        this.isInGame = true; // put on false if not in test
+        this.listOfPieces = [];
+        // this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
+        //     2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
+        //     4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
+        //     4, 1, 0, 4];
+        this.isInGame = false;
+        // this.isInGame = true; // put on false if not in test
         this.isDead = false; // TODO est-ce que ce truc est utile?
-        // this.idActualPiece = undefined;
         this.idRowBorder = ROWS;
         this.idActualPiece = -1;
         this.actualPiece = undefined;
@@ -119,7 +118,6 @@ class Player {
         let completeLines = [];
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
             for (let col = BORDER_WIDTH ; col < COLS ; col++) {
-                // TODO VERIFIER SI C'EST BORDER
                 const tile = this.board[row][col];
                 if (tile[0] !== 1 || tile[1] === colors.border) {
                     linesComplete = false;
@@ -172,8 +170,9 @@ class Player {
         this.checkCompleteLines();
         this.makeSpectrum();
         if (this.isInGame !== false) {
-            this.printBoard(); // TODO suppr
-            // this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), playerName: this.playerName});
+            // TODO pour test unitaire decommenter printBoard et commenter socket.emit
+            // this.printBoard(); // TODO suppr
+            this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
         }
     }
 
@@ -246,14 +245,14 @@ class Player {
         for (let col = 0 ; col < width ; col++) {
             for (let row = width - 1 ; row >= 0 ; row--) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    // isTile = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
 
-                        // TODO remettre ces 3 lignes
-                        // if (this.isInGame !== false) {
-                        //     this.generateNewPiece();
-                        // }
+                        // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
+                        if (this.isInGame !== false) {
+                            this.generateNewPiece();
+                        }
+
                         return true;
                     }
                     break;
@@ -331,7 +330,7 @@ class Player {
         this.isInGame = false;
         console.log(`Game Over`);
         // TODO envoyer a Game
-        // this.isInGame.leaveGame(this.playerName, 'died');
+        this.isInGame.leaveGame(this.playerName, 'died');
         // this.resetPlayer() A METTRE ? 
     }
 
@@ -368,9 +367,11 @@ module.exports = Player;
 
 // TESTS
 //
-/*const player = new Player(1, 2, 3);
+// const player = new Player(1, 2, 3);
 
 // player.startGame();
+
+/*
 player.generateNewPiece();
 player.moveLeft();
 player.moveLeft();
