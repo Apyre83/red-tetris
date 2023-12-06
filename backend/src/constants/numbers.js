@@ -1,5 +1,5 @@
-// const ROWS = 23;
-const ROWS = 8;
+const ROWS = 23;
+// const ROWS = 8;
 const COLS = 10;
 const BORDER_WIDTH = 1;
 const NB_PIECES = 7;

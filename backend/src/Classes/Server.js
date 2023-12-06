@@ -145,6 +145,8 @@ class Server {
                 if (_game.players[0].playerName !== data.playerName) { callback({...data, code: 2, error: "Only the creator can start the game"}); return; }
 
                 for (const player of _game.players) {
+                    player.isInGame = true;
+                    player.game = _game;
                     player.startGame();
                     socket.emit('GAME_STARTED', data);
                 }

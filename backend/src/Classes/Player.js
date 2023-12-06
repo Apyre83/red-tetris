@@ -17,6 +17,7 @@ class Player {
         //     2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
         //     4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
         //     4, 1, 0, 4];
+        this.game = undefined;
         this.isInGame = false;
         // this.isInGame = true; // put on false if not in test
         this.isDead = false; // TODO est-ce que ce truc est utile?
@@ -29,6 +30,7 @@ class Player {
     }
 
     startGame() {
+        this.listOfPieces = this.game.listOfPieces;
         this.generateNewPiece();
         var interval = setInterval(() => {
             if (this.isInGame === false) {
@@ -237,33 +239,37 @@ class Player {
     }
 
     moveDown(goToBottom) {
-        const width = this.actualPiece.width;
-        const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
-        const x     = this.actualPiece.x;
-        const y     = this.actualPiece.y;
+        if (this.isInGame !== false) {
+            const width = this.actualPiece.width;
+            const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
+            const x     = this.actualPiece.x;
+            const y     = this.actualPiece.y;
 
-        for (let col = 0 ; col < width ; col++) {
-            for (let row = width - 1 ; row >= 0 ; row--) {
-                if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    if (this.board[y + row + 1][x + col][0] > 0) {
-                        console.log(`Can't move down`);
+            for (let col = 0 ; col < width ; col++) {
+                for (let row = width - 1 ; row >= 0 ; row--) {
+                    if (this.actualPiece.tetromino[row][col][0] === 1) {
+                        if (this.board[y + row + 1][x + col][0] > 0) {
+                            this.printBoard();
+                            console.log(this.actualPiece.tetromino);
+                            console.log(`Can't move down`);
 
-                        // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
-                        if (this.isInGame !== false) {
-                            this.generateNewPiece();
+                            // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
+                            if (this.isInGame !== false) {
+                                this.generateNewPiece();
+                            }
+
+                            return true;
                         }
-
-                        return true;
+                        break;
                     }
-                    break;
-                }
-            } 
-        }
+                } 
+            }
 
-        this.actualPiece.y++;
-        if (goToBottom)
-            return false;
-        this.updateBoard(oldPiece);
+            this.actualPiece.y++;
+            if (goToBottom)
+                return false;
+            this.updateBoard(oldPiece);
+        }
     }
 
     directBottom() {
@@ -330,7 +336,7 @@ class Player {
         this.isInGame = false;
         console.log(`Game Over`);
         // TODO envoyer a Game
-        this.isInGame.leaveGame(this.playerName, 'died');
+        this.game.removePlayer(this.playerName);
         // this.resetPlayer() A METTRE ? 
     }
 
