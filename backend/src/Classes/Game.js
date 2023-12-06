@@ -64,6 +64,14 @@ class Game {
         }
     }
 
+    sendSpectrum(playerName, spectrum) {
+        for (let i = 0 ; i < this.players.length ; i++) {
+            if (this.players[i].playerName !== playerName) {
+                this.players[i].socket.emit('UPDATE_SPECTRUM', {spectrum: spectrum, playerName: playerName});
+            }
+        }
+    }
+
     hasPlayer(playerName) {
         for (const player of this.players) {
             if (player.playerName === playerName)

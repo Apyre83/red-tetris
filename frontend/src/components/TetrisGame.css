@@ -1,9 +1,13 @@
 /* TetrisGame.css */
-.tetris-container {
+.tetris-game-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.main-player, .side-player {
+    margin: 10px;
 }
 
 .tetris-row {
@@ -11,10 +15,15 @@
 }
 
 .tetris-cell {
-    width: 20px;  /* ou la taille souhaitée */
-    height: 20px;
-    border: 1px solid #ddd; /* ou le style de bordure souhaité */
+    width: 40px; /* Taille pour le joueur principal */
+    height: 40px;
+    border: 2px solid #ddd;
     box-sizing: border-box;
+}
+
+.tetris-cell.small {
+    width: 20px; /* Taille réduite pour les joueurs sur les côtés */
+    height: 20px;
 }
 
 .tetris-cell.filled {

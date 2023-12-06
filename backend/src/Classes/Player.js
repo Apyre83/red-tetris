@@ -171,7 +171,8 @@ class Player {
             // TODO pour test unitaire decommenter printBoard et commenter socket.emit
             // this.printBoard(); // TODO suppr
             this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
-            this.socket.emit('UPDATE_SPECTRUM', {spectrum: this.convertBoardForDisplay(this.spectrum), name: this.playerName})
+            // this.socket.emit('UPDATE_SPECTRUM', {spectrum: this.convertBoardForDisplay(this.spectrum), name: this.playerName})
+            this.game.sendSpectrum(this.playerName, this.convertBoardForDisplay(this.spectrum));
         }
     }
 

@@ -148,7 +148,7 @@ class Server {
                     player.isInGame = true;
                     player.game = _game;
                     player.startGame();
-                    socket.emit('GAME_STARTED', data);
+                    player.socket.emit('GAME_STARTED', data);
                 }
                 callback({...data, code: 0});
             })
