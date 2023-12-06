@@ -119,7 +119,7 @@ class Player {
         let linesComplete = true;
         let completeLines = [];
         for (let row = ROWS - BORDER_WIDTH; row >= 0 ; row--) {
-            for (let col = BORDER_WIDTH ; col < COLS ; col++) {
+            for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH ; col++) {
                 const tile = this.board[row][col];
                 if (tile[0] !== 1 || tile[1] === colors.border) {
                     linesComplete = false;
