@@ -13,7 +13,7 @@ class Player {
         this.ranking = 0;
         this.allTimeScores = 0;
         // this.listOfPieces = [];
-        this.listOfPieces = [1, 4, 2, 5,
+        this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
             2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
             4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
             4, 1, 0, 4];
@@ -199,20 +199,17 @@ class Player {
         const width = this.actualPiece.width;
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isTile = false;
 
-        for (let col = 0 ; col < width ; col++) {
-            for (let row = 0 ; row < width ; row++) {
+        for (let row = 0 ; row < width ; row++) {    
+            for (let col = 0 ; col < width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isTile = true;
                     if (this.board[y + row][x + col - 1][0] > 0) {
                         console.log(`Can't move left`);
                         return;
                     }
+                    break;
                 }
             } 
-            if (isTile === true) 
-                break;
         }
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         this.actualPiece.x--;
@@ -223,20 +220,17 @@ class Player {
         const width = this.actualPiece.width;
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        let isTile = false;
 
-        for (let col = width - 1 ; col >= 0 ; col--) {
-            for (let row = 0 ; row < width ; row++) {
+        for (let row = 0 ; row < width ; row++) {
+            for (let col = width - 1 ; col >= 0 ; col--) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    isTile = true;
                     if (this.board[y + row][x + col + 1][0] > 0) {
                         console.log(`Can't move right`);
                         return;
                     }
+                    break;
                 }
             } 
-            if (isTile === true) 
-                break;
         }
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         this.actualPiece.x++;
@@ -248,25 +242,6 @@ class Player {
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         const x     = this.actualPiece.x;
         const y     = this.actualPiece.y;
-        // let isTile = false;
-
-        // for (let row = width - 1 ; row >= 0 ; row--) {
-        //     for (let col = 0 ; col < width ; col++) {
-        //         if (this.actualPiece.tetromino[row][col][0] === 1) {
-        //             isTile = true;
-        //             if (this.board[y + row + 1][x + col][0] > 0) {
-        //                 console.log(`Can't move down`);
-        //                 // this.updateBoard(oldPiece);
-        //                 if (this.isInGame !== false) {
-        //                     this.generateNewPiece();
-        //                 }
-        //                 return true;
-        //             }
-        //         }
-        //     } 
-        //     if (isTile === true) 
-        //         break;
-        // }
 
         for (let col = 0 ; col < width ; col++) {
             for (let row = width - 1 ; row >= 0 ; row--) {
@@ -274,8 +249,6 @@ class Player {
                     // isTile = true;
                     if (this.board[y + row + 1][x + col][0] > 0) {
                         console.log(`Can't move down`);
-
-                        // this.updateBoard(oldPiece); // A SUPPRIMER
 
                         // TODO remettre ces 3 lignes
                         // if (this.isInGame !== false) {
@@ -286,9 +259,6 @@ class Player {
                     break;
                 }
             } 
-            // TODO SUPPRIMER CES 2 lignes 
-            // if (isTile === true) 
-            //     break;
         }
 
         this.actualPiece.y++;
@@ -420,6 +390,11 @@ player.directBottom();
 // player.printBoard();
 
 player.generateNewPiece();
+player.moveRight();
+player.moveRight();
+player.directBottom();
+
+player.generateNewPiece();
 player.rotateRight();
 player.moveRight();
 player.moveDown();
@@ -429,15 +404,19 @@ player.moveLeft();
 
 // ATTENTION DEVRAIT PAS MARCHER
 player.moveLeft();
+
+// TEST DROITE
+// player.generateNewPiece();
 // player.rotateLeft();
-// player.generateNewPiece();
-// player.moveLeft();
-// player.moveLeft()
+// player.moveRight();
 // player.moveDown();
-// player.generateNewPiece();
-//
-// player.printBoard();
-// player.printSpectrum();
+// player.moveDown();
+// player.moveDown();
+// player.moveDown();
+// player.moveRight();
+
+
+
 
 // console.log(`Bloup`);
 // player.penalty(5);
