@@ -145,7 +145,6 @@ class Player {
     }
 
     updateBoard(oldPiece) {
-        
         const x = this.actualPiece.x;
         const y = this.actualPiece.y;
 
@@ -212,6 +211,7 @@ class Player {
         }
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         this.actualPiece.x--;
+        console.log(`Gauche : old piece y: ` + oldPiece)
         this.updateBoard(oldPiece);
     }
 
@@ -247,16 +247,16 @@ class Player {
                 for (let row = width - 1 ; row >= 0 ; row--) {
                     if (this.actualPiece.tetromino[row][col][0] === 1) {
                         if (this.board[y + row + 1][x + col][0] > 0) {
-                            //this.printBoard();
-                            //console.log(this.actualPiece.tetromino);
                             console.log(`Can't move down`);
+                            if (goToBottom) {
+                                return true;
+                            }
                             this.checkCompleteLines();
                             // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
                             if (this.isInGame !== false) {
                                 this.generateNewPiece();
                             }
-
-                            return true;
+                            return;
                         }
                         break;
                     }
@@ -276,8 +276,11 @@ class Player {
         while (isAtBottom === false) {
             isAtBottom = this.moveDown(true);
         }
-        console.log(`At bottom`);
         this.updateBoard(oldPiece);
+        this.checkCompleteLines();
+        if (this.isInGame !== false) {
+            this.generateNewPiece();
+        }
     }
 
     canRotate(rotatedTetromino) {
