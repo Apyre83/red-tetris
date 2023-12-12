@@ -177,13 +177,25 @@ class Player {
 
     makeSpectrum() {
         let spectrum = this.createBoard(ROWS);
+        let boardWithoutPiece = JSON.parse(JSON.stringify(this.board));
+
+        if (this.actualPiece) {
+            for (let row = 0 ; row < this.actualPiece.width ; row++) {
+                for (let col = 0; col < this.actualPiece.width ; col++) {
+                    if (this.actualPiece.tetromino[row][col][0] === 1) {
+                        boardWithoutPiece[this.actualPiece.y + row][this.actualPiece.x + col] = [0, colors.empty];
+                    }
+                }
+            }
+        }
+         
         const allColsFull = {};
         for (let i = 0; i < ROWS; i++) {
-            for (let j = BORDER_WIDTH; j < COLS ; j++) {
+            for (let j = BORDER_WIDTH; j < COLS + BORDER_WIDTH; j++) {
                 if (allColsFull[j]) {
                     spectrum[i][j] = [1, colors.full];
                 } else {
-                    if (this.board[i][j][0] !== 0) {
+                    if (boardWithoutPiece[i][j][0] !== 0) {
                         allColsFull[j] = true;
                         spectrum[i][j] = [1, colors.full];
                     } 
@@ -211,7 +223,6 @@ class Player {
         }
         const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
         this.actualPiece.x--;
-        console.log(`Gauche : old piece y: ` + oldPiece)
         this.updateBoard(oldPiece);
     }
 
