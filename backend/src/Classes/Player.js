@@ -349,6 +349,7 @@ class Player {
         console.log(`Game Over`);
         // TODO envoyer a Game
         this.game.removePlayer(this.playerName);
+        this.socket.emit('GAME_OVER', {name: this.playerName, score: 0});
         // this.resetPlayer() A METTRE ? 
     }
 

@@ -67,6 +67,12 @@ function TetrisGame() {
             }
             socket.emit('MOVEMENT', {playerName: playerName, movement: movement});
         };
+
+        socket.on('GAME_OVER', (data) => {
+            console.log('GAME_OVER', data);
+            window.removeEventListener('keydown', handleKeyPress);
+            // TODO
+        });
         window.addEventListener('keydown', handleKeyPress);
         return () => {
             window.removeEventListener('keydown', handleKeyPress);
