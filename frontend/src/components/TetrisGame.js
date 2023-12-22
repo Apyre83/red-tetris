@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import './TetrisGame.css'; // Assurez-vous de créer ce fichier CSS pour le style
 
 function getPlayerNameFromHash() {
@@ -9,6 +10,7 @@ function getPlayerNameFromHash() {
 
 function TetrisGame() {
     const socket = useSelector(state => state.socket.socket);
+    const navigate = useNavigate();
     const [grid, setGrid] = useState(createEmptyGrid());
 
     const playerName = getPlayerNameFromHash();
@@ -83,7 +85,14 @@ function TetrisGame() {
         return Array.from({ length: 21 }, () => Array(12).fill([0, '#ffffff']));
     }
 
+    
+    const handleGoHome = () => {
+        navigate('/');
+    };
+
     return (
+        <div>
+        <button className="game-button" onClick={handleGoHome}>QUITTER LE JEU</button>
         <div className="tetris-game-container">
             <div className="side-player">
                 {leftPlayerGrid.map((row, rowIndex) => (
@@ -112,6 +121,7 @@ function TetrisGame() {
                     </div>
                 ))}
             </div>
+        </div>
         </div>
     );
 }

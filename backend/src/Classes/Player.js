@@ -11,7 +11,6 @@ class Player {
         this.socket = socket;
         this.playerName = playerName;
         this.ranking = 0;
-        this.allTimeScores = 0;
         this.listOfPieces = [];
         // this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
         //     2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
@@ -103,7 +102,7 @@ class Player {
     }
 
     supprLines(completeLines) {
-        // TODO socket.emit('LignesAFaireClignoter');
+        this.actualScore += Number(completeLines.length);
         for (let i = 0 ; i < completeLines.length ; i++) {
             const rowToSuppr = completeLines[i];
             if (rowToSuppr >= 0 && rowToSuppr < ROWS) {
@@ -344,13 +343,11 @@ class Player {
     }
 
     gameOver() {
-        this.isDead = true;
-        this.isInGame = false;
         console.log(`Game Over`);
-        // TODO envoyer a Game
-        this.game.removePlayer(this.playerName);
-        this.socket.emit('GAME_OVER', {name: this.playerName, score: 0});
-        // this.resetPlayer() A METTRE ? 
+        const rank = this.game.rank;
+        this.actualScore += this.game.giveScore(rank);
+        this.socket.emit('GAME_OVER', {name: this.playerName, rank: rank, score: this.actualScore});
+        this.game.playerGameOver(this);
     }
 
     resetPlayer() {
@@ -363,6 +360,8 @@ class Player {
         this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
+        this.rank = 0;
+        this.actualScore = 0;
     }
 
     printBoard() {

@@ -7,6 +7,8 @@ class Game {
         this.players = [/*gameMaster*/]; /* gameMaster is always the first player of the list */
         this.listOfPieces = this.generateListOfPieces();
         this.alivePlayers = [/*gameMaster*/];
+        this.rank = 0;
+        this.scores = {};
     }
 
 
@@ -23,39 +25,39 @@ class Game {
     }
 
     startGame() {
+        this.calculateScores();
+        console.log("Scores : ", this.scores);
         for (let i = 0 ; i < this.players.length ; i++) {
             this.players[i].listOfPieces = this.listOfPieces;
-            this.players[i].isInGame = this;
+            this.players[i].isInGame = true;
+            this.players[i].game = this;
             this.players[i].startGame();
         }
+    }
+
+    calculateScores() {
+        const totalPoints = this.players.length * 10;
+        const scores = {
+            1: Math.trunc(totalPoints / 2),
+            2: Math.trunc(totalPoints / 4),
+            3: Math.trunc(totalPoints / 8),
+        }
+        this.scores = scores;
+    }
+
+    giveScore(rank) {
+        if (rank > 3) return 0;
+        else return this.scores[rank];
     }
 
     addPlayer(player) {
         this.players.push(player);
         this.alivePlayers.push(player.playerName);
+        this.rank++;
     }
-
-    removePlayer(playerName) {
-        const player = this.players.find(player => player.playerName === playerName);
-        if (player) {
-            player.resetPlayer();
-        }
-        this.players = this.players.filter(p => p.playerName !== playerName);
-        this.alivePlayers = this.alivePlayers.filter(p => p.playerName !== playerName);
-    }
-
-    // TODO no need ? A gerer dans le front ? Puisque c'est Player qui envoie updateBoard
-    // updateBoard(playerName) {
-    //     for (let i = 0 ; i < this.players.length ; i++) {
-    //         if (this.players[i].playerName === playerName) {
-    //             // TODO socket.emit('UPDATE_BOARD');
-    //         } else {
-    //             // TODO socket.emit('UPDATE_SPECTRUM')
-    //         }
-    //     }
-    // }
 
     penalty(fromPlayerName, nbLines) {
+        console.log(`PENALTY FROM ${fromPlayerName} : ${nbLines} lines`);
         for (let i = 0 ; i < this.players.length ; i++) {
             if (this.players[i].playerName !== fromPlayerName) {
                 this.players[i].penalty(nbLines);
@@ -82,10 +84,38 @@ class Game {
 
     getNames() { return this.players.map(player => player.playerName); }
 
-    winner(winnerName) {
-        console.log(`${winnerName} wins the game ${`this.gameId`}`);
-        // TODO socket.emit('WINNER');
-        // TODO this.server.closeGame(this.gameId);
+    playerGameOver(player) {
+        this.rank--;
+        console.log(`Game over for ${player.playerName} in game ${this.gameName}`);
+
+        const database = this.server.readDatabase();
+        console.log('actual score : ' + player.actualScore);
+        database[player.playerName].allTimeScores += player.actualScore;
+        console.log("resultat" + database[player.playerName].allTimeScores);
+        this.server.writeDatabase(database);
+
+        this.removePlayer(player);
+    }
+
+    removePlayer(player) {
+        console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
+        player.resetPlayer();
+        const leftPlayers = this.alivePlayers.filter(p => p !== player.playerName);
+        this.alivePlayers = leftPlayers;
+
+        if (this.alivePlayers.length === 1) {
+            this.winner();
+        } else if (this.alivePlayers.length === 0) {
+            this.server.closeGame(this.gameName);
+        }
+    }
+
+    winner() {
+        const winnerName = this.alivePlayers[0];
+        console.log(`${winnerName} wins the game ${this.gameId}`);
+        const socketWinner = this.players.find(player => player.playerName === winnerName).socket;
+        socketWinner.emit('WINNER');
+        this.server.closeGame(this.gameName);
     }
 }
 

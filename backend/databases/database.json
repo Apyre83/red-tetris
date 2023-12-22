@@ -33,6 +33,12 @@
   },
   "qqqqq": {
     "password": "qq",
-    "email": "qqqq@gmail.com"
+    "email": "qqqq@gmail.com",
+    "allTimeScores": 25
+  },
+  "wwwww": {
+    "password": "ww",
+    "email": "ww@gmail.com",
+    "allTimeScores": 20
   }
 }

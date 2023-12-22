@@ -35,18 +35,20 @@ function GameComponent() {
         if (!isAuthenticated) { navigate('/'); }
 
         const handleLeavePage = (event) => {
+            console.log(`Dans handleLeavePage -->`);
+            // ATTENTION car on demande si veut partir de la page hors on envoie deja le socket.emit
             socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
             event.returnValue = "Are you sure you want to leave the game page?";
         };
         window.addEventListener("beforeunload", handleLeavePage);
 
-        socket.on('USER_LEAVE_ROOM', (data) => {
-            console.log('USER_LEAVE_ROOM', data);
+        socket.on('USER_LEAVE_GAME', (data) => {
+            console.log('USER_LEAVE_GAME', data);
             setPlayers(prev => prev.filter(player => player !== data.playerName));
             setIsCreator(data.creator === playerName);
         });
-        socket.on('USER_JOIN_ROOM', (data) => {
-            console.log('USER_JOIN_ROOM', data);
+        socket.on('USER_JOIN_GAME', (data) => {
+            console.log('USER_JOIN_GAME', data);
             setPlayers(prev => [...prev, data.playerName]);
         });
 
@@ -54,6 +56,16 @@ function GameComponent() {
             console.log('GAME_STARTED', data);
             setGameIsPlaying(true);
         });
+
+        socket.on('GAME_OVER', (data) => {
+            console.log('GAME_OVER', data);
+            setGameIsPlaying(false);
+        });
+
+        socket.on('WINNER', () => {
+            console.log('WINNER');
+            setGameIsPlaying(false);
+        })
 
         socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) { console.error(data.error); navigate('/'); return; }
@@ -63,11 +75,15 @@ function GameComponent() {
         });
         return () => {
             window.removeEventListener("beforeunload", handleLeavePage);
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
+            // COMMENTÉ CAR GÉRÉ DANS HandleGoHome
+            // console.log(`Dans useEffect de GameComponent -->`);
+            // socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
         }
     }, [socket, gameName, playerName, isAuthenticated, navigate]);
 
     const handleGoHome = () => {
+        console.log(`Dans handleGoHome -->`);
+        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
         navigate('/');
     };
 
