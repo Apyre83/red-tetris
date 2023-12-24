@@ -119,6 +119,7 @@ class Server {
                 const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
                 if (_game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
+                
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
 
@@ -180,7 +181,6 @@ class Server {
     }
 
     closeGame(gameName) {
-        console.log(`BEGIN: Closing game ${gameName}, there is ${this.games.length} game(s) running`);
         this.games = this.games.filter(game => game.gameName !== gameName);
         console.log(`Closing game ${gameName}, there is ${this.games.length} game(s) running`);
     }
