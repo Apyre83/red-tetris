@@ -134,6 +134,7 @@ class Server {
                 if (!_game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Player not in the game"}); return; }
 
                 for (const player of _game.players) {
+                    console.log(`PLAYER ${player.playerName} --> ${player.socket.id}`);
                     player.socket.emit('USER_JOIN_GAME', {...data, players: _game.getNames(), creator: _game.players[0].playerName});
                 }
                 callback({...data, code: 0, players: _game.getNames(), creator: _game.players[0].playerName});
