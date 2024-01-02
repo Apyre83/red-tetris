@@ -94,18 +94,35 @@ class Game {
         console.log("resultat" + database[player.playerName].allTimeScores);
         this.server.writeDatabase(database);
 
-        this.removePlayer(player);
-    }
 
-    removePlayer(player) {
-        console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
         player.resetPlayer();
         const leftPlayers = this.alivePlayers.filter(p => p !== player.playerName);
         this.alivePlayers = leftPlayers;
+        
+        this.checkIfSomeoneIsAlive();
+    }
 
+    removePlayer(player) {
+        this.rank--;
+        console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
+        player.resetPlayer();
+
+        const leftPlayersAlive = this.alivePlayers.filter(p => p !== player.playerName);
+        this.alivePlayers = leftPlayersAlive;
+
+        const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
+        this.players = leftPlayers;
+
+        this.checkIfSomeoneIsAlive();
+    }
+
+    checkIfSomeoneIsAlive() {
         if (this.alivePlayers.length === 1) {
             this.winner();
         } else if (this.alivePlayers.length === 0) {
+            // this.server.finishGame pour afficher les scores
+        }
+        if (this.players.length === 0) {
             this.server.closeGame(this.gameName);
         }
     }
@@ -115,7 +132,7 @@ class Game {
         console.log(`${winnerName} wins the game ${this.gameId}`);
         const socketWinner = this.players.find(player => player.playerName === winnerName).socket;
         socketWinner.emit('WINNER');
-        this.server.closeGame(this.gameName);
+        // this.server.finishGame pour afficher les scores
     }
 }
 

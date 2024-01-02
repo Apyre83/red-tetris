@@ -12,7 +12,9 @@ class Server {
         this.server = http.createServer(this.app);
         this.io = new IOServer(this.server, {
             cors: {
+                // TODO CHANGE ADRESS ?? 
                 origin: "http://localhost:3000", // ou utiliser '*' pour autoriser toutes les origines
+                // origin: "http://192.168.1.47:3000",
                 methods: ["GET", "POST"],
                 allowedHeaders: ["my-custom-header"],
                 credentials: true
@@ -178,6 +180,10 @@ class Server {
             });
 
         });
+    }
+
+    finishGame(gameName) {
+        // afficher les scores et permettre de rejouer sur la meme game
     }
 
     closeGame(gameName) {

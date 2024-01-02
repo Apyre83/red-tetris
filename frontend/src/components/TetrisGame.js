@@ -75,6 +75,7 @@ function TetrisGame() {
             window.removeEventListener('keydown', handleKeyPress);
             // TODO
         });
+        
         window.addEventListener('keydown', handleKeyPress);
         return () => {
             window.removeEventListener('keydown', handleKeyPress);

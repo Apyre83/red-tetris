@@ -47,6 +47,7 @@ function GameComponent() {
             setPlayers(prev => prev.filter(player => player !== data.playerName));
             setIsCreator(data.creator === playerName);
         });
+        
         socket.on('USER_JOIN_GAME', (data) => {
             console.log('USER_JOIN_GAME', data);
             setPlayers(prev => [...prev, data.playerName]);
@@ -75,6 +76,11 @@ function GameComponent() {
         });
         return () => {
             window.removeEventListener("beforeunload", handleLeavePage);
+            socket.off('USER_LEAVE_GAME');
+            socket.off('USER_JOIN_GAME');
+            socket.off('GAME_STARTED');
+            socket.off('GAME_OVER');
+            socket.off('WINNER');
             // COMMENTÉ CAR GÉRÉ DANS HandleGoHome
             // console.log(`Dans useEffect de GameComponent -->`);
             // socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
