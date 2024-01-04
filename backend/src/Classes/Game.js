@@ -91,7 +91,7 @@ class Game {
         const database = this.server.readDatabase();
         console.log('actual score : ' + player.actualScore);
         database[player.playerName].allTimeScores += player.actualScore;
-        console.log("resultat" + database[player.playerName].allTimeScores);
+        console.log("resultat " + database[player.playerName].allTimeScores);
         this.server.writeDatabase(database);
 
 
@@ -121,9 +121,6 @@ class Game {
             this.winner();
         } else if (this.alivePlayers.length === 0) {
             // this.server.finishGame pour afficher les scores
-        }
-        if (this.players.length === 0) {
-            this.server.closeGame(this.gameName);
         }
     }
 

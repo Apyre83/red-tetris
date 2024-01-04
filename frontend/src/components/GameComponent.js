@@ -37,7 +37,9 @@ function GameComponent() {
         const handleLeavePage = (event) => {
             console.log(`Dans handleLeavePage -->`);
             // ATTENTION car on demande si veut partir de la page hors on envoie deja le socket.emit
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
+            socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
+                if (data.code !== 0) console.error(data.error); return; 
+                })
             event.returnValue = "Are you sure you want to leave the game page?";
         };
         window.addEventListener("beforeunload", handleLeavePage);
@@ -88,8 +90,10 @@ function GameComponent() {
     }, [socket, gameName, playerName, isAuthenticated, navigate]);
 
     const handleGoHome = () => {
-        console.log(`Dans handleGoHome -->`);
-        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
+        console.log(`Dans handleGoHome GameComponent-->`);
+        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
+            if (data.code !== 0) { console.error(data.error); return; }
+        });
         navigate('/');
     };
 

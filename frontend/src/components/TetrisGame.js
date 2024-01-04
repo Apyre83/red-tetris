@@ -27,6 +27,7 @@ function TetrisGame() {
 
 
     useEffect(() => {
+        if (!socket) { console.error('Socket not connected'); return; }
         socket.on('UPDATE_BOARD', (data) => {
             // console.log('UPDATE_BOARD', data);
             setGrid(data.board);
@@ -72,7 +73,9 @@ function TetrisGame() {
                 default:
                     return;
             }
-            socket.emit('MOVEMENT', {playerName: playerName, movement: movement});
+            socket.emit('MOVEMENT', {playerName: playerName, movement: movement}, (data) => {
+                if (data.code !== 0) console.error(data.error);
+            });
         };
 
         socket.on('GAME_OVER', (data) => {
@@ -93,7 +96,9 @@ function TetrisGame() {
 
     
     const handleGoHome = () => {
-        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: getGameNameFromHash(), playerName: playerName });
+        console.log(`Dans handleGoHome TetrisGame-->`)
+        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: getGameNameFromHash(), playerName: playerName }, (data) => {
+            if (data.code !== 0) console.error(data.error); return; })
         navigate('/');
     };
 
