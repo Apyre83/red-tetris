@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import './TetrisGame.css'; // Assurez-vous de créer ce fichier CSS pour le style
+import './TetrisGame.css';
 
 function getPlayerNameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
     return match?.[2];
+}
+
+function getGameNameFromHash() {
+    const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
+    return match?.[1];
 }
 
 function TetrisGame() {
@@ -88,6 +93,7 @@ function TetrisGame() {
 
     
     const handleGoHome = () => {
+        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: getGameNameFromHash(), playerName: playerName });
         navigate('/');
     };
 
