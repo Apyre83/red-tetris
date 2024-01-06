@@ -179,15 +179,16 @@ class Server {
 				callback({...data, code: 0});
             });
 
-            socket.on('PLAYER_GIVE_UP', (data) => {
+            socket.on('PLAYER_GIVE_UP', (data, callback) => {
                 console.log('PLAYER GIVE UP', data);
 
                 const _game = this.games.find(game => game.gameName === data.gameName);
-                if (!_game) { return; }
+				if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
 
                 const gamePlayer = _game.players.find(player => player.playerName === data.playerName);
+				if (!gamePlayer) { callback({...data, code: 2, error: "Player does not exist"}); return; }
                 gamePlayer.giveUp();
-            
+				callback({...data, code: 0});
             })
 
         });
@@ -195,7 +196,7 @@ class Server {
 
     closeGame(gameName) {
         this.games = this.games.filter(game => game.gameName !== gameName);
-        socket.emit('GAME_CLOSED', {gameName: gameName});
+		//socket.emit('GAME_CLOSED', {gameName: gameName});
         console.log(`Closing game ${gameName}, there is ${this.games.length} game(s) running`);
     }
 

@@ -162,14 +162,17 @@ class Game {
             this.winner();
         } else if (this.alivePlayers.length === 0) {
             this.resetGame();
+            if (this.players.length === 0) {
+                this.server.closeGame(this.gameName);
+            }
         }
     }
 
     winner() {
-        const winnerName = this.alivePlayers[0];
-        console.log(`${winnerName} wins the game ${this.gameId}`);
-        const socketWinner = this.players.find(player => player.playerName === winnerName).socket;
-        socketWinner.emit('PLAYER_WINNER', {name: this.playerName, rank: rank, score: this.actualScore});
+		let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0])[0];
+		for (let i = 0 ; i < this.players.length ; i++) {
+			this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore});
+		}
         this.resetGame();
     }
 

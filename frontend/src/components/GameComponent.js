@@ -1,18 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './GameComponent.css';
 import TetrisGame from './TetrisGame';
 
 function getGameNameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
-    return match?.[1];
+    return match ? match[1] : null;
 }
 
 function getPlayerNameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
-    return match?.[2];
+    return match ? match[2] : null;
 }
 
 function GameComponent() {
@@ -25,10 +24,12 @@ function GameComponent() {
 
     const [isCreator, setIsCreator] = useState(false);
     const [players, setPlayers] = useState([]);
-
-    const [responseMessage, setResponseMessage] = useState('');
+    const [playerScore, setPlayerScore] = useState(-1);
+    const [playerRank, setPlayerRank] = useState(null);
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
+    const [responseMessage, setResponseMessage] = useState('');
 
+	const [isAlive, setIsAlive] = useState(false);
 
     useEffect(() => {
         if (!socket) { console.error('Socket not connected'); return; }
@@ -57,17 +58,29 @@ function GameComponent() {
         socket.on('GAME_STARTED', (data) => {
             console.log('GAME_STARTED', data);
             setGameIsPlaying(true);
+			setIsAlive(true);
         });
 
-        socket.on('GAME_OVER', (data) => {
-            console.log('GAME_OVER', data);
-            setGameIsPlaying(false);
+		socket.on('PLAYER_GAME_OVER', (data) => {
+			console.log('PLAYER_GAME_OVER', data);
+            if (data.playerName === playerName) {
+                setPlayerScore(data.score);
+                setPlayerRank(data.rank);
+				setIsAlive(false);
+            }
         });
 
-        socket.on('WINNER', () => {
-            console.log('WINNER');
-            setGameIsPlaying(false);
-        })
+		socket.on('PLAYER_WINNER', (data) => {
+			console.log('PLAYER_WINNER', data);
+			if (data.playerName === playerName) {
+				setPlayerScore(data.score);
+				setPlayerRank(data.rank);
+			}
+			setIsAlive(false);
+			setGameIsPlaying(false);
+		});
+
+
 
         socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) { console.error(data.error); navigate('/'); return; }
@@ -83,15 +96,25 @@ function GameComponent() {
             socket.off('GAME_OVER');
             socket.off('WINNER');
         }
-    }, [socket, gameName, playerName, isAuthenticated, navigate]);
+    }, [socket, gameName, playerName, isAuthenticated, navigate, isCreator]);
 
     const handleGoHome = () => {
-        console.log(`Dans handleGoHome GameComponent-->`);
 		socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
 			if (data.code !== 0) { console.error(data.error); return; }
 		});
         navigate('/');
     };
+
+	const handleGiveUp = () => {
+		if (!isAuthenticated) { console.error('Not authenticated'); return; }
+		if (!socket) { console.error('Socket not connected'); return; }
+
+		socket.emit('PLAYER_GIVE_UP', { gameName: gameName, playerName: playerName }, (data) => {
+			if (data.code !== 0) { console.error(data.error); return; }
+			console.log('PLAYER_GIVE_UP', data);
+			setIsAlive(false);
+		});
+	};
 
     const handleStartGame = () => {
         if (!isAuthenticated) { console.error('Not authenticated'); return; }
@@ -112,8 +135,8 @@ function GameComponent() {
             <header className="home-header">
                 <h2 className="header-title">Authenticated as {playerName}</h2>
             </header>
-            {gameIsPlaying && <TetrisGame />}
-            {!gameIsPlaying &&
+			{isAlive && <TetrisGame handlerGiveUp={handleGiveUp} />}
+            {!isAlive &&
                 <div className="game-container">
                     <h1 className="game-title">Game: {gameName}</h1>
                     {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
@@ -122,9 +145,16 @@ function GameComponent() {
                         {players.map((player, index) => <li key={index}>{player}</li>)}
                     </ul>
 
+					{playerScore !== -1 && (
+                        <div className="player-score">
+                            <p>Votre score: {playerScore}</p>
+                            <p>Votre classement: {playerRank}</p>
+                        </div>
+                    )}
+
                     {responseMessage && <p className="game-response-message">{responseMessage}</p>}
                     <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
-                    {isCreator && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
+                    {isCreator && !gameIsPlaying && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
                 </div>
             }
         </>

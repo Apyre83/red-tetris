@@ -347,7 +347,7 @@ class Player {
         console.log(`Game Over`);
         const rank = this.game.rank;
         this.actualScore += this.game.giveScore(rank);
-        this.socket.emit('PLAYER_GAME_OVER', {name: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
+        this.socket.emit('PLAYER_GAME_OVER', {playerName: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
         this.game.playerGameOver(this);
     }
 
