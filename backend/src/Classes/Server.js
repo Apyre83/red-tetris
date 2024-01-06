@@ -163,21 +163,24 @@ class Server {
                 _player[data.movement]();
             })
 
-            socket.on('PLAYER_LEAVE_ROOM', (data) => {
+            socket.on('PLAYER_LEAVE_ROOM', (data, callback) => {
                 console.log('PLAYER LEAVE ROOM', data);
 
                 const _game = this.games.find(game => game.gameName === data.gameName);
-                if (!_game) { return; }
+                if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
 
                 const gamePlayer = _game.players.find(player => player.playerName === data.playerName);
+				if (!gamePlayer) { callback({...data, code: 2, error: "Player does not exist"}); return; }
+
                 _game.removePlayer(gamePlayer);
                 if (_game.players.length === 0) {
                     this.closeGame(_game.gameName);
                 }
+				callback({...data, code: 0});
             });
 
             socket.on('PLAYER_GIVE_UP', (data) => {
-                console.log('PLAYER GAVE UP', data);
+                console.log('PLAYER GIVE UP', data);
 
                 const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { return; }
