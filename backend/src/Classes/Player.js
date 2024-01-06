@@ -7,9 +7,10 @@ const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
 
 class Player {
-    constructor(socket, playerName) {
+    constructor(socket, playerName, database) {
         this.socket = socket;
         this.playerName = playerName;
+        this.database = database;
         this.ranking = 0;
         this.listOfPieces = [];
         // this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
@@ -17,8 +18,8 @@ class Player {
         //     4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
         //     4, 1, 0, 4];
         this.game = undefined;
-        this.isInGame = false;
-        // this.isInGame = true; // put on false if not in test
+        this.isPlaying = false;
+        // this.isPlaying = true; // put on false if not in test
         this.isDead = false; // TODO est-ce que ce truc est utile?
         this.idRowBorder = ROWS;
         this.idActualPiece = -1;
@@ -32,7 +33,7 @@ class Player {
         this.listOfPieces = this.game.listOfPieces;
         this.generateNewPiece();
         var interval = setInterval(() => {
-            if (this.isInGame === false) {
+            if (this.isPlaying === false) {
                 clearInterval(interval);
             }
             this.moveDown();
@@ -165,7 +166,7 @@ class Player {
         }
         // this.checkCompleteLines();
         this.makeSpectrum();
-        if (this.isInGame !== false) {
+        if (this.isPlaying !== false) {
             // TODO pour test unitaire decommenter printBoard et commenter socket.emit
             // this.printBoard(); // TODO suppr
             this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
@@ -247,7 +248,7 @@ class Player {
     }
 
     moveDown(goToBottom) {
-        if (this.isInGame !== false) {
+        if (this.isPlaying !== false) {
             const width = this.actualPiece.width;
             const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
             const x     = this.actualPiece.x;
@@ -263,7 +264,7 @@ class Player {
                             }
                             this.checkCompleteLines();
                             // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
-                            if (this.isInGame !== false) {
+                            if (this.isPlaying !== false) {
                                 this.generateNewPiece();
                             }
                             return;
@@ -288,7 +289,7 @@ class Player {
         }
         this.updateBoard(oldPiece);
         this.checkCompleteLines();
-        if (this.isInGame !== false) {
+        if (this.isPlaying !== false) {
             this.generateNewPiece();
         }
     }
@@ -346,14 +347,21 @@ class Player {
         console.log(`Game Over`);
         const rank = this.game.rank;
         this.actualScore += this.game.giveScore(rank);
-        console.log(`SOCKET ::: ` + this.socket)
-        this.socket.emit('USER_LEAVE_GAME', {name: this.playerName, rank: rank, score: this.actualScore});
+        this.socket.emit('PLAYER_GAME_OVER', {name: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
         this.game.playerGameOver(this);
+    }
+
+    giveUp() {
+        console.log(`Gave up`);
+        const rank = this.game.rank;
+        this.actualScore += this.game.giveScore(rank);
+        this.socket.emit('PLAYER_GAVE_UP', {name: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
+        this.game.playerGiveUp(this);
     }
 
     resetPlayer() {
         this.listOfPieces = [];
-        this.isInGame = false;
+        this.isPlaying = false;
         this.isDead = false;
         this.idRowBorder = ROWS;
         this.idActualPiece = -1;

@@ -50,7 +50,7 @@ class Server {
 
     handleSocketConnections() {
         this.io.on('connection', (socket) => {
-            this.players.push(new Player(socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
+            this.players.push(new Player(socket, '', this.readDatabase())); /* '' is the username but since the user is not logged in yet, it is empty */
 
             socket.on('disconnect', () => {
                 this.players = this.players.filter(player => player.socket.id !== socket.id);
@@ -120,7 +120,7 @@ class Server {
                 console.log('JOIN_GAME', data);
                 const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
-                if (_game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in a game"}); return; }
+                if (_game.players.includes(data.playerName)) { callback({...data, code: 2, error: "Player already in this game"}); return; }
                 
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
@@ -159,35 +159,40 @@ class Server {
                 console.log('MOVEMENT', data);
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
-                if (_player.isInGame === false) { callback({...data, code: 4, error: "Player not playing"}); return;}
+                if (_player.isPlaying === false) { callback({...data, code: 4, error: "Player not playing"}); return;}
                 _player[data.movement]();
             })
 
-            socket.on('PLAYER_LEFT_GAME_PAGE', (data) => {
-                console.log('PLAYER LEFT GAME PAGE', data);
+            socket.on('PLAYER_LEAVE_ROOM', (data) => {
+                console.log('PLAYER LEAVE ROOM', data);
 
                 const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { return; }
 
                 const gamePlayer = _game.players.find(player => player.playerName === data.playerName);
                 _game.removePlayer(gamePlayer);
-
-                // QUEL INTERET DE DEGAGER TOUT LE MONDE ?
-                // for (const player of _game.players) {
-                //     console.log('PLAYER', player.playerName);
-                //     player.socket.emit('USER_LEAVE_GAME', {...data, creator: _game.players[0].playerName});
-                // }
+                if (_game.players.length === 0) {
+                    this.closeGame(_game.gameName);
+                }
             });
+
+            socket.on('PLAYER_GIVE_UP', (data) => {
+                console.log('PLAYER GAVE UP', data);
+
+                const _game = this.games.find(game => game.gameName === data.gameName);
+                if (!_game) { return; }
+
+                const gamePlayer = _game.players.find(player => player.playerName === data.playerName);
+                gamePlayer.giveUp();
+            
+            })
 
         });
     }
 
-    finishGame(gameName) {
-        // afficher les scores et permettre de rejouer sur la meme game
-    }
-
     closeGame(gameName) {
         this.games = this.games.filter(game => game.gameName !== gameName);
+        socket.emit('GAME_CLOSED', {gameName: gameName});
         console.log(`Closing game ${gameName}, there is ${this.games.length} game(s) running`);
     }
 

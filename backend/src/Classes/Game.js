@@ -5,6 +5,8 @@ class Game {
         this.server = server;
         this.gameName = gameName;
         this.players = [/*gameMaster*/]; /* gameMaster is always the first player of the list */
+        this.waiters = [];
+        this.gameIsRunning = false;
         this.listOfPieces = this.generateListOfPieces();
         this.alivePlayers = [/*gameMaster*/];
         this.rank = 0;
@@ -26,12 +28,41 @@ class Game {
 
     startGame() {
         this.calculateScores();
+        this.gameIsRunning = true;
         console.log("Scores : ", this.scores);
         for (let i = 0 ; i < this.players.length ; i++) {
             this.players[i].listOfPieces = this.listOfPieces;
-            this.players[i].isInGame = true;
+            this.players[i].isPlaying = true;
             this.players[i].game = this;
             this.players[i].startGame();
+        }
+    }
+
+    resetGame() {
+        this.gameIsRunning = false;
+        this.listOfPieces = this.generateListOfPieces();
+        this.rank = 0;
+        this.scores = {};
+        this.alivePlayers = [/*gameMaster*/];
+        for (let i = 0 ; i < this.players.length ; i++) {
+            this.alivePlayers.push(this.players[i].playerName);
+            this.rank++;
+        }
+        for (let i = 0 ; i < this.waiters.length ; i++) {
+            this.players.push(this.waiters[i]);
+            this.alivePlayers.push(this.waiters[i].playerName);
+            this.rank++;
+        }
+        this.waiters = [];
+    }
+
+    addPlayer(player) {
+        if (this.gameIsRunning) {
+            this.waiters.push(player);
+        } else {
+            this.players.push(player);
+            this.alivePlayers.push(player.playerName);
+            this.rank++;
         }
     }
 
@@ -48,12 +79,6 @@ class Game {
     giveScore(rank) {
         if (rank > 3) return 0;
         else return this.scores[rank];
-    }
-
-    addPlayer(player) {
-        this.players.push(player);
-        this.alivePlayers.push(player.playerName);
-        this.rank++;
     }
 
     penalty(fromPlayerName, nbLines) {
@@ -87,40 +112,56 @@ class Game {
     playerGameOver(player) {
         this.rank--;
         console.log(`Game over for ${player.playerName} in game ${this.gameName}`);
-
-        const database = this.server.readDatabase();
-        console.log('actual score : ' + player.actualScore);
-        database[player.playerName].allTimeScores += player.actualScore;
-        console.log("resultat " + database[player.playerName].allTimeScores);
-        this.server.writeDatabase(database);
-
-
-        player.resetPlayer();
-        const leftPlayers = this.alivePlayers.filter(p => p !== player.playerName);
-        this.alivePlayers = leftPlayers;
-        
-        this.checkIfSomeoneIsAlive();
+        this.playerFinishedGame(player);
     }
 
+    playerGiveUp(player) {
+        if (player.isPlaying === true) {
+            this.rank--;
+        }
+        console.log(`Player ${player.playerName} gave up from game ${this.gameName}`);
+        this.playerFinishedGame(player);
+    }
+
+    playerFinishedGame(player) {
+        if (player.isPlaying === true) {
+            const database = this.server.readDatabase();
+            console.log('actual score : ' + player.actualScore);
+
+            database[player.playerName].allTimeScores += player.actualScore;
+            console.log("resultat " + database[player.playerName].allTimeScores);
+
+            this.server.writeDatabase(database);
+
+            const leftPlayers = this.alivePlayers.filter(p => p !== player.playerName);
+            this.alivePlayers = leftPlayers;
+
+            player.resetPlayer();
+            this.checkIfSomeoneIsAlive();
+        }
+
+    }
+
+
     removePlayer(player) {
-        this.rank--;
+        if (this.waiters.filter(p => p === player.playerName)) {
+            console.log(`Player ${player.playerName} who wasn't playing  is removed from game ${this.gameName}`);
+            const leftWaiters = this.waiters.filter(p => p !== player.playerName);
+            this.waiters = leftWaiters;
+            return;
+        }
         console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
         player.resetPlayer();
 
-        const leftPlayersAlive = this.alivePlayers.filter(p => p !== player.playerName);
-        this.alivePlayers = leftPlayersAlive;
-
         const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
         this.players = leftPlayers;
-
-        this.checkIfSomeoneIsAlive();
     }
 
     checkIfSomeoneIsAlive() {
         if (this.alivePlayers.length === 1) {
             this.winner();
         } else if (this.alivePlayers.length === 0) {
-            // this.server.finishGame pour afficher les scores
+            this.resetGame();
         }
     }
 
@@ -128,9 +169,11 @@ class Game {
         const winnerName = this.alivePlayers[0];
         console.log(`${winnerName} wins the game ${this.gameId}`);
         const socketWinner = this.players.find(player => player.playerName === winnerName).socket;
-        socketWinner.emit('WINNER');
-        // this.server.finishGame pour afficher les scores
+        socketWinner.emit('PLAYER_WINNER', {name: this.playerName, rank: rank, score: this.actualScore});
+        this.resetGame();
     }
+
+
 }
 
 module.exports = Game;
