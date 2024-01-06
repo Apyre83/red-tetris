@@ -5,7 +5,6 @@ class Game {
         this.server = server;
         this.gameName = gameName;
         this.players = [/*gameMaster*/]; /* gameMaster is always the first player of the list */
-        this.waiters = [];
         this.gameIsRunning = false;
         this.listOfPieces = this.generateListOfPieces();
         this.alivePlayers = [/*gameMaster*/];
@@ -48,21 +47,16 @@ class Game {
             this.alivePlayers.push(this.players[i].playerName);
             this.rank++;
         }
-        for (let i = 0 ; i < this.waiters.length ; i++) {
-            this.players.push(this.waiters[i]);
-            this.alivePlayers.push(this.waiters[i].playerName);
-            this.rank++;
-        }
-        this.waiters = [];
     }
 
-    addPlayer(player) {
+    addPlayer(player, callback) {
         if (this.gameIsRunning) {
-            this.waiters.push(player);
+            callback({code: 1, error: "Game is already running"});
         } else {
             this.players.push(player);
             this.alivePlayers.push(player.playerName);
             this.rank++;
+            callback({code: 0});
         }
     }
 
@@ -142,14 +136,7 @@ class Game {
 
     }
 
-
     removePlayer(player) {
-        if (this.waiters.filter(p => p === player.playerName)) {
-            console.log(`Player ${player.playerName} who wasn't playing  is removed from game ${this.gameName}`);
-            const leftWaiters = this.waiters.filter(p => p !== player.playerName);
-            this.waiters = leftWaiters;
-            return;
-        }
         console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
         player.resetPlayer();
 

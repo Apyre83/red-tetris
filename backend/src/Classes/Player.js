@@ -74,13 +74,16 @@ class Player {
             this.idActualPiece++;
         this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
 
+        for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH ; col++) {
+            if (this.board[2][col][0] != 0) {
+                this.gameOver();
+                return;
+            }
+        }
+
         for (let row = 0 ; row < this.actualPiece.width ; row++) {
             for (let col = 0; col < this.actualPiece.width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
-                    if (this.board[this.actualPiece.y + row][this.actualPiece.x + col][0] != 0) {
-                        this.gameOver();
-                        return;
-                    }
                     this.board[this.actualPiece.y + row][this.actualPiece.x + col] = this.actualPiece.tetromino[row][col];
                 }
             }
@@ -391,62 +394,3 @@ class Player {
 }
 
 module.exports = Player;
-
-// TESTS
-//
-// const player = new Player(1, 2, 3);
-
-// player.startGame();
-
-/*
-player.generateNewPiece();
-player.moveLeft();
-player.moveLeft();
-player.directBottom();
-
-
-player.generateNewPiece();
-// player.printBoard();
-player.moveLeft();
-player.rotateRight();
-player.moveLeft();
-player.moveLeft();
-// player.printBoard();
-player.moveDown();
-player.moveDown();
-player.directBottom();
-// player.printBoard();
-
-player.generateNewPiece();
-player.moveRight();
-player.moveRight();
-player.directBottom();
-
-player.generateNewPiece();
-player.rotateRight();
-player.moveRight();
-player.moveDown();
-player.moveDown();
-player.moveDown();
-player.moveLeft();
-
-// ATTENTION DEVRAIT PAS MARCHER
-player.moveLeft();
-
-// TEST DROITE
-// player.generateNewPiece();
-// player.rotateLeft();
-// player.moveRight();
-// player.moveDown();
-// player.moveDown();
-// player.moveDown();
-// player.moveDown();
-// player.moveRight();
-
-
-
-
-// console.log(`Bloup`);
-// player.penalty(5);
-// player.printBoard();
-*/

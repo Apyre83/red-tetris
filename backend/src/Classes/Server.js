@@ -125,7 +125,12 @@ class Server {
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
 
-                _game.addPlayer(_player)
+                _game.addPlayer(_player, (callback_add) => {
+                    if (callback_add.code === 1) {
+                        console.log(`Error game running cannot join`);
+                        callback({...data, code: 4, error: "Game is already running, wait until it's finished"});
+                    }
+                })
                 callback({...data, code: 0});
             });
 
