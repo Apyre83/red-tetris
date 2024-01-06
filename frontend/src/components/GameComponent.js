@@ -35,12 +35,11 @@ function GameComponent() {
         if (!isAuthenticated) { navigate('/'); }
 
         const handleLeavePage = (event) => {
-            console.log(`Dans handleLeavePage -->`);
-            // ATTENTION car on demande si veut partir de la page hors on envoie deja le socket.emit
-            socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
-                if (data.code !== 0) console.error(data.error); return; 
-                })
-            event.returnValue = "Are you sure you want to leave the game page?";
+			event.preventDefault();
+			event.returnValue = '';
+			socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
+				if (data.code !== 0) { console.error(data.error); return; }
+			});
         };
         window.addEventListener("beforeunload", handleLeavePage);
 
@@ -83,17 +82,14 @@ function GameComponent() {
             socket.off('GAME_STARTED');
             socket.off('GAME_OVER');
             socket.off('WINNER');
-            // COMMENTÉ CAR GÉRÉ DANS HandleGoHome
-            // console.log(`Dans useEffect de GameComponent -->`);
-            // socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName });
         }
     }, [socket, gameName, playerName, isAuthenticated, navigate]);
 
     const handleGoHome = () => {
         console.log(`Dans handleGoHome GameComponent-->`);
-        socket.emit('PLAYER_LEFT_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
-            if (data.code !== 0) { console.error(data.error); return; }
-        });
+		socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
+			if (data.code !== 0) { console.error(data.error); return; }
+		});
         navigate('/');
     };
 
