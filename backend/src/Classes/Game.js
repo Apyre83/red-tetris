@@ -29,6 +29,7 @@ class Game {
     }
 
     startGame() {
+        if (this.players.length === 0) throw new Error('No player in the game');
         this.calculateScores();
         this.gameIsRunning = true;
         console.log("Scores : ", this.scores);

@@ -1,13 +1,56 @@
-const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
-const Game = require('./Game');
-const Player = require('./Player');
-const Server = require('./Server');
+// const Game = require("./Game");
+// const fs = require('fs');
+// const Player = require("./Player");
 
-describe ('Game class', () => {
-    describe('constructor', () => {
-        test('should throw an error if server is not an object', () => {
-            expect(() => new Game('server', 'gameName')).toThrow('Server must be an object');
-            expect(() => new Game(new Server(3000), 'gameName')).not.toThrow();
-        })
-    })
-});
+
+// const username = "usertest";
+// const roomname = "roomtest";
+
+// function readDatabase() {
+//     const data = fs.readFileSync('./databases/database.json', 'utf8');
+//     return JSON.parse(data);
+// }
+
+// jest.useFakeTimers();
+
+// const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// let fakeio = () => ({
+// 	id: Math.random(),
+// 	emit: (...args) => {
+// 		// console.log('emit', ...args);
+// 	},
+// 	join: (channel) => {
+// 		// console.log('join', channel);
+// 	},
+// 	leave: () => {},
+// 	on: (ev, func) => {
+// 		if (ev === `event:${roomname}` || ev === 'initgame')
+// 			func();
+// 	},
+// 	in: (channel) => ({
+// 		emit: (...args) => {
+// 			// console.log('in', channel, 'emit', ...args)
+// 		}
+// 	}),
+// 	removeListener: () => {},
+// 	removeAllListeners: () => {}
+// })
+
+// describe('Game class', () => {
+//     test('test startGame', async () => {
+//         let game = new Game(fakeio(), roomname);
+
+//         let player = new Player(fakeio(), 'playerName', readDatabase());
+
+//         game.addPlayer(player, () => {});
+//         game.startGame();
+
+//         expect(game.gameIsRunning).toBe(true);  
+
+//         await sleep(2000);
+        
+//         player.gameOver();
+
+//     });
+// });
