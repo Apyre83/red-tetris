@@ -6,7 +6,16 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest"
+    "test": "jest --coverage"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/**/*.{js,jsx}",
+      "!**/node_modules/**"
+    ],
+    "coverageReporters": ["json", "lcov", "text", "clover"],
+    "coverageDirectory": "coverage"
   },
   "author": "",
   "license": "ISC",
