@@ -145,8 +145,11 @@ class Game {
         console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
         player.resetPlayer();
 
+        this.rank--;
+        const leftAlivePlayers = this.alivePlayers.filter(p => p !== player.playerName);
         const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
         this.players = leftPlayers;
+        this.alivePlayers = leftAlivePlayers;
     }
 
     checkIfSomeoneIsAlive() {

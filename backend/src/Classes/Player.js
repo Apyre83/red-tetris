@@ -75,7 +75,8 @@ class Player {
         this.actualPiece = new Piece(this.listOfPieces[this.idActualPiece]);
 
         for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH ; col++) {
-            if (this.board[2][col][0] != 0) {
+            if (this.board[3][col][0] != 0) {
+                console.log(`Coordonnees de la piece : 3, ${col}`);
                 this.gameOver();
                 return;
             }
@@ -94,7 +95,7 @@ class Player {
     penalty(nbLines) {
         for (let i = 0 ; i < nbLines ; i++) {
             this.idRowBorder--;
-            if (this.idRowBorder === 0) {
+            if (this.idRowBorder === 3) {
                 this.gameOver();
                 return;
             }
