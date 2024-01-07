@@ -362,6 +362,13 @@ class Player {
 		return {rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores };
     }
 
+    winner() {
+        console.log(`Winner`);
+        const rank = this.game.rank;
+        this.actualScore += this.game.giveScore(rank);
+        console.log(`Score de winner : ` + this.actualScore);
+    }
+
     resetPlayer() {
         this.listOfPieces = [];
         this.isPlaying = false;
@@ -373,7 +380,6 @@ class Player {
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
         this.rank = 0;
-        this.actualScore = 0;
     }
 
     printBoard() {

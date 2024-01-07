@@ -1,8 +1,11 @@
 const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
+const Player = require('./Player');
 
 class Game {
     constructor(server, gameName/*, gameMaster*/) {
+        if (typeof server !== 'object') throw new Error('Server must be an object');
         this.server = server;
+        if (typeof gameName !== 'string') throw new Error('Game name must be a string');
         this.gameName = gameName;
         this.players = [/*gameMaster*/]; /* gameMaster is always the first player of the list */
         this.gameIsRunning = false;
@@ -52,6 +55,7 @@ class Game {
     addPlayer(player, callback) {
         if (this.gameIsRunning) {
             callback({code: 1, error: "Game is already running"});
+        if (typeof player !== typeof(Player)) throw new Error('Player must be an object Player');
         } else {
             this.players.push(player);
             this.alivePlayers.push(player.playerName);
@@ -157,9 +161,11 @@ class Game {
 
     winner() {
 		let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0])[0];
+        playerWinner.winner();
 		for (let i = 0 ; i < this.players.length ; i++) {
-			this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore});
+            this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore});
 		}
+        this.playerFinishedGame(playerWinner);
         this.resetGame();
     }
 
