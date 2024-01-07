@@ -3,6 +3,8 @@ const { BORDER_WIDTH }    = require('../constants/numbers');
 
 class Piece {
     constructor(id) {
+        if (typeof id !== 'number') throw new Error('Piece id must be a number');
+        if (id < 0 || id > 6) throw new Error('Piece id must be between 0 and 6');
         this.id = id;
         this.data = this.getData();
         this.letter = this.data.letter;
@@ -68,11 +70,6 @@ class Piece {
             }
             return matrix;
         }
-
-        // function copyMatrix(matrix) {
-        //     const newMatrix = matrix.map(row => [...row]);
-        //     return newMatrix;
-        // }
 
         function rotate90(matrix) {
             const newMatrix = createEmptyTetromino(rows, cols);

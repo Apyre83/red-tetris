@@ -167,7 +167,3 @@ class Game {
 }
 
 module.exports = Game;
-
-// const myGame = new Game(1, 1, 1);
-// console.log(myGame.listOfPieces);
-
