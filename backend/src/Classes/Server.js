@@ -192,8 +192,8 @@ class Server {
 
                 const gamePlayer = _game.players.find(player => player.playerName === data.playerName);
 				if (!gamePlayer) { callback({...data, code: 2, error: "Player does not exist"}); return; }
-                gamePlayer.giveUp();
-				callback({...data, code: 0});
+                let result = gamePlayer.giveUp();
+				callback({...data, code: 0, ...result});
             })
 
         });

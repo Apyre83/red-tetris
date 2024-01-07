@@ -113,6 +113,8 @@ function GameComponent() {
 			if (data.code !== 0) { console.error(data.error); return; }
 			console.log('PLAYER_GIVE_UP', data);
 			setIsAlive(false);
+			setPlayerScore(data.score);
+			setPlayerRank(data.rank);
 		});
 	};
 

@@ -358,8 +358,8 @@ class Player {
         console.log(`Gave up`);
         const rank = this.game.rank;
         this.actualScore += this.game.giveScore(rank);
-        this.socket.emit('PLAYER_GAVE_UP', {name: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
         this.game.playerGiveUp(this);
+		return {rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores };
     }
 
     resetPlayer() {
