@@ -53,6 +53,7 @@ function GameComponent() {
         socket.on('USER_JOIN_GAME', (data) => {
             console.log('USER_JOIN_GAME', data);
             setPlayers(prev => [...prev, data.playerName]);
+			setIsCreator(data.creator === playerName);
         });
 
         socket.on('GAME_STARTED', (data) => {
@@ -102,6 +103,10 @@ function GameComponent() {
     }, [socket, gameName, playerName, isAuthenticated, navigate, isCreator]);
 
     const handleGoHome = () => {
+		if (!isAuthenticated) { console.error('Not authenticated'); return; }
+		if (!socket) { console.error('Socket not connected'); return; }
+
+		console.log('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName });
 		socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
 			if (data.code !== 0) { console.error(data.error); return; }
 		});
@@ -158,8 +163,8 @@ function GameComponent() {
                     )}
 
                     {responseMessage && <p className="game-response-message">{responseMessage}</p>}
-                    <button className="game-button" onClick={handleGoHome}>Retour à l'accueil</button>
-                    {isCreator && !gameIsPlaying && <button className="game-button" onClick={handleStartGame}>Lancer la partie</button>}
+                    <button className="game-button" onClick={handleGoHome}>Home</button>
+                    {isCreator && !gameIsPlaying && <button className="game-button" onClick={handleStartGame}>Start</button>}
                 </div>
             }
         </>

@@ -186,6 +186,11 @@ class Server {
                 if (_game.players.length === 0) {
                     this.closeGame(_game.gameName);
                 }
+				else {
+					for (const player of _game.players) {
+						player.socket.emit('USER_LEAVE_GAME', {playerName: data.playerName, creator: _game.players[0].playerName});
+					}
+				}
 				callback({...data, code: 0});
             });
 

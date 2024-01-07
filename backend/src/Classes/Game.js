@@ -157,6 +157,12 @@ class Game {
             if (this.players.length === 0) {
                 this.server.closeGame(this.gameName);
             }
+			else {
+				for (let i = 0 ; i < this.players.length ; i++) {
+					this.players[i].socket.emit('PLAYER_WINNER');
+				}
+				this.resetGame();
+			}
         }
     }
 
