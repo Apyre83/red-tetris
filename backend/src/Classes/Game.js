@@ -152,10 +152,17 @@ class Game {
         if (this.alivePlayers.length === 1) {
             this.winner();
         } else if (this.alivePlayers.length === 0) {
+			console.log("No one is alive");
             this.resetGame();
             if (this.players.length === 0) {
                 this.server.closeGame(this.gameName);
             }
+			else {
+				for (let i = 0 ; i < this.players.length ; i++) {
+					this.players[i].socket.emit('PLAYER_WINNER');
+				}
+				this.resetGame();
+			}
         }
     }
 
