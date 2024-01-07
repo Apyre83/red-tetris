@@ -68,6 +68,11 @@ class Server {
                 if (!database[data.username]) { callback({...data, code: 1, error: "Username does not exist"}); return; }
                 if (database[data.username].password !== data.password) { callback({...data, code: 2, error: "Wrong password"}); return; }
 
+                // if players already connected cannot login
+                for (const player of this.players) {
+                    if (player.playerName === data.username) { callback({...data, code: 3, error: "Player already connected"}); return; }
+                }
+
                 /* Change the username of the player */
                 for (const player of this.players) {
                     if (player.socket.id === socket.id) {
