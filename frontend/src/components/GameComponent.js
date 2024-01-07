@@ -72,7 +72,10 @@ function GameComponent() {
 
 		socket.on('PLAYER_WINNER', (data) => {
 			console.log('PLAYER_WINNER', data);
-			if (data.playerName === playerName) {
+			if (!data) { /* Game was played alone */
+			}
+
+			else if (data.playerName === playerName) {
 				setPlayerScore(data.score);
 				setPlayerRank(data.rank);
 			}

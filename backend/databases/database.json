@@ -6,7 +6,7 @@
   "apyre": {
     "password": "apyre",
     "email": "test@test.com",
-    "allTimeScores": 35
+    "allTimeScores": null
   },
   "apyre2": {
     "password": "apyre2",
@@ -15,7 +15,7 @@
   "apyre3": {
     "password": "apyre",
     "email": "apyre3@t.e",
-    "allTimeScores": 5
+    "allTimeScores": 30
   },
   "rertr": {
     "password": "rrrty",
