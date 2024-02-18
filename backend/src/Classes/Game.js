@@ -150,6 +150,7 @@ class Game {
         const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
         this.players = leftPlayers;
         this.alivePlayers = leftAlivePlayers;
+        this.checkIfSomeoneIsAlive();
     }
 
     checkIfSomeoneIsAlive() {

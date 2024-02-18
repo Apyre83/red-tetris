@@ -12,17 +12,14 @@ class Server {
         this.server = http.createServer(this.app);
         this.io = new IOServer(this.server, {
             cors: {
-                // TODO CHANGE ADRESS ?? 
-                origin: "http://localhost:3000", // ou utiliser '*' pour autoriser toutes les origines
-                // origin: "http://192.168.1.47:3000",
+                origin:"*",
                 methods: ["GET", "POST"],
                 allowedHeaders: ["my-custom-header"],
                 credentials: true
             }
         });
         this.port = port;
-        this.games = []; /* TODO */
-        /* this.players is a list of Players from Player.js */
+        this.games = [];
         this.players = [];
 
         this.DATABASE_FILE = './databases/database.json';
@@ -158,9 +155,20 @@ class Server {
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
                 if (_game.players[0].playerName !== data.playerName) { callback({...data, code: 2, error: "Only the creator can start the game"}); return; }
 
-                _game.startGame(); // here send to all players
-                for (const player of _game.players) {
-                    player.socket.emit('GAME_STARTED', data);
+                _game.startGame();
+
+                for (let i = 0; i < _game.players.length; i++) {
+                    const leftPlayerIndex = (i - 1 + _game.players.length) % _game.players.length;
+                    const rightPlayerIndex = (i + 1) % _game.players.length;
+
+                    const leftPlayerName = _game.players[leftPlayerIndex].playerName;
+                    const rightPlayerName = _game.players[rightPlayerIndex].playerName;
+
+                    _game.players[i].socket.emit('GAME_STARTED', {
+                        ...data,
+                        leftPlayerName: leftPlayerName,
+                        rightPlayerName: rightPlayerName
+                    });
                 }
                 callback({...data, code: 0});
             })

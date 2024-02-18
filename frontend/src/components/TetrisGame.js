@@ -7,14 +7,12 @@ function getPlayerNameFromHash() {
     return match ? match[2] : null;
 }
 
-function TetrisGame({ handlerGiveUp }) {
+function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
     const socket = useSelector(state => state.socket.socket);
     const [grid, setGrid] = useState(createEmptyGrid());
 
     const playerName = getPlayerNameFromHash();
 
-    const [leftPlayerName, setLeftPlayerName] = useState('');
-    const [rightPlayerName, setRightPlayerName] = useState('');
     const [leftPlayerGrid, setLeftPlayerGrid] = useState(createEmptyGrid());
     const [rightPlayerGrid, setRightPlayerGrid] = useState(createEmptyGrid());
 
@@ -26,14 +24,18 @@ function TetrisGame({ handlerGiveUp }) {
         });
 
         socket.on('UPDATE_SPECTRUM', (data) => {
-            if (leftPlayerName === '' || leftPlayerName === data.playerName) {
-                setLeftPlayerName(data.playerName);
-                setLeftPlayerGrid(data.spectrum);
-            }
-            else if (rightPlayerName === '' || rightPlayerName === data.playerName) {
-                setRightPlayerName(data.playerName);
-                setRightPlayerGrid(data.spectrum);
-            }
+            console.log(data);
+            // if (leftPlayerName === '' || leftPlayerName === data.playerName) {
+            //     setLeftPlayerName(data.playerName);
+            //     setLeftPlayerGrid(data.spectrum);
+            // }
+            // else if (rightPlayerName === '' || rightPlayerName === data.playerName) {
+            //     setRightPlayerName(data.playerName);
+            //     setRightPlayerGrid(data.spectrum);
+            // }
+            if (leftPlayerName === data.playerName) { setLeftPlayerGrid(data.spectrum); }
+            else if (rightPlayerName === data.playerName) { setRightPlayerGrid(data.spectrum); }
+
         });
 
         const handleKeyPress = (event) => {
@@ -72,6 +74,8 @@ function TetrisGame({ handlerGiveUp }) {
 	window.addEventListener('keydown', handleKeyPress);
         return () => {
             window.removeEventListener('keydown', handleKeyPress);
+            socket.off('UPDATE_BOARD');
+            socket.off('UPDATE_SPECTRUM');
         };
     }, [socket, playerName, leftPlayerName, rightPlayerName]);
 

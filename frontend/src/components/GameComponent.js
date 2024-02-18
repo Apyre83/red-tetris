@@ -29,6 +29,11 @@ function GameComponent() {
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [responseMessage, setResponseMessage] = useState('');
 
+
+    const [leftPlayerName, setLeftPlayerName] = useState('');
+    const [rightPlayerName, setRightPlayerName] = useState('');
+
+
 	const [isAlive, setIsAlive] = useState(false);
 
     useEffect(() => {
@@ -36,7 +41,10 @@ function GameComponent() {
         if (!isAuthenticated) { navigate('/'); }
 
         const handleLeavePage = (event) => {
-			event.preventDefault();
+            if (!isAuthenticated) { console.error('Not authenticated'); return; }
+            if (!socket) { console.error('Socket not connected'); return; }
+
+            event.preventDefault();
 			event.returnValue = '';
 			socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
 				if (data.code !== 0) { console.error(data.error); return; }
@@ -58,6 +66,8 @@ function GameComponent() {
 
         socket.on('GAME_STARTED', (data) => {
             console.log('GAME_STARTED', data);
+            setLeftPlayerName(data.leftPlayerName);
+            setRightPlayerName(data.rightPlayerName);
             setGameIsPlaying(true);
 			setIsAlive(true);
         });
@@ -94,11 +104,11 @@ function GameComponent() {
         });
         return () => {
             window.removeEventListener("beforeunload", handleLeavePage);
-            socket.off('USER_LEAVE_GAME');
-            socket.off('USER_JOIN_GAME');
+            socket.off('PLAYER_WINNER');
+            socket.off('PLAYER_GAME_OVER');
             socket.off('GAME_STARTED');
-            socket.off('GAME_OVER');
-            socket.off('WINNER');
+            socket.off('USER_JOIN_GAME');
+            socket.off('USER_LEAVE_GAME');
         }
     }, [socket, gameName, playerName, isAuthenticated, navigate, isCreator]);
 
@@ -145,7 +155,7 @@ function GameComponent() {
             <header className="home-header">
                 <h2 className="header-title">Authenticated as {playerName}</h2>
             </header>
-			{isAlive && <TetrisGame handlerGiveUp={handleGiveUp} />}
+			{isAlive && <TetrisGame handlerGiveUp={handleGiveUp} leftPlayerName={leftPlayerName} rightPlayerName={rightPlayerName} />}
             {!isAlive &&
                 <div className="game-container">
                     <h1 className="game-title">Game: {gameName}</h1>
