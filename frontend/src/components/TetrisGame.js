@@ -25,14 +25,6 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
 
         socket.on('UPDATE_SPECTRUM', (data) => {
             console.log(data);
-            // if (leftPlayerName === '' || leftPlayerName === data.playerName) {
-            //     setLeftPlayerName(data.playerName);
-            //     setLeftPlayerGrid(data.spectrum);
-            // }
-            // else if (rightPlayerName === '' || rightPlayerName === data.playerName) {
-            //     setRightPlayerName(data.playerName);
-            //     setRightPlayerGrid(data.spectrum);
-            // }
             if (leftPlayerName === data.playerName) { setLeftPlayerGrid(data.spectrum); }
             else if (rightPlayerName === data.playerName) { setRightPlayerGrid(data.spectrum); }
 

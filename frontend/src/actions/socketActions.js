@@ -7,7 +7,8 @@ export const SOCKET_ERROR = 'SOCKET_ERROR';
 
 export const connectWebSocket = () => {
     return (dispatch) => {
-        const socket = io("http://localhost:8080");
+        //const socket = io("http://localhost:8080");
+	const socket = io("http://10.13.1.6:8080/");
         // const socket = io('http://88.172.30.166:20005');
 
         socket.on('connect', () => {

@@ -6,12 +6,12 @@
   "apyre": {
     "password": "apyre",
     "email": "test@test.com",
-    "allTimeScores": 22
+    "allTimeScores": 129
   },
   "apyre2": {
     "password": "apyre2",
     "email": "apyre2@gmail.com",
-    "allTimeScores": 98
+    "allTimeScores": 10
   },
   "apyre3": {
     "password": "apyre",
@@ -39,16 +39,21 @@
   "qqqqq": {
     "password": "qq",
     "email": "qqqq@gmail.com",
-    "allTimeScores": 202
+    "allTimeScores": 338
   },
   "wwwww": {
     "password": "ww",
     "email": "ww@gmail.com",
-    "allTimeScores": 147
+    "allTimeScores": 201
   },
   "Prout": {
     "password": "Prout",
     "email": "Magicfires@hotmail.com",
     "allTimeScores": 31
+  },
+  "vdelafos": {
+    "password": "qwert",
+    "email": "vdelafos@student.42nice.fr",
+    "allTimeScores": 0
   }
 }

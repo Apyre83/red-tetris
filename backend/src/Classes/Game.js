@@ -1,3 +1,15 @@
+// ************************************************************************** //
+//                                                                            //
+//                                                        :::      ::::::::   //
+//   Game.js                                            :+:      :+:    :+:   //
+//                                                    +:+ +:+         +:+     //
+//   By: lfresnay <marvin@42.fr>                    +#+  +:+       +#+        //
+//                                                +#+#+#+#+#+   +#+           //
+//   Created: 2024/02/19 18:07:25 by lfresnay          #+#    #+#             //
+//   Updated: 2024/02/19 18:07:28 by lfresnay         ###   ########.fr       //
+//                                                                            //
+// ************************************************************************** //
+
 const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
 const Player = require('./Player');
 
@@ -48,7 +60,7 @@ class Game {
         this.scores = {};
         this.alivePlayers = [/*gameMaster*/];
         for (let i = 0 ; i < this.players.length ; i++) {
-            this.alivePlayers.push(this.players[i].playerName);
+            this.alivePlayers.push(this.players[i]);
             this.rank++;
         }
     }
@@ -59,7 +71,7 @@ class Game {
         if (typeof player !== typeof(Player)) throw new Error('Player must be an object Player');
         } else {
             this.players.push(player);
-            this.alivePlayers.push(player.playerName);
+            this.alivePlayers.push(player);
             this.rank++;
             callback({code: 0});
         }
@@ -82,18 +94,18 @@ class Game {
 
     penalty(fromPlayerName, nbLines) {
         console.log(`PENALTY FROM ${fromPlayerName} : ${nbLines} lines`);
-        for (let i = 0 ; i < this.players.length ; i++) {
-            if (this.players[i].playerName !== fromPlayerName) {
-                this.players[i].penalty(nbLines);
+        for (let i = 0 ; i < this.alivePlayers.length ; i++) {
+            if (this.alivePlayers[i].playerName !== fromPlayerName) {
+                this.alivePlayers[i].penalty(nbLines);
             //    TODO socket.emit('PENALTY', {info: `${nbLines} penalty row(s) from ${fromPlayerName}`};
             }
         }
     }
 
     sendSpectrum(playerName, spectrum) {
-        for (let i = 0 ; i < this.players.length ; i++) {
-            if (this.players[i].playerName !== playerName) {
-                this.players[i].socket.emit('UPDATE_SPECTRUM', {spectrum: spectrum, playerName: playerName});
+        for (let i = 0 ; i < this.alivePlayers.length ; i++) {
+            if (this.alivePlayers[i].playerName !== playerName) {
+                this.alivePlayers[i].socket.emit('UPDATE_SPECTRUM', {spectrum: spectrum, playerName: playerName});
             }
         }
     }
@@ -132,7 +144,7 @@ class Game {
 
             this.server.writeDatabase(database);
 
-            const leftPlayers = this.alivePlayers.filter(p => p !== player.playerName);
+            const leftPlayers = this.alivePlayers.filter(p => p.playerName !== player.playerName);
             this.alivePlayers = leftPlayers;
 
             player.resetPlayer();
@@ -146,7 +158,7 @@ class Game {
         player.resetPlayer();
 
         this.rank--;
-        const leftAlivePlayers = this.alivePlayers.filter(p => p !== player.playerName);
+        const leftAlivePlayers = this.alivePlayers.filter(p => p.playerName !== player.playerName);
         const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
         this.players = leftPlayers;
         this.alivePlayers = leftAlivePlayers;
@@ -172,7 +184,7 @@ class Game {
     }
 
     winner() {
-		let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0])[0];
+		let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0].playerName)[0];
         playerWinner.winner();
 		for (let i = 0 ; i < this.players.length ; i++) {
             this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore});
