@@ -29,6 +29,7 @@ function GameComponent() {
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [responseMessage, setResponseMessage] = useState('');
 
+    const [score, setScore] = useState(0);
 
     const [leftPlayerName, setLeftPlayerName] = useState('');
     const [rightPlayerName, setRightPlayerName] = useState('');
@@ -39,6 +40,14 @@ function GameComponent() {
     useEffect(() => {
         if (!socket) { console.error('Socket not connected'); return; }
         if (!isAuthenticated) { navigate('/'); }
+
+        socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
+            console.log("GET_SCORE", data);
+            if (data.code !== 0) {
+                console.error('Error while getting score', data.error);
+            }
+            else setScore(data.score);
+        });
 
         const handleLeavePage = (event) => {
             if (!isAuthenticated) { console.error('Not authenticated'); return; }
@@ -92,6 +101,14 @@ function GameComponent() {
 			}
 			setIsAlive(false);
 			setGameIsPlaying(false);
+
+            socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
+                console.log("GET_SCORE", data);
+                if (data.code !== 0) {
+                    console.error('Error while getting score', data.error);
+                }
+                else setScore(data.score);
+            });
 		});
 
 
@@ -154,6 +171,7 @@ function GameComponent() {
         <>
             <header className="home-header">
                 <h2 className="header-title">Authenticated as {playerName}</h2>
+                <div className="score-display">Score: {score}</div>
             </header>
 			{isAlive && <TetrisGame handlerGiveUp={handleGiveUp} leftPlayerName={leftPlayerName} rightPlayerName={rightPlayerName} />}
             {!isAlive &&
@@ -167,8 +185,8 @@ function GameComponent() {
 
 					{playerScore !== -1 && (
                         <div className="player-score">
-                            <p>Votre score: {playerScore}</p>
-                            <p>Votre classement: {playerRank}</p>
+                            <p>Your score: {playerScore}</p>
+                            <p>Your rank: {playerRank}</p>
                         </div>
                     )}
 

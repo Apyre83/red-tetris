@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Modal.css';
-import { useSelector, useDispatch } from "react-redux"; // Importez useDispatch
+import { useSelector, useDispatch } from "react-redux";
 
 
 const LoginForm = () => {
@@ -17,7 +17,7 @@ const LoginForm = () => {
             password
         }, (data) => {
             if (data.code !== 0) {
-                setError(data.error || 'Erreur de connexion. Veuillez réessayer.');
+                setError(data.error || 'Error while logging in, please try again.');
                 return;
             }
             dispatch({ type: "LOGIN_SUCCESS", payload: data.username });
@@ -27,10 +27,10 @@ const LoginForm = () => {
     return (
         <div className="form-container">
             <form onSubmit={handleSubmit}>
-                <h2>Connexion</h2>
+                <h1>Welcome to tetris</h1>
                 {error && <div className="error-message">{error}</div>}
                 <div>
-                    <label>Nom d'utilisateur</label>
+                    <label>Username</label>
                     <input
                         type="text"
                         value={username}
@@ -39,7 +39,7 @@ const LoginForm = () => {
                     />
                 </div>
                 <div>
-                    <label>Mot de passe</label>
+                    <label>Password</label>
                     <input
                         type="password"
                         value={password}
@@ -47,7 +47,7 @@ const LoginForm = () => {
                         className="modal-input"
                     />
                 </div>
-                <button type="submit" className="modal-button">Se connecter</button>
+                <button type="submit" className="modal-button">Login</button>
             </form>
         </div>
     );

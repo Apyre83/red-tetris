@@ -5,6 +5,7 @@ import LoginForm from './LoginForm';
 import SignUpForm from './SignUpForm';
 import './Home.css';
 
+
 function Home() {
     const socket = useSelector(state => state.socket.socket);
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
@@ -16,16 +17,24 @@ function Home() {
 
     const user = useSelector(state => state.auth);
     const playerName = user.isAuthenticated ? user.user : '';
+    const [score, setScore] = useState(0);
 
     const [error, setError] = useState('');
-    const [errorCount, setErrorCount] = useState(0);
 
     useEffect(() => {
         if (!socket) { /*console.error('Socket not connected'); */return; }
 
+        socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
+            console.log("GET_SCORE", data);
+            if (data.code !== 0) {
+                console.error('Error while getting score', data.error);
+            }
+            else setScore(data.score);
+        });
+
         return () => {
         }
-    }, [socket]);
+    }, [socket, playerName]);
 
     const socketJoinGame = (gameName, playerName, callback) => {
         socket.emit('JOIN_GAME', {
@@ -35,7 +44,6 @@ function Home() {
             console.log("JOIN_GAME", data);
             if (data.code !== 0) {
                 setError(data.error);
-                setErrorCount(prev => prev + 1);
                 return;
             }
             console.log("Game joined successfully: ", data);
@@ -48,13 +56,11 @@ function Home() {
 
         e.preventDefault();
         if (!playerName) {
-            setError('Veuillez saisir un nom.');
-            setErrorCount(prev => prev + 1);
+            setError('Please enter a room name.');
             return;
         }
         if (!game) {
-            setError('Veuillez choisir une salle pour rejoindre.');
-            setErrorCount(prev => prev + 1);
+            setError('Please enter a valid room name.');
             return;
         }
         setError('');
@@ -66,7 +72,7 @@ function Home() {
 
         e.preventDefault();
         if (!playerName) {
-            setError('Veuillez saisir un nom.');
+            setError('Please enter a room name.');
             return;
         }
         setError('');
@@ -79,7 +85,6 @@ function Home() {
             console.log("Game created successfully: ", data);
             if (data.code !== 0) {
                 setError(data.error);
-                setErrorCount(prev => prev + 1);
                 return;
             }
             socketJoinGame(uniqueGameName, playerName);
@@ -92,6 +97,9 @@ function Home() {
 
     const onAuthentication = (status) => {
         dispatch({ type: 'LOGOUT', payload: status });
+        if (status === false) {
+            socket.emit('LOGOUT', { playerName: playerName }, (data) => {});
+        }
     }
 
     return (
@@ -101,12 +109,12 @@ function Home() {
                     {showLogin ? (
                         <>
                             <LoginForm />
-                            <button onClick={() => setShowLogin(false)} className="modal-button">S'inscrire</button>
+                            <button onClick={() => setShowLogin(false)} className="modal-button">Register</button>
                         </>
                     ) : (
                         <>
                             <SignUpForm />
-                            <button onClick={() => setShowLogin(true)} className="modal-button">Se connecter</button>
+                            <button onClick={() => setShowLogin(true)} className="modal-button">Login</button>
                         </>
                     )}
                 </Modal>
@@ -115,11 +123,10 @@ function Home() {
                 <>
                     <header className="home-header">
                         <h2 className="header-title">Authenticated as {playerName}</h2>
+                        <div className="score-display">Score: {score}</div>
                     </header>
                     <div className="home-container">
-
-                        {error && <div key={errorCount} className="error-message">{error}</div>}
-                        {/*<h2 className="connectedAs">Connecté en tant que {playerName}</h2>*/}
+                        {error && <div className="error-message">{error}</div>}
                         <h1 className="title">Tetris Game</h1>
                         <form className="home-form">
                             <input
@@ -139,5 +146,6 @@ function Home() {
         </div>
     );
 }
+
 
 export default Home;

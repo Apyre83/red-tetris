@@ -19,7 +19,7 @@ const SignUpForm = () => {
             password
         }, (data) => {
             if (data.code !== 0) {
-                setError(data.error || 'Une erreur s’est produite lors de l’inscription.');
+                setError(data.error || 'An error has occured during registration.');
                 return;
             }
             console.log("Signed up successfully: ", data);
@@ -30,10 +30,10 @@ const SignUpForm = () => {
     return (
         <div className="form-container">
             <form onSubmit={handleSubmit}>
-                <h2>Inscription</h2>
+                <h1>Welcome to tetris</h1>
                 {error && <div className="error-message">{error}</div>}
                 <div>
-                    <label>Nom d'utilisateur</label>
+                    <label>Username</label>
                     <input
                         type="text"
                         value={username}
@@ -54,7 +54,7 @@ const SignUpForm = () => {
                     />
                 </div>
                 <div>
-                    <label>Mot de passe</label>
+                    <label>Password</label>
                     <input
                         type="password"
                         value={password}
@@ -62,7 +62,7 @@ const SignUpForm = () => {
                         className="modal-input"
                     />
                 </div>
-                <button type="submit" className="modal-button">S'inscrire</button>
+                <button type="submit" className="modal-button">Register</button>
             </form>
         </div>
     );

@@ -79,6 +79,16 @@ class Server {
                 callback({...data, code: 0});
             });
 
+            socket.on('LOGOUT', (data, callback) => {
+                console.log('LOGOUT', data);
+                for (const player of this.players) {
+                    if (player.socket.id === socket.id) {
+                        player.playerName = '';
+                    }
+                }
+                callback({...data, code: 0});
+            });
+
             socket.on('SIGNUP', (data, callback) => {
                 console.log('SIGNUP', data);
                 const database = this.readDatabase();
@@ -103,6 +113,13 @@ class Server {
                 this.writeDatabase(database);
 
                 callback({...data, code: 0});
+            });
+
+            socket.on('GET_SCORE', (data, callback) => {
+                console.log('GET_SCORE', data);
+                const database = this.readDatabase();
+                if (!database[data.playerName]) { callback({...data, code: 1, error: "Player does not exist"}); return; }
+                callback({...data, code: 0, score: database[data.playerName].allTimeScores});
             });
 
             socket.on('CREATE_GAME', (data, callback) => {
