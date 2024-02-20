@@ -198,7 +198,7 @@ function GameComponent() {
                 </>
             ) : (
                 <>
-                    <SignUpForm />
+                    <SignUpForm setShowLogin={setShowLogin} />
                     <button onClick={() => setShowLogin(true)} className="modal-button">Login</button>
                 </>
             )}

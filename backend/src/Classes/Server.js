@@ -99,11 +99,6 @@ class Server {
                 if (data.email === '') { callback({...data, code: 4, error: "Email cannot be empty"}); return; }
                 if (data.password === '') { callback({...data, code: 5, error: "Password cannot be empty"}); return; }
 
-                // const player = new Player; ?
-                for (const player of this.players) {
-                    if (player.socket.id === socket.id) { player.playerName = data.username; }
-                }
-
                 // TODO: password hashing
                 database[data.username] = {
                     password: data.password,

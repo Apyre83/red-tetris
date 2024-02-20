@@ -96,8 +96,8 @@ function Home() {
     }
 
     const onAuthentication = (status) => {
-        dispatch({ type: 'LOGOUT', payload: status });
         if (status === false) {
+            dispatch({ type: 'LOGOUT', payload: status });
             socket.emit('LOGOUT', { playerName: playerName }, (data) => {});
         }
     }
@@ -113,7 +113,7 @@ function Home() {
                         </>
                     ) : (
                         <>
-                            <SignUpForm />
+                            <SignUpForm setShowLogin={setShowLogin} />
                             <button onClick={() => setShowLogin(true)} className="modal-button">Login</button>
                         </>
                     )}

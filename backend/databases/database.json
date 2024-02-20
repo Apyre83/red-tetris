@@ -55,5 +55,30 @@
     "password": "qwert",
     "email": "vdelafos@student.42nice.fr",
     "allTimeScores": 0
+  },
+  "rrrrr": {
+    "password": "r",
+    "email": "r.r@r.r",
+    "allTimeScores": 0
+  },
+  "yyyyy": {
+    "password": "y",
+    "email": "y.y@y.y",
+    "allTimeScores": 0
+  },
+  "zzzzz": {
+    "password": "z",
+    "email": "z.z@z.z",
+    "allTimeScores": 0
+  },
+  "jjjjj": {
+    "password": "j",
+    "email": "j.j@j.j",
+    "allTimeScores": 0
+  },
+  "ooooo": {
+    "password": "o",
+    "email": "o@o.o",
+    "allTimeScores": 0
   }
 }
