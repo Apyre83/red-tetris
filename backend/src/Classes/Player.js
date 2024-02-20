@@ -37,6 +37,7 @@ class Player {
                 clearInterval(interval);
             }
             this.moveDown();
+            this.doubleCheckPenalty();
         }, INIT_TIME_MS );
 
     }
@@ -102,6 +103,17 @@ class Player {
             for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH; col++) {
                 this.board[this.idRowBorder][col] = [1, colors.border];
             }
+        }
+        this.updateBoard();
+    }
+
+    doubleCheckPenalty() {
+        if (this.idRowBorder === 3) {
+            this.gameOver();
+            return;
+        }
+        for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH; col++) {
+            this.board[this.idRowBorder][col] = [1, colors.border];
         }
         this.updateBoard();
     }
@@ -358,7 +370,7 @@ class Player {
     giveUp() {
         console.log(`Gave up`);
         const rank = this.game.rank;
-        this.actualScore += this.game.giveScore(rank);
+        this.isPlaying = false;
         this.game.playerGiveUp(this);
 		return {rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores };
     }

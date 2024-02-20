@@ -42,14 +42,18 @@ class Game {
 
     startGame() {
         if (this.players.length === 0) throw new Error('No player in the game');
-        this.calculateScores();
-        this.gameIsRunning = true;
-        console.log("Scores : ", this.scores);
-        for (let i = 0 ; i < this.players.length ; i++) {
-            this.players[i].listOfPieces = this.listOfPieces;
-            this.players[i].isPlaying = true;
-            this.players[i].game = this;
-            this.players[i].startGame();
+        else {
+            this.calculateScores();
+            this.gameIsRunning = true;
+            this.rank = this.players.length;
+            console.log("Scores : ", this.scores);
+            for (let i = 0 ; i < this.players.length ; i++) {
+                this.alivePlayers.push(this.players[i]);
+                this.players[i].listOfPieces = this.listOfPieces;
+                this.players[i].isPlaying = true;
+                this.players[i].game = this;
+                this.players[i].startGame();
+            }
         }
     }
 
@@ -59,10 +63,6 @@ class Game {
         this.rank = 0;
         this.scores = {};
         this.alivePlayers = [/*gameMaster*/];
-        for (let i = 0 ; i < this.players.length ; i++) {
-            this.alivePlayers.push(this.players[i]);
-            this.rank++;
-        }
     }
 
     addPlayer(player, callback) {
@@ -71,8 +71,6 @@ class Game {
         if (typeof player !== typeof(Player)) throw new Error('Player must be an object Player');
         } else {
             this.players.push(player);
-            this.alivePlayers.push(player);
-            this.rank++;
             callback({code: 0});
         }
     }
@@ -127,9 +125,7 @@ class Game {
     }
 
     playerGiveUp(player) {
-        if (player.isPlaying === true) {
-            this.rank--;
-        }
+        this.rank--;
         console.log(`Player ${player.playerName} gave up from game ${this.gameName}`);
         this.playerFinishedGame(player);
     }
@@ -143,13 +139,12 @@ class Game {
             console.log("resultat " + database[player.playerName].allTimeScores);
 
             this.server.writeDatabase(database);
-
-            const leftPlayers = this.alivePlayers.filter(p => p.playerName !== player.playerName);
-            this.alivePlayers = leftPlayers;
-
-            player.resetPlayer();
-            this.checkIfSomeoneIsAlive();
         }
+        const leftPlayers = this.alivePlayers.filter(p => p.playerName !== player.playerName);
+        this.alivePlayers = leftPlayers;
+
+        player.resetPlayer();
+        this.checkIfSomeoneIsAlive();
 
     }
 
@@ -157,12 +152,8 @@ class Game {
         console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
         player.resetPlayer();
 
-        this.rank--;
-        const leftAlivePlayers = this.alivePlayers.filter(p => p.playerName !== player.playerName);
         const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
         this.players = leftPlayers;
-        this.alivePlayers = leftAlivePlayers;
-        this.checkIfSomeoneIsAlive();
     }
 
     checkIfSomeoneIsAlive() {
@@ -184,7 +175,8 @@ class Game {
     }
 
     winner() {
-		let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0].playerName)[0];
+        let playerWinner = this.alivePlayers[0];
+		// let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0].playerName)[0];
         playerWinner.winner();
 		for (let i = 0 ; i < this.players.length ; i++) {
             this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore});

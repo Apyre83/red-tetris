@@ -127,7 +127,7 @@ class Server {
 
                 for (const game of this.games) {
                     if (game.gameName === data.gameName) { callback({...data, code: 1, error: "Game already exists"}); return; }
-                    if (game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Can't create game : Player already in a game"}); return; }
+                    if (game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Can't create game : Player already in this game"}); return; }
                 }
                 const newGame = new Game(this, data.gameName);
                 this.games.push(newGame);
