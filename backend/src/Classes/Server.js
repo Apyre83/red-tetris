@@ -144,6 +144,8 @@ class Server {
                 const _player = this.players.find(player => player.playerName === data.playerName);
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
 
+                console.log("ADD PLAYER: ", _player.playerName, _player.socket.id);
+
                 _game.addPlayer(_player, (callback_add) => {
                     if (callback_add.code === 1) {
                         console.log(`Error game running cannot join`);
@@ -159,6 +161,13 @@ class Server {
                 const _game = this.games.find(game => game.gameName === data.gameName);
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
                 if (!_game.hasPlayer(data.playerName)) { callback({...data, code: 2, error: "Player not in the game"}); return; }
+
+                console.log("--------------");
+                for (const player of _game.players) {
+                    console.log(`PLAYER ${player.playerName} --> ${player.socket.id}`);
+                }
+                console.log(data);
+                console.log(" ");
 
                 for (const player of _game.players) {
                     console.log(`PLAYER ${player.playerName} --> ${player.socket.id}`);

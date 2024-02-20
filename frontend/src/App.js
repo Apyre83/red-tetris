@@ -18,8 +18,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/:gameId" element={<GameComponent />} />
-          {/* autres routes */}
+          <Route path="/:idRoom" element={<GameComponent />} />
         </Routes>
       </Router>
   );

@@ -66,10 +66,14 @@ class Game {
     }
 
     addPlayer(player, callback) {
+        console.log("Adding player to game " + this.gameName);
+        console.log("typeof player : " + typeof(player));
+
         if (this.gameIsRunning) {
             callback({code: 1, error: "Game is already running"});
-        if (typeof player !== typeof(Player)) throw new Error('Player must be an object Player');
-        } else {
+            // if (typeof(player) !== typeof(Player)) throw new Error('Player must be an object Player');
+        }
+        else {
             this.players.push(player);
             callback({code: 0});
         }

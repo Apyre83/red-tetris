@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import './Modal.css';
 import { useSelector, useDispatch } from "react-redux";
 
-
 const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -12,14 +11,12 @@ const LoginForm = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        socket.emit('LOGIN', {
-            username,
-            password
-        }, (data) => {
+        socket.emit('LOGIN', { username, password }, (data) => {
             if (data.code !== 0) {
                 setError(data.error || 'Error while logging in, please try again.');
                 return;
             }
+            console.log("LOGIN_SUCCESS", data);
             dispatch({ type: "LOGIN_SUCCESS", payload: data.username });
         });
     };

@@ -3,24 +3,30 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import './GameComponent.css';
 import TetrisGame from './TetrisGame';
+import LoginForm from "./LoginForm";
+import SignUpForm from "./SignUpForm";
+import Modal from "./Modal";
 
 function getGameNameFromHash() {
     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
     return match ? match[1] : null;
 }
 
-function getPlayerNameFromHash() {
-    const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
-    return match ? match[2] : null;
-}
+// function getPlayerNameFromHash() {
+//     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
+//     return match ? match[2] : null;
+// }
 
 function GameComponent() {
     const socket = useSelector(state => state.socket.socket);
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
     const navigate = useNavigate();
 
+    const user = useSelector(state => state.auth);
+
+    const playerName = user.isAuthenticated ? user.user : '';
     const gameName = getGameNameFromHash();
-    const playerName = getPlayerNameFromHash();
+
 
     const [isCreator, setIsCreator] = useState(false);
     const [players, setPlayers] = useState([]);
@@ -29,6 +35,7 @@ function GameComponent() {
     const [gameIsPlaying, setGameIsPlaying] = useState(false);
     const [responseMessage, setResponseMessage] = useState('');
 
+    const [showLogin, setShowLogin] = useState(true);
     const [score, setScore] = useState(0);
 
     const [leftPlayerName, setLeftPlayerName] = useState('');
@@ -37,14 +44,16 @@ function GameComponent() {
 
 	const [isAlive, setIsAlive] = useState(false);
 
+
     useEffect(() => {
+        console.log('GameComponent useEffect', { socket, gameName, playerName, isAuthenticated });
         if (!socket) { console.error('Socket not connected'); return; }
-        if (!isAuthenticated) { navigate('/'); }
+        if (!isAuthenticated) { return;}
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
             console.log("GET_SCORE", data);
             if (data.code !== 0) {
-                console.error('Error while getting score', data.error);
+                console.error('Error while getting score: ', data.error);
             }
             else setScore(data.score);
         });
@@ -69,7 +78,7 @@ function GameComponent() {
         
         socket.on('USER_JOIN_GAME', (data) => {
             console.log('USER_JOIN_GAME', data);
-            setPlayers(prev => [...prev, data.playerName]);
+            setPlayers(data.players);
 			setIsCreator(data.creator === playerName);
         });
 
@@ -111,14 +120,26 @@ function GameComponent() {
             });
 		});
 
-
-
         socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
-            if (data.code !== 0) { console.error(data.error); navigate('/'); return; }
+            if (data.code !== 0) {
+                if (data.code !== 2) { navigate('/'); return; }
 
-            setIsCreator(data.creator === playerName);
-            setPlayers(data.players);
+                socket.emit('JOIN_GAME', { gameName: gameName, playerName: playerName }, (data) => {
+                    console.log("JOIN_GAME_ZEBI", data);
+                    if (data.code !== 0) { navigate('/'); return; }
+                    window.location.href = `#${data.gameName}[${data.playerName}]`;
+
+                    socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
+                        if (data.code !== 0) { console.error(data.error); return; }
+                        setIsCreator(data.creator === playerName);
+                        setPlayers(data.players);
+                    });
+
+                });
+            }
+            else { setIsCreator(data.creator === playerName); setPlayers(data.players); }
         });
+
         return () => {
             window.removeEventListener("beforeunload", handleLeavePage);
             socket.off('PLAYER_WINNER');
@@ -166,6 +187,24 @@ function GameComponent() {
             setResponseMessage('');
         });
     };
+
+    if (!isAuthenticated) {
+        return (
+        <Modal>
+            {showLogin ? (
+                <>
+                    <LoginForm/>
+                    <button onClick={() => setShowLogin(false)} className="modal-button">Register</button>
+                </>
+            ) : (
+                <>
+                    <SignUpForm />
+                    <button onClick={() => setShowLogin(true)} className="modal-button">Login</button>
+                </>
+            )}
+        </Modal>
+        );
+    }
 
     return (
         <>

@@ -108,7 +108,7 @@ function Home() {
                 <Modal>
                     {showLogin ? (
                         <>
-                            <LoginForm />
+                            <LoginForm/>
                             <button onClick={() => setShowLogin(false)} className="modal-button">Register</button>
                         </>
                     ) : (
