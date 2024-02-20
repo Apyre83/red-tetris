@@ -27,8 +27,9 @@ const SignUpForm = ( {setShowLogin} ) => {
                 <h1>Welcome to tetris</h1>
                 {error && <div className="error-message">{error}</div>}
                 <div>
-                    <label>Username</label>
+                    <label htmlFor="username">Username</label>
                     <input
+                        id="username"
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
@@ -38,8 +39,9 @@ const SignUpForm = ( {setShowLogin} ) => {
                     />
                 </div>
                 <div>
-                    <label>Email</label>
+                    <label htmlFor="email">Email</label>
                     <input
+                        id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -48,8 +50,9 @@ const SignUpForm = ( {setShowLogin} ) => {
                     />
                 </div>
                 <div>
-                    <label>Password</label>
+                    <label htmlFor="password">Password</label>
                     <input
+                        id="password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
