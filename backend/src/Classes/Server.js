@@ -27,7 +27,6 @@ class Server {
 
     start() {
         this.configureApp();
-        this.handleRoutes();
         this.handleSocketConnections();
         this.server.listen(this.port, () => {
             console.log(`server running at http://localhost:${this.port}`);
@@ -37,12 +36,6 @@ class Server {
     configureApp() {
         this.app.use(express.json());
         this.app.use(express.static(path.join(__dirname, 'public')));
-    }
-
-    handleRoutes() {
-        this.app.get('/', (req, res) => {
-            res.status(200).sendFile(path.resolve(__dirname, './index.html'));
-        });
     }
 
     handleSocketConnections() {
