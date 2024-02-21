@@ -47,8 +47,24 @@ const store = mockStore({
 });
 
 describe('TetrisGame Component', () => {
+    beforeEach(() => {
+        // Réinitialisation des mocks avant chaque test
+        mockSocket.on.mockClear();
+        mockSocket.emit.mockClear();
+        mockSocket.off.mockClear();
+    });
+
+    it('renders TetrisGame component', () => {
+        render(
+            <Provider store={store}>
+                <TetrisGame handlerGiveUp={() => {}} leftPlayerName="PlayerLeft" rightPlayerName="PlayerRight" />
+            </Provider>
+        );
+
+        expect(screen.getByText('GIVE UP')).toBeInTheDocument();
+    });
+
     it('updates the game board on UPDATE_BOARD event', async () => {
-        // Rendu du composant avec le Provider et le store mock
         await act(async () => {
             render(
                 <Provider store={store}>
@@ -57,25 +73,54 @@ describe('TetrisGame Component', () => {
             );
         });
 
-        // Simuler directement la réception de l'événement 'UPDATE_BOARD'
-        const boardUpdateData = { board: facticeUpdateBoard };
-        mockSocket.on.mock.calls.forEach(call => {
-            if (call[0] === 'UPDATE_BOARD') {
-                call[1](boardUpdateData); // Invocation du callback avec les données de mise à jour du tableau
-            }
+        await act(async () => {
+            mockSocket.on.mock.calls.forEach(([eventName, callback]) => {
+                if (eventName === 'UPDATE_BOARD') {
+                    callback({ board: facticeUpdateBoard });
+                }
+            });
+        });
+        expect(screen.getByTestId('main-grid-cell-5-5')).toHaveStyle(`backgroundColor: #2bace2`);
+    });
+
+    it('emits correct movement on key press', async () => {
+        await act(async () => {
+            render(
+                <Provider store={store}>
+                    <TetrisGame handlerGiveUp={() => {}} leftPlayerName="PlayerLeft" rightPlayerName="PlayerRight" />
+                </Provider>
+            );
         });
 
-        // Insérez ici la vérification attendue après la mise à jour du tableau
-        // Par exemple, vérifier qu'un élément du DOM a été mis à jour avec les nouvelles données du tableau
+        const keyPresses = [
+            { key: 'ArrowLeft', movement: 'moveLeft' },
+            { key: 'ArrowRight', movement: 'moveRight' },
+            { key: 'ArrowDown', movement: 'moveDown' },
+            { key: ' ', movement: 'directBottom' },
+            { key: 'q', movement: 'rotateLeft' },
+            { key: 'e', movement: 'rotateRight' }
+        ];
+
+        for (const { key, movement } of keyPresses) {
+            fireEvent.keyDown(window, { key });
+            expect(mockSocket.emit).toHaveBeenCalledWith('MOVEMENT',
+                expect.objectContaining({ movement: movement }),
+                expect.any(Function)
+            );
+            mockSocket.emit.mockClear();
+        }
+    });
+
+    it('handles give up action correctly', async () => {
+        const handlerGiveUp = jest.fn();
+
+        await act(async () => {
+            render(
+                <Provider store={store}>
+                    <TetrisGame handlerGiveUp={handlerGiveUp} leftPlayerName="PlayerLeft"
+                                rightPlayerName="PlayerRight"/>
+                </Provider>
+            );
+        });
     });
 });
-
-    // it('renders TetrisGame component', () => {
-    //     render(
-    //         <Provider store={store}>
-    //             <TetrisGame handlerGiveUp={() => {}} leftPlayerName="PlayerLeft" rightPlayerName="PlayerRight" />
-    //         </Provider>
-    //     );
-    //
-    //     expect(screen.getByText('GIVE UP')).toBeInTheDocument();
-    // });
