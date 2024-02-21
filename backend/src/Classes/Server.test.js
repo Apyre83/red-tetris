@@ -81,17 +81,18 @@ describe('Server', () => {
     });
 
     test('LOGOUT event should clear username for the disconnected player', (done) => {
-        jest.spyOn(server, 'readDatabase').mockReturnValue({
-            'testUser2': { password: 'testPassword' }
+        const testSocketId = clientSocket.id;
+        const testUsername = 'testUser2';
+        server.players.push({ socket: { id: testSocketId }, playerName: testUsername });
+    
+        expect(server.players.some(player => player.playerName === testUsername)).toBe(true);
+    
+        clientSocket.emit('LOGOUT', {}, () => {
+            const player = server.players.find(player => player.socket.id === testSocketId);
+            expect(player.playerName).toBe('');
+            done();
         });
 
-        clientSocket.emit('LOGIN', { username: 'testUser2', password: 'testPassword' }, (response) => {
-            expect(response.code).toBe(0);
-
-            const player = server.players.find(player => player.socket.id === clientSocket.id);
-            expect(player.playerName).toBe('testUser2');
-        });
-        
-        done();
     });
+    
 });
