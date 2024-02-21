@@ -197,6 +197,56 @@ describe('Server', () => {
         });
     });
     
+    test('ASK_INFORMATIONS_GAME_PAGE event should return game details for a player in the game', (done) => {
+        const gameName = 'ExistingGame';
+        const playerName = 'PlayerInGame';
+    
+        const newGame = new Game(server, gameName);
+        server.games.push(newGame);
+    
+        const newPlayer = new Player(clientSocket, playerName, {});
+        server.players.push(newPlayer);
+        newGame.addPlayer(newPlayer, () => {});
+    
+        jest.spyOn(newGame, 'getNames').mockReturnValue([playerName]);
+    
+        clientSocket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, response => {
+            expect(response.code).toBe(0);
+            expect(response.players).toContain(playerName);
+            expect(response.creator).toBe(playerName); 
+    
+            done();
+        });
+    });
+
+    test('START_GAME event should start the game if initiated by the creator', done => {
+        const gameName = 'GameToStart';
+        const creatorName = 'CreatorPlayer';
+    
+        const newGame = new Game(server, gameName);
+        server.games.push(newGame);
+
+        const creatorPlayer = new Player(clientSocket, creatorName, {});        server.players.push(creatorPlayer);
+        newGame.addPlayer(creatorPlayer, () => {});
+
+        jest.spyOn(newGame, 'startGame').mockImplementation(() => {
+            newGame.gameIsRunning = true; 
+        });
+    
+        // faire un seul client !
+        clientSocket.emit('START_GAME', { gameName: gameName, playerName: creatorName }, (response) => {
+            expect(game.players.length).toBe(1);
+            
+            // expect(response.code).toBe(0);
+        //     expect(newGame.gameIsRunning).toBe(true);
+        //     expect(newGame.startGame).toHaveBeenCalled();
+    
+            done();
+        });
+        done();
+    });
+    
+    
 
     
 });

@@ -37,7 +37,9 @@ class Player {
                 clearInterval(interval);
             }
             this.moveDown();
-            this.doubleCheckPenalty();
+            if (this.isPlaying === true) {
+                this.doubleCheckPenalty();
+            }
         }, INIT_TIME_MS );
 
     }
