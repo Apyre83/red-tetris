@@ -193,6 +193,7 @@ class Server {
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
                 if (_player.isPlaying === false) { callback({...data, code: 4, error: "Player not playing"}); return;}
                 _player[data.movement]();
+                callback({...data, code: 0});
             })
 
             socket.on('PLAYER_LEAVE_ROOM', (data, callback) => {

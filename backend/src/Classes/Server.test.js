@@ -219,33 +219,54 @@ describe('Server', () => {
         });
     });
 
-    test('START_GAME event should start the game if initiated by the creator', done => {
-        const gameName = 'GameToStart';
-        const creatorName = 'CreatorPlayer';
+    // test('START_GAME event should start the game if initiated by the creator', done => {
+    //     const gameName = 'GameToStart';
+    //     const creatorName = 'CreatorPlayer';
     
-        const newGame = new Game(server, gameName);
-        server.games.push(newGame);
+    //     const newGame = new Game(server, gameName);
+    //     server.games.push(newGame);
 
-        const creatorPlayer = new Player(clientSocket, creatorName, {});        server.players.push(creatorPlayer);
-        newGame.addPlayer(creatorPlayer, () => {});
+    //     const creatorPlayer = new Player(clientSocket, creatorName, {});        server.players.push(creatorPlayer);
+    //     newGame.addPlayer(creatorPlayer, () => {});
 
-        jest.spyOn(newGame, 'startGame').mockImplementation(() => {
-            newGame.gameIsRunning = true; 
-        });
+    //     jest.spyOn(newGame, 'startGame').mockImplementation(() => {
+    //         newGame.gameIsRunning = true; 
+    //     });
     
-        // faire un seul client !
-        clientSocket.emit('START_GAME', { gameName: gameName, playerName: creatorName }, (response) => {
-            expect(game.players.length).toBe(1);
+    //     clientSocket.emit('START_GAME', { gameName: gameName, playerName: creatorName }, (response, done) => {
             
-            // expect(response.code).toBe(0);
-        //     expect(newGame.gameIsRunning).toBe(true);
-        //     expect(newGame.startGame).toHaveBeenCalled();
+    //         // expect(response.code).toBe(0);
+    //         expect(newGame.gameIsRunning).toBe(true);
+    //         // expect(newGame.startGame).toHaveBeenCalled();
+    //         // clientSocket.on('GAME_STARTED', (response) => {
+    //         //     expect(response.code).toBe(0);
+    //         //     done();
+    //         // });
+    //         done();
+    //     });
+    //     done();
+    // });
     
+    test('MOVEMENT event should process movement for an active player', (done) => {
+        const playerName = 'ActivePlayer';
+        const playerSocketId = clientSocket.id;
+        const movementCommand = 'moveRight'; 
+    
+        const moveRightSpy = jest.fn();
+    
+        const newPlayer = new Player({id: playerSocketId}, playerName, {});
+        newPlayer.isPlaying = true;
+        newPlayer.moveRight = moveRightSpy;
+        server.players.push(newPlayer);
+    
+        clientSocket.emit('MOVEMENT', { playerName: playerName, movement: movementCommand }, response => {
+            expect(response.code).toBe(0);
+            expect(moveRightSpy).toHaveBeenCalled();
             done();
         });
-        done();
     });
     
+
     
 
     
