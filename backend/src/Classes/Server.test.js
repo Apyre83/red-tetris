@@ -1,31 +1,97 @@
-const request = require('supertest');
 const Server = require('./Server');
+const ioClient = require('socket.io-client');
+const Player = require('./Player');
+const e = require('express');
 
 describe('Server', () => {
-    let server_test;
+    let server;
+    const port = 8080;
+    let clientSocket;
 
-    beforeEach(() => {
-        server_test = new Server(8080);
+    beforeAll((done) => {
+        server = new Server(port);
+        server.start();
+        done();
     });
 
-    afterEach(async () => {
-        await server_test.server.close();
+    afterAll((done) => {
+        server.server.close();
+        done();
     });
 
-    test('server constructor', () => {
-        expect(server_test).toBeInstanceOf(Server);
+    beforeEach((done) => {
+        clientSocket = ioClient(`http://localhost:${port}`, {
+            transports: ['websocket'],
+            'force new connection': true
+        });
+        clientSocket.on('connect', done);
     });
 
-    test('start() should launch the server', () => {
-        const configureAppSpy = jest.spyOn(server_test, 'configureApp');
-        const handleSocketConnectionsSpy = jest.spyOn(server_test, 'handleSocketConnections');  
+    afterEach((done) => {
+        if (clientSocket.connected) {
+            clientSocket.disconnect();
+        }
+        jest.restoreAllMocks();
+        done();
+    });
 
-        server_test.start();
+    test('should handle disconnect event', (done) => {
+        const playersBefore = server.players.length;
 
-        expect(configureAppSpy).toHaveBeenCalledTimes(1);
-        expect(handleSocketConnectionsSpy).toHaveBeenCalledTimes(1);
+        clientSocket.on('disconnect', () => {
+        });
 
-        configureAppSpy.mockRestore();
-        handleSocketConnectionsSpy.mockRestore();
+        clientSocket.disconnect();
+
+        setTimeout(() => {
+            expect(server.players.length).toBe(playersBefore - 1);
+            done();
+        }, 100);
+    });
+
+    test('LOGIN event with valid credentials should succeed', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({
+            'testUser': { password: 'testPassword' }
+        });
+
+        clientSocket.emit('LOGIN', { username: 'testUser', password: 'testPassword' }, (response) => {
+            expect(response.code).toBe(0);
+            done();
+        });
+    });
+
+    test('LOGIN event with incorrect password should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({
+            'testUser': { password: 'testPassword' }
+        });
+
+        clientSocket.emit('LOGIN', { username: 'testUser', password: 'wrongPassword' }, (response) => {
+            expect(response.code).toBe(2);
+            done();
+        });
+    });
+
+    test('LOGIN event with non-existing username should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({});
+
+        clientSocket.emit('LOGIN', { username: 'nonExistingUser', password: 'testPassword' }, (response) => {
+            expect(response.code).toBe(1);
+            done();
+        });
+    });
+
+    test('LOGOUT event should clear username for the disconnected player', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({
+            'testUser2': { password: 'testPassword' }
+        });
+
+        clientSocket.emit('LOGIN', { username: 'testUser2', password: 'testPassword' }, (response) => {
+            expect(response.code).toBe(0);
+
+            const player = server.players.find(player => player.socket.id === clientSocket.id);
+            expect(player.playerName).toBe('testUser2');
+        });
+        
+        done();
     });
 });

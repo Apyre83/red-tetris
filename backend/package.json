@@ -12,7 +12,8 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "./src/**/*.{js,jsx}",
-      "!**/node_modules/**"
+      "!**/node_modules/**",
+      "!./src/constants/*.{js,jsx}"
     ],
     "coverageReporters": [
       "json",
