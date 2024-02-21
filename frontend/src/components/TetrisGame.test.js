@@ -42,7 +42,6 @@ jest.mock('socket.io-client', () => jest.fn(() => mockSocket));
 // Création du store mock avec redux-mock-store
 const mockStore = configureMockStore();
 const store = mockStore({
-    // État initial pour le store
     socket: { socket: mockSocket }
 });
 

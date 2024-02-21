@@ -25,7 +25,6 @@ function Home() {
         if (!socket) { /*console.error('Socket not connected'); */return; }
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
-            console.log("GET_SCORE", data);
             if (data.code !== 0) {
                 console.error('Error while getting score', data.error);
             }
@@ -76,7 +75,7 @@ function Home() {
             return;
         }
         setError('');
-        const uniqueGameName = generateUniqueGameName();
+        const uniqueGameName = Math.random().toString(36).substr(2, 9);
 
         socket.emit('CREATE_GAME',{
             gameName: uniqueGameName,
@@ -90,10 +89,6 @@ function Home() {
             socketJoinGame(uniqueGameName, playerName);
         });
     };
-
-    function generateUniqueGameName() {
-        return Math.random().toString(36).substr(2, 9);
-    }
 
     const onAuthentication = (status) => {
         if (status === false) {
