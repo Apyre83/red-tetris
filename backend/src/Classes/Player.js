@@ -20,11 +20,10 @@ class Player {
         this.game = undefined;
         this.isPlaying = false;
         // this.isPlaying = true; // put on false if not in test
-        this.isDead = false; // TODO est-ce que ce truc est utile?
         this.idRowBorder = ROWS;
         this.idActualPiece = -1;
         this.actualPiece = undefined;
-        this.actualScore = 0; // TODO mettre un systeme de scores
+        this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
     }
@@ -187,6 +186,8 @@ class Player {
         if (this.isPlaying !== false) {
             // TODO pour test unitaire decommenter printBoard et commenter socket.emit
             // this.printBoard(); // TODO suppr
+            let tmpBoard = this.convertBoardForDisplay(this.board);
+            console.log({boardSize: tmpBoard.length, board: tmpBoard, board0: tmpBoard[0]});
             this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
             // this.socket.emit('UPDATE_SPECTRUM', {spectrum: this.convertBoardForDisplay(this.spectrum), name: this.playerName})
             this.game.sendSpectrum(this.playerName, this.convertBoardForDisplay(this.spectrum));

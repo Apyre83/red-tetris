@@ -12,11 +12,6 @@ function getGameNameFromHash() {
     return match ? match[1] : null;
 }
 
-// function getPlayerNameFromHash() {
-//     const match = window.location.hash.match(/#([^[]+)(?:\[(.*?)\])?/);
-//     return match ? match[2] : null;
-// }
-
 function GameComponent() {
     const socket = useSelector(state => state.socket.socket);
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);

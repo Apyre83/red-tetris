@@ -17,14 +17,13 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
     const [rightPlayerGrid, setRightPlayerGrid] = useState(createEmptyGrid());
 
     useEffect(() => {
-        if (!socket) { console.error('Socket not connected'); return; }
+        if (!socket) { return; }
 
         socket.on('UPDATE_BOARD', (data) => {
             setGrid(data.board);
         });
 
         socket.on('UPDATE_SPECTRUM', (data) => {
-            console.log(data);
             if (leftPlayerName === data.playerName) { setLeftPlayerGrid(data.spectrum); }
             else if (rightPlayerName === data.playerName) { setRightPlayerGrid(data.spectrum); }
 
@@ -92,8 +91,9 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
 				{grid.map((row, rowIndex) => (
 					<div key={rowIndex} className="tetris-row">
 						{row.map(([filled, color], cellIndex) => (
-							<div key={cellIndex} className="tetris-cell" style={{ backgroundColor: color }}></div>
-						))}
+                            <div key={cellIndex} data-testid={`main-grid-cell-${rowIndex}-${cellIndex}`}
+                                 className="tetris-cell" style={{backgroundColor: color}}></div>))}
+
 					</div>
 				))}
 			</div>
