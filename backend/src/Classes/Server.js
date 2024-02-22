@@ -206,6 +206,7 @@ class Server {
 				if (!gamePlayer) { callback({...data, code: 2, error: "Player does not exist"}); return; }
 
                 _game.removePlayer(gamePlayer);
+                
                 if (_game.players.length === 0) {
                     this.closeGame(_game.gameName);
                 }

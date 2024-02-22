@@ -258,38 +258,65 @@ describe('Server', () => {
     test('PLAYER_LEAVE_ROOM event should correctly handle a player leaving a room', done => {
         const gameName = 'TestGameForLeave';
         const playerName = 'PlayerLeaving';
-        // const otherPlayerName = 'OtherPlayer';
+        const otherPlayerName = 'OtherPlayer';
     
         const newGame = new Game(server, gameName);
         const leavingPlayer = new Player(clientSocket, playerName, {});
-        // const otherPlayer = new Player(clientSocket, otherPlayerName, {});
+        const otherPlayer = new Player(clientSocket, otherPlayerName, {});
 
         server.games.push(newGame);
         newGame.addPlayer(leavingPlayer, () => {});
-        // newGame.addPlayer(otherPlayer, () => {});
+        newGame.addPlayer(otherPlayer, () => {});
     
-        // clientSocket.on('USER_LEAVE_GAME', (data) => {
-        //     expect(data.playerName).toBe(playerName);
-        //     // expect(data.creator).toBe(otherPlayerName); // Assumer que le deuxième joueur devient le créateur
-        //     done();
-        // });
+        clientSocket.on('USER_LEAVE_GAME', (data) => {
+            expect(data.playerName).toBe(playerName);
+            expect(data.creator).toBe(playerName);
+            expect(data.creator).toBe(otherPlayerName); // Assumer que le deuxième joueur devient le créateur
+            done();
+        });
     
         // Simuler l'événement 'PLAYER_LEAVE_ROOM'
         clientSocket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (response) => {
             expect(response.code).toBe(0);
             done();
-            // Vérifier que le joueur a été retiré du jeu
-            // const _game = server.games.find(game => game.gameName === gameName);
-            // expect(_game.players.find(player => player.playerName === playerName)).toBeUndefined();
+            const _game = server.games.find(game => game.gameName === gameName);
+            expect(_game.players.find(player => player.playerName === playerName)).toBeUndefined();
     
-            // Si le jeu doit être fermé (dans un autre scénario), vérifier que le jeu n'existe plus
-            // if (_game.players.length === 0) {
-            //     expect(server.games.find(game => game.gameName === gameName)).toBeUndefined();
-            // }
         });
     });
     
+    test('PLAYER_LEAVE_ROOM event should close the game is there is not player inside', done => {
+        const gameName = 'TestGameForLeave';
+        const playerName = 'PlayerLeaving';
+    
+        const newGame = new Game(server, gameName);
+        const leavingPlayer = new Player(clientSocket, playerName, {});
 
+        const closeGameSpy = jest.fn();
+        server.closeGame = closeGameSpy;
+
+        server.games.push(newGame);
+        newGame.addPlayer(leavingPlayer, () => {});
+    
+        clientSocket.on('USER_LEAVE_GAME', (data) => {
+            expect(data.playerName).toBe(playerName);
+            expect(data.creator).toBe(playerName);
+            done();
+        });
+    
+        clientSocket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (response) => {
+            expect(response.code).toBe(0);
+            done();
+            const _game = server.games.find(game => game.gameName === gameName);
+            expect(_game.players.find(player => player.playerName === playerName)).toBeUndefined();
+    
+            expect(_game.players.length).toBe(0);
+
+            if (_game.players.length === 0) {
+                expect(closeGameSpy).toHaveBeenCalled();
+            }
+        });
+    });
 
 
 });
