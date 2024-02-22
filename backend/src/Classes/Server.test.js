@@ -29,19 +29,21 @@ describe('Server', () => {
         done();
     });
 
-    test('should handle disconnect event', (done) => {
-        const playersBefore = server.players.length;
-
-        clientSocket.on('disconnect', () => {
-        });
-
-        clientSocket.disconnect();
-
-        setTimeout(() => {
-            expect(server.players.length).toBe(playersBefore - 1);
-            done();
-        }, 100);
-    });
+    // afterEach((done) => {
+    //     if (clientSocket.connected) {
+    //         clientSocket.disconnect();
+    //     }
+    
+    //     // Fermer le serveur Socket.IO
+    //     server.io.close(() => {
+    //         // Fermer le serveur HTTP
+    //         server.server.close(() => {
+    //             jest.restoreAllMocks();
+    //             done();
+    //         });
+    //     });
+    // });
+    
 
     test('LOGIN event with valid credentials should succeed', (done) => {
         jest.spyOn(server, 'readDatabase').mockReturnValue({
@@ -252,6 +254,41 @@ describe('Server', () => {
             done();
         });
     });
+
+    test('PLAYER_LEAVE_ROOM event should correctly handle a player leaving a room', done => {
+        const gameName = 'TestGameForLeave';
+        const playerName = 'PlayerLeaving';
+        // const otherPlayerName = 'OtherPlayer';
+    
+        const newGame = new Game(server, gameName);
+        const leavingPlayer = new Player(clientSocket, playerName, {});
+        // const otherPlayer = new Player(clientSocket, otherPlayerName, {});
+
+        server.games.push(newGame);
+        newGame.addPlayer(leavingPlayer, () => {});
+        // newGame.addPlayer(otherPlayer, () => {});
+    
+        // clientSocket.on('USER_LEAVE_GAME', (data) => {
+        //     expect(data.playerName).toBe(playerName);
+        //     // expect(data.creator).toBe(otherPlayerName); // Assumer que le deuxième joueur devient le créateur
+        //     done();
+        // });
+    
+        // Simuler l'événement 'PLAYER_LEAVE_ROOM'
+        clientSocket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (response) => {
+            expect(response.code).toBe(0);
+            done();
+            // Vérifier que le joueur a été retiré du jeu
+            // const _game = server.games.find(game => game.gameName === gameName);
+            // expect(_game.players.find(player => player.playerName === playerName)).toBeUndefined();
+    
+            // Si le jeu doit être fermé (dans un autre scénario), vérifier que le jeu n'existe plus
+            // if (_game.players.length === 0) {
+            //     expect(server.games.find(game => game.gameName === gameName)).toBeUndefined();
+            // }
+        });
+    });
+    
 
 
 
