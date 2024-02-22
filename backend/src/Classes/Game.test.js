@@ -4,6 +4,7 @@ const Player = require('./Player');
 jest.mock('./Player', () => {
     return jest.fn().mockImplementation(() => {
         return {
+            winner: jest.fn(),
             startGame: jest.fn(),
             isPlaying: false,
             listOfPieces: [],
@@ -43,6 +44,29 @@ describe('Game', () => {
         expect(game.rank).toBe(1);
         expect(game.alivePlayers.length).toBe(1);
         expect(playerMock.startGame).toHaveBeenCalled();
+    });
+
+    test('should add player to game if game is not running', () => {
+        let mockCallback;
+        mockCallback = jest.fn();
+        const player = { playerName: 'Riri' };
+        
+        game.addPlayer(player, mockCallback);
+        
+        expect(game.players).toContain(player);
+        expect(mockCallback).toHaveBeenCalledWith({ code: 0 });
+    });
+
+    test('should not add player and return error if game is already running', () => {
+        let mockCallback;
+        mockCallback = jest.fn();
+        const player = { playerName: 'Fifi' }; 
+        game.gameIsRunning = true;
+        
+        game.addPlayer(player, mockCallback);
+        
+        expect(game.players).not.toContain(player);
+        expect(mockCallback).toHaveBeenCalledWith({ code: 1, error: "Game is already running" });
     });
 
     test('should reset the game correctly', () => {
@@ -92,23 +116,23 @@ describe('Game', () => {
     });
 
     test('returns true if player is in the game', () => {
-        game.players = [{ playerName: 'Alice' }, { playerName: 'Bob' }];
-        expect(game.hasPlayer('Alice')).toBe(true);
+        game.players = [{ playerName: 'Riri' }, { playerName: 'Fifi' }];
+        expect(game.hasPlayer('Riri')).toBe(true);
     });
 
     test('returns false if player is not in the game', () => {
-        game.players = [{ playerName: 'Alice' }, { playerName: 'Bob' }];
+        game.players = [{ playerName: 'Riri' }, { playerName: 'Fifi' }];
         expect(game.hasPlayer('Charlie')).toBe(false);
     });
 
     test('returns names of all players', () => {
-        game.players = [{ playerName: 'Alice' }, { playerName: 'Bob' }];
-        expect(game.getNames()).toEqual(['Alice', 'Bob']);
+        game.players = [{ playerName: 'Riri' }, { playerName: 'Fifi' }];
+        expect(game.getNames()).toEqual(['Riri', 'Fifi']);
     });
 
     test('playerGameOver decreases rank and calls playerFinishedGame', () => {
         game.rank = 3;
-        player = { playerName: 'Alice' };
+        player = { playerName: 'Riri' };
         game.playerFinishedGame = jest.fn();
         game.playerGameOver(player);
         expect(game.rank).toBe(2);
@@ -117,7 +141,7 @@ describe('Game', () => {
 
     test('playerGiveUp decreases rank and calls playerFinishedGame', () => {
         game.rank = 3; 
-        player = { playerName: 'Alice' };
+        player = { playerName: 'Riri' };
         game.playerFinishedGame = jest.fn();
         game.playerGiveUp(player);
         expect(game.rank).toBe(2);
@@ -126,11 +150,11 @@ describe('Game', () => {
 
     test('updates player score and modifies alive players list', () => {
         serverMock = {
-            readDatabase: jest.fn().mockReturnValue({ "Alice": { allTimeScores: 0 } }),
+            readDatabase: jest.fn().mockReturnValue({ "Riri": { allTimeScores: 0 } }),
             writeDatabase: jest.fn()
         };
         game = new Game(serverMock, "TestGame");
-        playerMock = { playerName: 'Alice', isPlaying: true, actualScore: 100, resetPlayer: jest.fn() };
+        playerMock = { playerName: 'Riri', isPlaying: true, actualScore: 100, resetPlayer: jest.fn() };
         game.alivePlayers = [playerMock];
         game.checkIfSomeoneIsAlive = jest.fn();
         game.playerFinishedGame(playerMock);
@@ -142,7 +166,7 @@ describe('Game', () => {
     });
 
     test('removes player from game and resets it', () => {
-        playerMock = { playerName: 'Alice', resetPlayer: jest.fn() };
+        playerMock = { playerName: 'Riri', resetPlayer: jest.fn() };
         game.players = [playerMock];
         game.removePlayer(playerMock);
         expect(game.players).toEqual([]);
@@ -154,7 +178,7 @@ describe('Game', () => {
         game = new Game(serverMock, "TestGame");
         game.resetGame = jest.fn();
         game.winner = jest.fn();
-        game.alivePlayers = [{ playerName: 'Alice' }];
+        game.alivePlayers = [{ playerName: 'Riri' }];
         game.checkIfSomeoneIsAlive();
         expect(game.winner).toHaveBeenCalled();
     });
@@ -165,7 +189,7 @@ describe('Game', () => {
         game.resetGame = jest.fn();
         game.winner = jest.fn();
         game.alivePlayers = [];
-        game.players = [{ playerName: 'Alice' }, { playerName: 'Bob' }];
+        game.players = [{ playerName: 'Riri' }, { playerName: 'Fifi' }];
         game.checkIfSomeoneIsAlive();
         expect(game.resetGame).toHaveBeenCalledTimes(2);
     });
@@ -189,6 +213,36 @@ describe('Game', () => {
         game.checkIfSomeoneIsAlive();
         expect(playerMock1.socket.emit).toHaveBeenCalledWith('PLAYER_WINNER');
         expect(playerMock2.socket.emit).toHaveBeenCalledWith('PLAYER_WINNER');
+    });
+
+    test('correctly handles winner', () => {
+        let playerWinnerMock;
+        
+        mockServer = { closeGame: jest.fn(), readDatabase: jest.fn(), writeDatabase: jest.fn() };
+        game = new Game(mockServer, "TestGame");
+        playerWinnerMock = { playerName: 'Winner', actualScore: 100, winner: jest.fn(), socket: { emit: jest.fn() } };
+        playerMock = { playerName: 'Player', socket: { emit: jest.fn() } };
+
+        game.alivePlayers.push(playerWinnerMock);
+        game.players.push(playerWinnerMock, playerMock);
+        game.playerFinishedGame = jest.fn();
+        game.resetGame = jest.fn();
+
+        game.winner();
+        expect(playerWinnerMock.winner).toHaveBeenCalled();
+        expect(playerWinnerMock.socket.emit).toHaveBeenCalledWith('PLAYER_WINNER', expect.objectContaining({
+            playerName: 'Winner',
+            rank: 1,
+            score: 100
+        }));
+        expect(playerMock.socket.emit).toHaveBeenCalledWith('PLAYER_WINNER', expect.objectContaining({
+            playerName: 'Winner',
+            rank: 1,
+            score: 100
+        }));
+
+        expect(game.playerFinishedGame).toHaveBeenCalledWith(playerWinnerMock);
+        expect(game.resetGame).toHaveBeenCalled();
     });
 });
 
