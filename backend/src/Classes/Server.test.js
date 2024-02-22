@@ -1,7 +1,6 @@
 const Server = require('./Server');
 const ioClient = require('socket.io-client');
 const Player = require('./Player');
-const e = require('express');
 const Game = require('./Game');
 
 describe('Server', () => {
@@ -318,5 +317,54 @@ describe('Server', () => {
         });
     });
 
+    test('should return error if game does not exist', (done) => {
+        clientSocket.emit('PLAYER_GIVE_UP', { gameName: 'NonExistentGame', playerName: 'TestPlayer' }, (response) => {
+            expect(response.code).toBe(1);
+            expect(response.error).toBe('Game does not exist');
+            done();
+        });
+    });
+
+    test('should return error if player does not exist in the game', (done) => {
+        const gameName = 'TestGameForLeave';
+        const newGame = new Game(server, gameName);
+        const giveUpPlayer = new Player(clientSocket, 'existingPlayer', {});
+        server.games.push(newGame);
+        newGame.addPlayer(giveUpPlayer, () => {});
+        clientSocket.emit('PLAYER_GIVE_UP', { gameName, playerName: 'TestPlayer' }, (response) => {
+            expect(response.code).toBe(2);
+            expect(response.error).toBe('Player does not exist');
+            done();
+        });
+    });
+
+    test('should process give up successfully for an existing player', (done) => {
+        const gameName = 'TestGameForLeave';
+        const newGame = new Game(server, gameName);
+        const giveUpPlayer = new Player(clientSocket, 'existingPlayer', {});
+
+        const giveUpSpy = jest.fn();
+        giveUpPlayer.giveUp = giveUpSpy;
+
+        server.games.push(newGame);
+        newGame.addPlayer(giveUpPlayer, () => {});
+        clientSocket.emit('PLAYER_GIVE_UP', { gameName, playerName: 'existingPlayer' }, (response) => {
+            expect(giveUpSpy).toHaveBeenCalled();
+            expect(response.code).toBe(0);
+            done();
+        });
+    });
+
+    test('should remove the specified game from the list of games', () => {
+        server.games.push(new Game(server, 'TestGame1'));
+        server.games.push(new Game(server, 'TestGame2'));
+
+        const initialGameCount = server.games.length;
+
+        server.closeGame('TestGame1');
+        expect(server.games.find(game => game.gameName === 'TestGame1')).toBeUndefined();
+        expect(server.games.length).toBe(initialGameCount - 1);
+    });
 
 });
+
