@@ -19,8 +19,8 @@ const mockSocket = {
 const initialState = {
     auth: {
         isAuthenticated: false,
-        user: null // ou un mock de user
-    },
+        user: null
+	},
     socket: {
         socket: mockSocket
     }
@@ -120,13 +120,10 @@ describe('Home Component', () => {
             </Provider>
         );
 
-        // Vérifiez que le formulaire de connexion est affiché par défaut
         expect(screen.getByText('Login')).toBeInTheDocument();
 
-        // Simulez le clic pour afficher le formulaire d'inscription
         fireEvent.click(screen.getByText('Register'));
 
-        // Vérifiez que le formulaire d'inscription est maintenant affiché
         expect(screen.getByText('Email')).toBeInTheDocument();
     });
 
@@ -235,7 +232,9 @@ describe('Home Component', () => {
         };
         const store = configureMockStore()(initialState);
 
-        mockSocket.emit('GET_SCORE', { playerName: 'testUser' }, jest.fn());
+        mockSocket.emit('GET_SCORE', { playerName: 'testUser' }, (data) => {
+			expect(data).toEqual({ code: 0, score: 0 });
+		});
 
         await act(async () => {
             render(
