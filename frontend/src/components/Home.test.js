@@ -226,15 +226,18 @@ describe('Home Component', () => {
     });
 
     it('should update score on GET_SCORE event from socket', async () => {
+
+        mockSocket.emit.mockImplementationOnce((event, data, callback) => {
+            if (event === 'GET_SCORE') {
+                callback({ code: 0, score: 15 });
+            }
+        });
+
         const initialState = {
             auth: { isAuthenticated: true, user: 'testUser' },
             socket: { socket: mockSocket }
         };
         const store = configureMockStore()(initialState);
-
-        mockSocket.emit('GET_SCORE', { playerName: 'testUser' }, (data) => {
-			expect(data).toEqual({ code: 0, score: 0 });
-		});
 
         await act(async () => {
             render(
@@ -244,8 +247,12 @@ describe('Home Component', () => {
             );
         });
 
+        mockSocket.emit('GET_SCORE', { playerName: 'testUser' }, (data) => {
+            expect(data).toEqual({ code: 0, score: 15 });
+        });
+
         await waitFor(() => {
-            expect(screen.getByText('Score: 0')).toBeInTheDocument();
+            expect(screen.getByText('Score: 15')).toBeInTheDocument();
         });
     });
 
@@ -322,20 +329,24 @@ describe('Home Component', () => {
 
     it('should redirect on successful game join', async () => {
         delete window.location;
-        window.location = { href: '' };
+        window.location = { href: '', assign: jest.fn() };
+
+        const tmpMockSocket = {
+            emit: jest.fn( (event, data, callback) => {
+                if (event === 'JOIN_GAME') {
+                    callback({ code: 0, gameName: 'testGame', playerName: 'testUser' });
+                }
+            }),
+            on: jest.fn(),
+            off: jest.fn()
+        };
 
         const modifiedState = {
             ...initialState,
-            auth: { ...authInitialState, isAuthenticated: true, user: 'testUser' }
+            auth: { ...authInitialState, isAuthenticated: true, user: 'testUser' },
+            socket: { socket: tmpMockSocket }
         };
         store = mockStore(modifiedState);
-
-        mockSocket.emit.mockImplementationOnce((event, data, callback) => {
-            console.log(event, data, callback);
-            if (event === 'JOIN_GAME') {
-                callback({ code: 0 });
-            }
-        });
 
         render(
             <Provider store={store}>
@@ -343,11 +354,16 @@ describe('Home Component', () => {
             </Provider>
         );
 
-        fireEvent.change(screen.getByPlaceholderText('Game name'), { target: { value: 'testGame' } });
+        const gameInput = screen.getByPlaceholderText('Game name');
+        fireEvent.change(gameInput, { target: { value: 'testGame' } });
         fireEvent.click(screen.getByText('Join'));
 
         await waitFor(() => {
-            expect(window.location.href).toContain('#testGame');
+            expect(tmpMockSocket.emit).toHaveBeenCalledWith('JOIN_GAME', { gameName: 'testGame', playerName: 'testUser' }, expect.any(Function));
+        });
+
+        await waitFor(() => {
+            expect(window.location.href).toContain('testGame');
         });
     });
 });

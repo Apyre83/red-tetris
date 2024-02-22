@@ -22,7 +22,7 @@ function Home() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!socket) { /*console.error('Socket not connected'); */return; }
+        if (!socket) { return; }
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
             if (data.code !== 0) {
@@ -36,28 +36,24 @@ function Home() {
     }, [socket, playerName]);
 
     const socketJoinGame = (gameName, playerName, callback) => {
-        socket.emit('JOIN_GAME', {
-            gameName: gameName,
-            playerName: playerName
-        }, (data) => {
-            console.log("JOIN_GAME", data);
+        socket.emit('JOIN_GAME', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) {
                 setError(data.error);
                 return;
             }
-            console.log("Game joined successfully: ", data);
             window.location.href = `#${data.gameName}[${data.playerName}]`;
         });
     }
 
     const handleJoinGame = (e) => {
-        if (!socket) { console.error('Socket not connected'); return; }
+        if (!socket) { return; }
 
         e.preventDefault();
         if (!playerName) {
             setError('Please enter a room name.');
             return;
         }
+
         if (!game) {
             setError('Please enter a valid room name.');
             return;
@@ -67,7 +63,7 @@ function Home() {
     };
 
     const handleCreateGame = (e) => {
-        if (!socket) { console.error('Socket not connected'); return; }
+        if (!socket) { return; }
 
         e.preventDefault();
         if (!playerName) {

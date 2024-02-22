@@ -41,21 +41,17 @@ function GameComponent() {
 
 
     useEffect(() => {
-        console.log('GameComponent useEffect', { socket, gameName, playerName, isAuthenticated });
-        if (!socket) { console.error('Socket not connected'); return; }
+        if (!socket) { return; }
         if (!isAuthenticated) { return;}
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
-            console.log("GET_SCORE", data);
-            if (data.code !== 0) {
-                console.error('Error while getting score: ', data.error);
-            }
+            if (data.code !== 0) {}
             else setScore(data.score);
         });
 
         const handleLeavePage = (event) => {
-            if (!isAuthenticated) { console.error('Not authenticated'); return; }
-            if (!socket) { console.error('Socket not connected'); return; }
+            if (!isAuthenticated) { return; }
+            if (!socket) { return; }
 
             event.preventDefault();
 			event.returnValue = '';
@@ -66,19 +62,16 @@ function GameComponent() {
         window.addEventListener("beforeunload", handleLeavePage);
 
         socket.on('USER_LEAVE_GAME', (data) => {
-            console.log('USER_LEAVE_GAME', data);
             setPlayers(prev => prev.filter(player => player !== data.playerName));
             setIsCreator(data.creator === playerName);
         });
         
         socket.on('USER_JOIN_GAME', (data) => {
-            console.log('USER_JOIN_GAME', data);
             setPlayers(data.players);
 			setIsCreator(data.creator === playerName);
         });
 
         socket.on('GAME_STARTED', (data) => {
-            console.log('GAME_STARTED', data);
             setLeftPlayerName(data.leftPlayerName);
             setRightPlayerName(data.rightPlayerName);
             setGameIsPlaying(true);
@@ -86,7 +79,6 @@ function GameComponent() {
         });
 
 		socket.on('PLAYER_GAME_OVER', (data) => {
-			console.log('PLAYER_GAME_OVER', data);
             if (data.playerName === playerName) {
                 setPlayerScore(data.score);
                 setPlayerRank(data.rank);
@@ -95,7 +87,6 @@ function GameComponent() {
         });
 
 		socket.on('PLAYER_WINNER', (data) => {
-			console.log('PLAYER_WINNER', data);
 			if (!data) { /* Game was played alone */
 			}
 
@@ -107,10 +98,7 @@ function GameComponent() {
 			setGameIsPlaying(false);
 
             socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
-                console.log("GET_SCORE", data);
-                if (data.code !== 0) {
-                    console.error('Error while getting score', data.error);
-                }
+                if (data.code !== 0) {}
                 else setScore(data.score);
             });
 		});
@@ -120,7 +108,6 @@ function GameComponent() {
                 if (data.code !== 2) { navigate('/'); return; }
 
                 socket.emit('JOIN_GAME', { gameName: gameName, playerName: playerName }, (data) => {
-                    console.log("JOIN_GAME_ZEBI", data);
                     if (data.code !== 0) { navigate('/'); return; }
                     window.location.href = `#${data.gameName}[${data.playerName}]`;
 
@@ -146,23 +133,21 @@ function GameComponent() {
     }, [socket, gameName, playerName, isAuthenticated, navigate, isCreator]);
 
     const handleGoHome = () => {
-		if (!isAuthenticated) { console.error('Not authenticated'); return; }
-		if (!socket) { console.error('Socket not connected'); return; }
+		if (!isAuthenticated) { return; }
+		if (!socket) { return; }
 
-		console.log('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName });
 		socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
-			if (data.code !== 0) { console.error(data.error); return; }
+			if (data.code !== 0) { return; }
 		});
         navigate('/');
     };
 
 	const handleGiveUp = () => {
-		if (!isAuthenticated) { console.error('Not authenticated'); return; }
-		if (!socket) { console.error('Socket not connected'); return; }
+		if (!isAuthenticated) { return; }
+		if (!socket) { return; }
 
 		socket.emit('PLAYER_GIVE_UP', { gameName: gameName, playerName: playerName }, (data) => {
-			if (data.code !== 0) { console.error(data.error); return; }
-			console.log('PLAYER_GIVE_UP', data);
+			if (data.code !== 0) { return; }
 			setIsAlive(false);
 			setPlayerScore(data.score);
 			setPlayerRank(data.rank);
@@ -170,9 +155,9 @@ function GameComponent() {
 	};
 
     const handleStartGame = () => {
-        if (!isAuthenticated) { console.error('Not authenticated'); return; }
-        if (!socket) { console.error('Socket not connected'); return; }
-        if (!isCreator) { console.error('Not creator'); return; }
+        if (!isAuthenticated) { return; }
+        if (!socket) { return; }
+        if (!isCreator) { }
 
         socket.emit('START_GAME', { gameName, playerName }, (data) => {
             if (data.code !== 0) {
