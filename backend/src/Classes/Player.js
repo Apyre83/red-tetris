@@ -222,6 +222,7 @@ class Player {
             }
         }
         this.spectrum = spectrum;
+        console.log(this.spectrum);
     }
 
     moveLeft() {
