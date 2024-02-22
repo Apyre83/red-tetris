@@ -53,6 +53,7 @@ describe('Server', () => {
             expect(response.code).toBe(0);
             done();
         });
+
     });
 
     test('LOGIN event with incorrect password should fail', (done) => {
@@ -71,6 +72,39 @@ describe('Server', () => {
 
         clientSocket.emit('LOGIN', { username: 'nonExistingUser', password: 'testPassword' }, (response) => {
             expect(response.code).toBe(1);
+            done();
+        });
+    });
+
+    test('LOGIN event with empty username should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({});
+
+        clientSocket.emit('LOGIN', { username: '', password: 'testPassword' }, (response) => {
+            expect(response.code).toBe(1);
+            done();
+        });
+    });
+
+    test('LOGIN event with empty password should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({});
+
+        clientSocket.emit('LOGIN', { username: 'validUsername', password: '' }, (response) => {
+            expect(response.code).toBe(2);
+            done();
+        });
+    });
+
+    test('LOGIN event when already connected should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({
+            'validUsername': { password: 'validPassword' }
+        });
+
+        clientSocket.emit('LOGIN', { username: 'validUsername', password: 'validPassword' }, (response) => {
+            expect(response.code).toBe(0);
+        });
+
+        clientSocket.emit('LOGIN', { username: 'validUsername', password: 'validPassword' }, (response) => {
+            expect(response.code).toBe(3);
             done();
         });
     });

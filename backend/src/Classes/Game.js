@@ -171,7 +171,9 @@ class Game {
             }
 			else {
 				for (let i = 0 ; i < this.players.length ; i++) {
-					this.players[i].socket.emit('PLAYER_WINNER');
+                    if (this.players[i].socket) {
+					    this.players[i].socket.emit('PLAYER_WINNER');
+                    }
 				}
 				this.resetGame();
 			}
