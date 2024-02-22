@@ -9,17 +9,6 @@ describe('Server', () => {
     const port = 8080;
     let clientSocket;
 
-    // beforeAll((done) => {
-    //     server = new Server(port);
-    //     server.start();
-    //     done();
-    // });
-
-    // afterAll((done) => {
-    //     server.server.close();
-    //     done();
-    // });
-
     beforeEach((done) => {
         server = new Server(port);
         server.start();
@@ -223,6 +212,46 @@ describe('Server', () => {
         });
     });
 
+    test('START_GAME event should start the game if initiated by the creator', done => {
+        const gameName = 'GameToStart';
+        const creatorName = 'CreatorPlayer';
+    
+        const newGame = new Game(server, gameName);
+        server.games.push(newGame);
+    
+        const creatorPlayer = new Player(clientSocket, creatorName, {});
+        server.players.push(creatorPlayer);
+        newGame.addPlayer(creatorPlayer, () => {});
+    
+        jest.spyOn(newGame, 'startGame').mockImplementation(() => {
+            newGame.gameIsRunning = true; 
+        });
+    
+        clientSocket.emit('START_GAME', { gameName: gameName, playerName: creatorName }, () => {
+            expect(newGame.gameIsRunning).toBe(true);
+            expect(newGame.startGame).toHaveBeenCalled();            
+            done();
+        });
+    });
+
+    test('MOVEMENT event should process movement for an active player', (done) => {
+        const playerName = 'ActivePlayer';
+        const playerSocketId = clientSocket.id;
+        const movementCommand = 'moveRight'; 
+    
+        const moveRightSpy = jest.fn();
+    
+        const newPlayer = new Player({id: playerSocketId}, playerName, {});
+        newPlayer.isPlaying = true;
+        newPlayer.moveRight = moveRightSpy;
+        server.players.push(newPlayer);
+    
+        clientSocket.emit('MOVEMENT', { playerName: playerName, movement: movementCommand }, response => {
+            expect(response.code).toBe(0);
+            expect(moveRightSpy).toHaveBeenCalled();
+            done();
+        });
+    });
 
 
 
