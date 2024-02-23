@@ -222,7 +222,6 @@ class Player {
             }
         }
         this.spectrum = spectrum;
-        console.log(this.spectrum);
     }
 
     moveLeft() {
@@ -268,6 +267,7 @@ class Player {
     }
 
     moveDown(goToBottom) {
+        console.log('Dans move Down');
         if (this.isPlaying !== false) {
             const width = this.actualPiece.width;
             const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));

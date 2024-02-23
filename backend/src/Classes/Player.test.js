@@ -44,13 +44,13 @@ describe('Player', () => {
 });
 
 describe('Player.startGame', () => {
-    jest.useFakeTimers(); // Utiliser les timers fictifs de Jest
     let player;
     const mockSocket = { emit: jest.fn() };
     const playerName = 'TestPlayer';
     const database = {};
 
     beforeEach(() => {
+        jest.useFakeTimers();
         const Player = require('./Player'); 
         const gameMock = { listOfPieces: [0, 1, 2, 3] }; 
         player = new Player(mockSocket, playerName, database);
@@ -63,6 +63,11 @@ describe('Player.startGame', () => {
         player.startGame();
     });
 
+    afterEach(() => {
+        jest.runOnlyPendingTimers(); // Exécute les timers en attente
+        jest.useRealTimers(); // Reviens aux timers réels après chaque test
+      });
+
     test('should set listOfPieces from game and call generateNewPiece', () => {
         expect(player.listOfPieces).toEqual([0, 1, 2, 3]);
         expect(player.generateNewPiece).toHaveBeenCalled();
@@ -70,8 +75,6 @@ describe('Player.startGame', () => {
 
     test('should call moveDown and doubleCheckPenalty periodically', () => {
         jest.advanceTimersByTime(INIT_TIME_MS);
-
-        // Vérifier que `moveDown` et `doubleCheckPenalty` sont appelés après INIT_TIME_MS
         expect(player.moveDown).toHaveBeenCalled();
         expect(player.doubleCheckPenalty).toHaveBeenCalled();
     });
@@ -79,13 +82,10 @@ describe('Player.startGame', () => {
     test('should clear interval when isPlaying is false', () => {
         player.isPlaying = false; // Simuler l'arrêt du jeu
         jest.advanceTimersByTime(INIT_TIME_MS); // Avancer le temps encore une fois
-
-        // Vérifier que `moveDown` et `doubleCheckPenalty` ne sont pas appelés une fois le jeu arrêté
         expect(player.moveDown).not.toHaveBeenCalledTimes(2);
     });
 
-    afterEach(() => {
-        jest.useRealTimers(); // Revenir aux timers réels après les tests
-    });
+    
+
 });
 
