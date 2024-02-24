@@ -45,18 +45,18 @@ function GameComponent() {
         if (!isAuthenticated) { return;}
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
-            if (data.code !== 0) {}
-            else setScore(data.score);
+            if (data.code === 0) { setScore(data.score); }
         });
 
         const handleLeavePage = (event) => {
             if (!isAuthenticated) { return; }
             if (!socket) { return; }
-
-            event.preventDefault();
-			event.returnValue = '';
-			socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
-				if (data.code !== 0) { console.error(data.error); return; }
+            if (event) {
+                event.preventDefault();
+			    event.returnValue = '';
+			}
+            socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
+				if (data.code !== 0) { return; }
 			});
         };
         window.addEventListener("beforeunload", handleLeavePage);
@@ -106,13 +106,12 @@ function GameComponent() {
         socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) {
                 if (data.code !== 2) { navigate('/'); return; }
-
                 socket.emit('JOIN_GAME', { gameName: gameName, playerName: playerName }, (data) => {
                     if (data.code !== 0) { navigate('/'); return; }
                     window.location.href = `#${data.gameName}[${data.playerName}]`;
 
                     socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
-                        if (data.code !== 0) { console.error(data.error); return; }
+                        if (data.code !== 0) { return; }
                         setIsCreator(data.creator === playerName);
                         setPlayers(data.players);
                     });
@@ -158,7 +157,6 @@ function GameComponent() {
         if (!isAuthenticated) { return; }
         if (!socket) { return; }
         if (!isCreator) { }
-
         socket.emit('START_GAME', { gameName, playerName }, (data) => {
             if (data.code !== 0) {
                 setResponseMessage(data.error);
@@ -199,11 +197,12 @@ function GameComponent() {
                     {isCreator && <h3 className="game-subtitle">You are the creator</h3>}
                     <h3 className="game-subtitle">Players:</h3>
                     <ul className="game-players-list">
-                        {players.map((player, index) => <li key={index}>{player}</li>)}
+                        {!players && <li>No players yet</li>}
+                        {players && players.length > 0 && players.map((player, index) => <li key={index}>{player}</li>)}
                     </ul>
 
 					{playerScore !== -1 && (
-                        <div className="player-score">
+                        <div className="player-score" data-testid="player-score">
                             <p>Your score: {playerScore}</p>
                             <p>Your rank: {playerRank}</p>
                         </div>

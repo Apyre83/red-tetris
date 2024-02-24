@@ -73,11 +73,7 @@ function Home() {
         setError('');
         const uniqueGameName = Math.random().toString(36).substr(2, 9);
 
-        socket.emit('CREATE_GAME',{
-            gameName: uniqueGameName,
-            playerName: playerName
-        }, (data) => {
-            console.log("Game created successfully: ", data);
+        socket.emit('CREATE_GAME', { gameName: uniqueGameName, playerName: playerName }, (data) => {
             if (data.code !== 0) {
                 setError(data.error);
                 return;
