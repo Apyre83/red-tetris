@@ -175,8 +175,10 @@ class Server {
                     const leftPlayerIndex = (i - 1 + _game.players.length) % _game.players.length;
                     const rightPlayerIndex = (i + 1) % _game.players.length;
 
-                    const leftPlayerName = _game.players[leftPlayerIndex].playerName;
-                    const rightPlayerName = _game.players[rightPlayerIndex].playerName;
+                    let leftPlayerName = '';
+                    let rightPlayerName = '';
+                    if (_game.players.length > 1) { leftPlayerName = _game.players[leftPlayerIndex].playerName; }
+                    if (_game.players.length > 2) { const rightPlayerName = _game.players[rightPlayerIndex].playerName; }
 
                     _game.players[i].socket.emit('GAME_STARTED', {
                         ...data,

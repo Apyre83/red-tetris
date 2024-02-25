@@ -29,3 +29,13 @@
 .tetris-cell.filled {
     background-color: blue; /* ou toute autre couleur visible */
 }
+
+.playerInformationGame {
+    font-size: 24px; /* Taille de la police */
+    color: #333; /* Couleur de la police */
+    text-align: center; /* Centrer le texte */
+    margin: 0 0 10px; /* Marge en bas pour espacer du reste */
+    font-weight: bold; /* Rendre le texte en gras */
+    text-transform: uppercase; /* Mettre le texte en majuscules pour plus d'impact */
+    letter-spacing: 1px; /* Espacer légèrement les lettres */
+}

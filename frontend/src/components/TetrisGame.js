@@ -79,6 +79,7 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
         <button className="game-button" onClick={handlerGiveUp}>GIVE UP</button>
 		<div className="tetris-game-container">
 			<div className="side-player">
+                <h1 className="playerInformationGame">{leftPlayerName}</h1>
 				{leftPlayerGrid.map((row, rowIndex) => (
 					<div key={rowIndex} className="tetris-row">
 						{row.map(([filled, color], cellIndex) => (
@@ -98,6 +99,7 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
 				))}
 			</div>
 			<div className="side-player">
+                {rightPlayerName !== leftPlayerName && <h1 className="playerInformationGame">{rightPlayerName}</h1>}
 				{rightPlayerGrid.map((row, rowIndex) => (
 					<div key={rowIndex} className="tetris-row">
 						{row.map(([filled, color], cellIndex) => (
