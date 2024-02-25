@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import './TetrisGame.css';
 
@@ -58,7 +58,7 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
                     return;
             }
             socket.emit('MOVEMENT', {playerName: playerName, movement: movement}, (data) => {
-                if (data.code !== 0) console.error(data.error);
+                if (data.code !== 0) {}
             });
         };
 

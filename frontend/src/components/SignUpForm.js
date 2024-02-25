@@ -14,7 +14,7 @@ const SignUpForm = ( {setShowLogin} ) => {
         event.preventDefault();
         socket.emit('SIGNUP', { username, email, password }, (data) => {
             if (data.code !== 0) {
-                setError(data.error || 'An error has occured during registration.');
+                setError(data.error || 'An error has occurred during registration.');
                 return;
             }
             setShowLogin(true);

@@ -25,9 +25,7 @@ function Home() {
         if (!socket) { return; }
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
-            if (data.code !== 0) {
-                console.error('Error while getting score', data.error);
-            }
+            if (data.code !== 0) {}
             else setScore(data.score);
         });
 
