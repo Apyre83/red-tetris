@@ -185,8 +185,11 @@ class Game {
 		// let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0].playerName)[0];
         playerWinner.winner();
 		for (let i = 0 ; i < this.players.length ; i++) {
-            this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore});
+            this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore, newCreator: playerWinner.playerName});
 		}
+        const tmp = this.players[0];
+        this.players[this.players.indexOf(playerWinner)] = tmp;
+        this.players[0] = playerWinner;
         this.playerFinishedGame(playerWinner);
         this.resetGame();
     }

@@ -87,14 +87,15 @@ function GameComponent() {
         });
 
 		socket.on('PLAYER_WINNER', (data) => {
-			if (!data) { /* Game was played alone */
-			}
+			if (data) {
+                if (data.playerName === playerName) {
+                    setPlayerScore(data.score);
+                    setPlayerRank(data.rank);
+                }
+                setIsCreator(data.newCreator === playerName);
+            }
 
-			else if (data.playerName === playerName) {
-				setPlayerScore(data.score);
-				setPlayerRank(data.rank);
-			}
-			setIsAlive(false);
+            setIsAlive(false);
 			setGameIsPlaying(false);
 
             socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
