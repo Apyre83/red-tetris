@@ -87,6 +87,11 @@ function Home() {
         }
     }
 
+    const goToLeaderboard = (e) => {
+        e.preventDefault();
+        window.location.href = '#leaderboard';
+    }
+
     return (
         <div className="home-container">
             {!isAuthenticated && (
@@ -124,6 +129,7 @@ function Home() {
                             <button className="home-button" onClick={handleJoinGame}>Join</button>
                             <button className="home-button" onClick={handleCreateGame}>Create game</button>
                             <button className="home-button" onClick={() => onAuthentication(false)}>Logout</button>
+                            <button className="home-button" onClick={goToLeaderboard}>Leaderboard</button>
                         </form>
                     </div>
                 </>

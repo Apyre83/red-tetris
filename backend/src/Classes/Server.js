@@ -85,8 +85,6 @@ class Server {
                 bcrypt.compare(data.password, hashedPasswordFromDB, verifyPassword.bind(this));
             });
 
-
-
             socket.on('LOGOUT', (data, callback) => {
                 console.log('LOGOUT', data);
                 for (const player of this.players) {
@@ -122,6 +120,13 @@ class Server {
                 } catch (err) {
                     callback({...data, code: 6, error: "Server error hashing password"});
                 }
+            });
+
+            socket.on('GET_LEADERBOARD', (data, callback) => {
+                const database = this.readDatabase();
+                const leaderboard = Object.keys(database).map(playerName => ({ name: playerName, score: database[playerName].allTimeScores }));
+                leaderboard.sort((a, b) => b.score - a.score);
+                callback({...data, code: 0, leaderboard});
             });
 
             socket.on('GET_SCORE', (data, callback) => {

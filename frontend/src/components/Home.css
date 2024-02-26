@@ -12,9 +12,9 @@ html, body {
     text-align: left;
     width: 100%;
     box-sizing: border-box;
-    display: flex; /* Utilisez flexbox pour aligner les éléments du header */
-    align-items: center; /* Centre les éléments verticalement */
-    justify-content: space-between; /* Espacement entre les éléments, aide à mettre le score à droite */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .header-title {
@@ -49,10 +49,10 @@ html, body {
 }
 
 .title {
-    font-size: 4em; /* Taille ajustée */
+    font-size: 4em;
     color: #4caf50;
     margin-bottom: 20px;
-    font-family: 'Tetris', sans-serif; /* Assurez-vous que cette police est chargée */
+    font-family: 'Tetris', sans-serif;
 }
 
 .home-form {
@@ -82,15 +82,15 @@ html, body {
     background-color: #333;
     border: 1px solid #4caf50;
     color: white;
-    padding: 5px 5px; /* Ajustez le padding si nécessaire */
+    padding: 5px 5px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s;
-    width: 300px; /* Largeur fixe pour tous les boutons */
-    height: 40px; /* Hauteur fixe pour tous les boutons */
-    margin: 1px 0; /* Espacement entre les boutons */
-    display: block; /* Assure que les boutons prennent toute la largeur disponible */
+    width: 300px;
+    height: 40px;
+    margin: 1px 0;
+    display: block;
 }
 
 .home-button:hover {
