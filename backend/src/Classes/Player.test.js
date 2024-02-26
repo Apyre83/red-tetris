@@ -486,13 +486,13 @@ describe('Player.moveRight', () => {
         }
         player.board = player.createBoard(ROWS);
         player.actualPiece = piece;
-        player.updateBoard = jest.fn(); // Spy sur la méthode pour vérifier son appel
+        player.updateBoard = jest.fn(); 
     });
 
     test('should move piece right if there is no obstruction', () => {
         player.moveRight();
         expect(player.actualPiece.x).toBe(5);
-        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything()); // Vérifie que updateBoard est appelé avec l'ancienne pièce
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything());
     });
 
     test('should not move piece right if there is an obstruction', () => {
@@ -500,5 +500,94 @@ describe('Player.moveRight', () => {
         player.board[player.actualPiece.y][player.actualPiece.x + player.actualPiece.width][0] = 1;
         player.moveRight();
         expect(player.updateBoard).not.toHaveBeenCalled();
+    });
+});
+
+describe('Player.moveDown', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        const Player = require('./Player'); // Assurez-vous que ce chemin est correct
+        player = new Player(mockSocket, playerName, database);
+        player.isPlaying = true;
+        player.board = player.createBoard(ROWS);
+        player.actualPiece = {
+            x: 5,
+            y: 0,
+            width: 2,
+            tetromino: [[[1, 'color'], [1, 'color']], [[1, 'color'], [1, 'color']]]
+        };
+        player.updateBoard = jest.fn();
+        player.checkCompleteLines = jest.fn();
+        player.generateNewPiece = jest.fn();
+    });
+
+    test('should move piece down if there is no obstruction', () => {
+        const initialY = player.actualPiece.y;
+        player.moveDown();
+        expect(player.actualPiece.y).toBe(initialY + 1);
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything());
+    });
+
+    test('should not move piece down if there is an obstruction', () => {
+        player.board[player.actualPiece.y + player.actualPiece.width][player.actualPiece.x] = [1, 'obstacleColor'];
+        player.moveDown();
+        expect(player.checkCompleteLines).toHaveBeenCalled();
+        expect(player.generateNewPiece).toHaveBeenCalled();
+    });
+
+    test('should return true if goToBottom is true and piece cannot move down', () => {
+        player.board[player.actualPiece.y + player.actualPiece.width][player.actualPiece.x] = [1, 'obstacleColor'];
+        const result = player.moveDown(true);
+        expect(result).toBe(true);
+    });
+
+    test('should return false if goToBottom is true and piece can move down', () => {
+        const result = player.moveDown(true);
+        expect(result).toBe(false);
+    });
+});
+
+describe('Player.directBottom', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.actualPiece = {
+            x: 5,
+            y: 0,
+            width: 2,
+            tetromino: [[[1, 'color'], [1, 'color']], [[1, 'color'], [1, 'color']]]
+        };
+        player.board = player.createBoard(ROWS);
+        player.isPlaying = true;
+
+        // Simuler les méthodes appelées dans directBottom
+        player.updateBoard = jest.fn();
+        player.checkCompleteLines = jest.fn();
+        player.generateNewPiece = jest.fn();
+    });
+
+    test('should move piece directly to bottom, update board, check lines, and generate new piece if playing', () => {
+        player.moveDown = jest.fn();
+        player.directBottom();
+        expect(player.moveDown).toHaveBeenCalled();
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything());
+        expect(player.checkCompleteLines).toHaveBeenCalled();
+        expect(player.generateNewPiece).toHaveBeenCalled();
+    });
+
+    test('should not generate new piece if not playing after moving directly to bottom', () => {
+        player.isPlaying = false;
+        player.directBottom();
+        expect(player.generateNewPiece).not.toHaveBeenCalled();
     });
 });
