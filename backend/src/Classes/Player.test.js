@@ -22,7 +22,7 @@ describe('Player', () => {
     test('constructor initializes properties correctly', () => {
         expect(player.socket).toBe(mockSocket);
         expect(player.playerName).toBe(playerName);
-        // expect(player.database).toBe(database);
+        expect(player.database).toBe(database);
         expect(player.ranking).toBe(0);
         expect(player.listOfPieces).toEqual([]);
         expect(player.game).toBeUndefined();
@@ -570,7 +570,6 @@ describe('Player.directBottom', () => {
         player.board = player.createBoard(ROWS);
         player.isPlaying = true;
 
-        // Simuler les méthodes appelées dans directBottom
         player.updateBoard = jest.fn();
         player.checkCompleteLines = jest.fn();
         player.generateNewPiece = jest.fn();
@@ -589,5 +588,285 @@ describe('Player.directBottom', () => {
         player.isPlaying = false;
         player.directBottom();
         expect(player.generateNewPiece).not.toHaveBeenCalled();
+    });
+});
+
+describe('Player.canRotate', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.board = player.createBoard(20); 
+        player.actualPiece = {
+            x: 5,
+            y: 1,
+            width: 3,
+            tetromino: [
+                [[1, 'blue'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']]
+            ]
+        };
+        player.updateBoard();
+    });
+
+    test('should allow rotation when there is no obstruction', () => {
+        const rotatedTetromino = [
+            [[0, 'empty'], [0, 'empty'], [0, 'empty']],
+            [[1, 'blue'], [1, 'blue'], [1, 'blue']],
+            [[0, 'empty'], [1, 'blue'], [0, 'empty']]
+        ];
+
+        const canRotate = player.canRotate(rotatedTetromino);
+        expect(canRotate).toBe(true);
+    });
+
+    test('should not allow rotation when there is an obstruction', () => {
+        player.board[2][5] = [1, 'red']; 
+        const rotatedTetromino = [
+            [[0, 'empty'], [0, 'empty'], [0, 'empty']],
+            [[1, 'blue'], [1, 'blue'], [1, 'blue']],
+            [[0, 'empty'], [1, 'blue'], [0, 'empty']]
+        ];
+
+        const canRotate = player.canRotate(rotatedTetromino);
+        expect(canRotate).toBe(false);
+    });
+});
+
+describe('Player.rotateRight', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.board = player.createBoard(20); 
+        player.actualPiece = {
+            x: 4,
+            y: 1,
+            width: 3,
+            rotate: jest.fn().mockReturnValue([
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']],
+                [[1, 'blue'], [1, 'blue'], [0, 'empty']]
+            ]),
+            tetromino: [
+                [[1, 'blue'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']]
+            ]
+        };
+        player.canRotate = jest.fn().mockReturnValue(true); 
+        player.updateBoard = jest.fn(); 
+    });
+
+    test('should rotate piece right if rotation is allowed', () => {
+        player.rotateRight();
+        expect(player.canRotate).toHaveBeenCalledWith(expect.any(Array)); 
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.any(Object)); 
+        expect(player.actualPiece.tetromino).toEqual(expect.any(Array)); 
+    });
+
+    test('should not rotate piece right if rotation is not allowed', () => {
+        player.canRotate.mockReturnValue(false); 
+
+        player.rotateRight();
+        expect(player.canRotate).toHaveBeenCalledWith(expect.any(Array));
+        expect(player.updateBoard).not.toHaveBeenCalled();
+    });
+});
+
+describe('Player.rotateLeft', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.board = player.createBoard(20); 
+        player.actualPiece = {
+            x: 4,
+            y: 1,
+            width: 3,
+            rotate: jest.fn().mockReturnValue([ 
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [1, 'blue']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']]
+            ]),
+            tetromino: [
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']],
+                [[1, 'blue'], [1, 'blue'], [0, 'empty']],
+                [[0, 'empty'], [1, 'blue'], [0, 'empty']]
+            ]
+        };
+        player.canRotate = jest.fn().mockReturnValue(true); 
+        player.updateBoard = jest.fn();
+    });
+
+    test('should rotate piece left if rotation is allowed', () => {
+        player.rotateLeft();
+        expect(player.canRotate).toHaveBeenCalledWith(expect.any(Array)); 
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.any(Object)); 
+        expect(player.actualPiece.tetromino).toEqual(expect.any(Array)); 
+    });
+
+    test('should not rotate piece left if rotation is not allowed', () => {
+        player.canRotate.mockReturnValue(false); 
+
+        player.rotateLeft();
+        expect(player.canRotate).toHaveBeenCalledWith(expect.any(Array));
+        expect(player.updateBoard).not.toHaveBeenCalled();
+    });
+});
+
+describe('Player.gameOver', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, {});
+        player.game = {
+            rank: 1,
+            giveScore: jest.fn().mockReturnValue(500),
+            playerGameOver: jest.fn(),
+        };
+
+        player.database = {
+            [playerName]: { allTimeScores: 7 } 
+        };
+        player.readDatabase = jest.fn().mockReturnValue(player.database); 
+        player.playerName = playerName;
+        player.actualScore = 0; 
+    });
+
+    test('should emit PLAYER_GAME_OVER with correct data and call playerGameOver', () => {
+        player.gameOver();
+
+        expect(mockSocket.emit).toHaveBeenCalledWith('PLAYER_GAME_OVER', expect.objectContaining({
+            playerName: playerName,
+            rank: player.game.rank,
+            score: expect.any(Number),
+            allTimeScore: 7 
+        }));
+        expect(player.game.playerGameOver).toHaveBeenCalledWith(player);
+        expect(player.actualScore).toBe(500); 
+        expect(player.game.giveScore).toHaveBeenCalledWith(player.game.rank); 
+    });
+
+});
+
+describe('Player.giveUp', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, {});
+        player.game = {
+            rank: 1,
+            playerGiveUp: jest.fn(),
+        };
+        player.database = {
+            [playerName]: { allTimeScores: 7 }
+        };
+        player.readDatabase = jest.fn().mockReturnValue(player.database);
+        player.playerName = playerName;
+        player.actualScore = 100; 
+        player.isPlaying = true;
+    });
+
+    test('should set isPlaying to false and call playerGiveUp', () => {
+        const result = player.giveUp();
+
+        expect(player.isPlaying).toBe(false);
+        expect(player.game.playerGiveUp).toHaveBeenCalledWith(player);
+        expect(result).toEqual({
+            rank: player.game.rank,
+            score: player.actualScore,
+            allTimeScore: 7
+        });
+        expect(player.readDatabase).toHaveBeenCalled();
+        expect(result).toMatchObject({
+            rank: 1,
+            score: 100,
+            allTimeScore: 7
+        });
+    });
+});
+
+describe('Player.winner', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const initialScore = 100; 
+
+    beforeEach(() => {
+        jest.resetModules(); 
+        const Player = require('./Player'); 
+        player = new Player(mockSocket, playerName, {});
+        player.actualScore = initialScore;
+        player.game = {
+            rank: 1, 
+            giveScore: jest.fn().mockReturnValue(50), 
+        };
+    });
+
+    test('should increase player\'s score based on rank', () => {
+        player.winner();
+
+        expect(player.game.giveScore).toHaveBeenCalledWith(player.game.rank); 
+        expect(player.actualScore).toBe(initialScore + 50); 
+        console.log(`Score après winner: ${player.actualScore}`); 
+    });
+
+});
+
+describe('Player.resetPlayer', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.resetModules();
+        const Player = require('./Player'); 
+        player = new Player(mockSocket, playerName, database);
+        player.listOfPieces = [1, 2, 3]; 
+        player.isPlaying = true;
+        player.isDead = true;
+        player.idRowBorder = 10; 
+        player.idActualPiece = 5;
+        player.actualPiece = {}; 
+        player.actualScore = 100;
+        player.board = [[]]; 
+        player.spectrum = [[]]; 
+        player.rank = 5; 
+
+        player.resetPlayer(); 
+    });
+
+    test('should reset player attributes to their default values', () => {
+        expect(player.listOfPieces).toEqual([]);
+        expect(player.isPlaying).toBe(false);
+        expect(player.isDead).toBe(false);
+        expect(player.idRowBorder).toBe(ROWS);
+        expect(player.idActualPiece).toBe(-1);
+        expect(player.actualPiece).toBeUndefined();
+        expect(player.actualScore).toBe(0);
+        expect(player.board).toEqual(player.createBoard(ROWS)); 
+        expect(player.spectrum).toEqual(player.makeSpectrum()); 
+        expect(player.rank).toBe(0);
     });
 });

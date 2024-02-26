@@ -419,21 +419,21 @@ class Player {
         this.rank = 0;
     }
 
-    printBoard() {
-        for (let row = 0; row < this.board.length; row++) {
-            const rowValues = this.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
-            console.log(`${rowValues.join()}`);
-        }
-        console.log(`\n-------\n`);
-    }
+    // printBoard() {
+    //     for (let row = 0; row < this.board.length; row++) {
+    //         const rowValues = this.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+    //         console.log(`${rowValues.join()}`);
+    //     }
+    //     console.log(`\n-------\n`);
+    // }
 
-    printSpectrum() {
-        for (let row = 0; row < this.spectrum.length; row++) {
-            const rowValues = this.spectrum[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
-            console.log(`${rowValues.join()}`);
-        }
-        console.log(`\n-------\n`);
-    }
+    // printSpectrum() {
+    //     for (let row = 0; row < this.spectrum.length; row++) {
+    //         const rowValues = this.spectrum[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
+    //         console.log(`${rowValues.join()}`);
+    //     }
+    //     console.log(`\n-------\n`);
+    // }
 }
 
 module.exports = Player;
