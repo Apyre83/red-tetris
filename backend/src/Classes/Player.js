@@ -346,6 +346,10 @@ class Player {
         // check if rotatedTetromino fits in the copy of the board
         for (let row = 0 ; row < width ; row++) {   
             for (let col = 0; col < width ; col++) {
+                    if ((y + row < 0 || x + col < 0)) {
+                        console.log(`Can't rotate`);
+                        return false;
+                    }
                     if (rotatedTetromino[row][col][0] === 1) {
                         if (board[y + row][x + col][0] === 1) {
                             console.log(`Can't rotate`);
