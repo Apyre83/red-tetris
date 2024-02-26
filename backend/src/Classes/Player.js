@@ -5,12 +5,15 @@ const {
     INIT_TIME_MS }                      = require('../constants/numbers');
 const colors                            = require('../constants/colors');
 const Piece                             = require('./Piece');
+const fs = require("fs");
+
+const DATABASE_FILE = "./databases/database.json";
 
 class Player {
-    constructor(socket, playerName, database) {
+    constructor(socket, playerName) {
         this.socket = socket;
         this.playerName = playerName;
-        this.database = database;
+        this.database = this.readDatabase();
         this.ranking = 0;
         this.listOfPieces = [];
         // this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
@@ -26,6 +29,17 @@ class Player {
         this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
+        // this.DATABASE_FILE = "./databases/database.json";
+    }
+
+    readDatabase() {
+        console.log("this.DATABASE_FILE : " + DATABASE_FILE);
+        const data = fs.readFileSync(DATABASE_FILE, 'utf8');
+        return JSON.parse(data);
+    }
+
+    writeDatabase(data) {
+        fs.writeFileSync(DATABASE_FILE, JSON.stringify(data, null, 2), 'utf8');
     }
 
     startGame() {
@@ -367,6 +381,9 @@ class Player {
         console.log(`Game Over`);
         const rank = this.game.rank;
         this.actualScore += this.game.giveScore(rank);
+
+        this.database = this.readDatabase();
+        console.log(this.database);
         this.socket.emit('PLAYER_GAME_OVER', {playerName: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
         this.game.playerGameOver(this);
     }
@@ -376,6 +393,9 @@ class Player {
         const rank = this.game.rank;
         this.isPlaying = false;
         this.game.playerGiveUp(this);
+
+        this.database = this.readDatabase();
+        console.log(this.database);
 		return {rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores };
     }
 

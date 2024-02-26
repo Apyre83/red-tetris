@@ -1,84 +1,17 @@
 {
-  "rrtyui": {
-    "password": "rtyuui",
-    "email": "rr@re.com"
-  },
   "apyre": {
-    "password": "apyre",
-    "email": "test@test.com",
-    "allTimeScores": 219
+    "password": "$2b$10$gV5f4zDMVGnaudDyN9nikuIg1o8TaRfm42Es6pRFZLMZSlEQpuE/6",
+    "email": "apyre@apyre.com",
+    "allTimeScores": 0
   },
   "apyre2": {
-    "password": "apyre2",
-    "email": "apyre2@gmail.com",
-    "allTimeScores": 100
+    "password": "$2b$10$aVRas/yG7B1/5N2pMV2qn.gwmjtPFrlsPNrESOx6WrP9WUDKO8cJq",
+    "email": "apyre@apyre2.com",
+    "allTimeScores": 0
   },
   "apyre3": {
-    "password": "apyre",
-    "email": "apyre3@t.e",
-    "allTimeScores": 97
-  },
-  "rertr": {
-    "password": "rrrty",
-    "email": "leo.f@f.co"
-  },
-  "alloa": {
-    "password": "allo",
-    "email": "allo.allo@allo.allo",
-    "allTimeScores": 45
-  },
-  "llolo": {
-    "password": "errtyyu",
-    "email": "lololo@lololo.c"
-  },
-  "oplik": {
-    "password": "frgrhyh",
-    "email": "oplok@olopo.cdrg",
-    "allTimeScores": 10
-  },
-  "qqqqq": {
-    "password": "qq",
-    "email": "qqqq@gmail.com",
-    "allTimeScores": 400
-  },
-  "wwwww": {
-    "password": "ww",
-    "email": "ww@gmail.com",
-    "allTimeScores": 283
-  },
-  "Prout": {
-    "password": "Prout",
-    "email": "Magicfires@hotmail.com",
-    "allTimeScores": 31
-  },
-  "vdelafos": {
-    "password": "qwert",
-    "email": "vdelafos@student.42nice.fr",
-    "allTimeScores": 0
-  },
-  "rrrrr": {
-    "password": "r",
-    "email": "r.r@r.r",
-    "allTimeScores": 0
-  },
-  "yyyyy": {
-    "password": "y",
-    "email": "y.y@y.y",
-    "allTimeScores": 0
-  },
-  "zzzzz": {
-    "password": "z",
-    "email": "z.z@z.z",
-    "allTimeScores": 0
-  },
-  "jjjjj": {
-    "password": "j",
-    "email": "j.j@j.j",
-    "allTimeScores": 0
-  },
-  "ooooo": {
-    "password": "o",
-    "email": "o@o.o",
+    "password": "$2b$10$2FVMHGCLVSdCKNzz2EKpReo6idel0YL3M4Vztdr6yXLHhhEtirQ5u",
+    "email": "apyre@apyre3.com",
     "allTimeScores": 0
   }
 }
