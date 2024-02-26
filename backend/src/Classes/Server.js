@@ -196,8 +196,10 @@ class Server {
                     const leftPlayerIndex = (i - 1 + _game.players.length) % _game.players.length;
                     const rightPlayerIndex = (i + 1) % _game.players.length;
 
-                    const leftPlayerName = _game.players[leftPlayerIndex].playerName;
-                    const rightPlayerName = _game.players[rightPlayerIndex].playerName;
+                    let leftPlayerName = '';
+                    let rightPlayerName = '';
+                    if (_game.players.length > 1) { leftPlayerName = _game.players[leftPlayerIndex].playerName; }
+                    if (_game.players.length > 2) { const rightPlayerName = _game.players[rightPlayerIndex].playerName; }
 
                     _game.players[i].socket.emit('GAME_STARTED', {
                         ...data,
@@ -214,6 +216,7 @@ class Server {
                 if (!_player) { callback({...data, code: 3, error: "Player does not exist"}); return; }
                 if (_player.isPlaying === false) { callback({...data, code: 4, error: "Player not playing"}); return;}
                 _player[data.movement]();
+                callback({...data, code: 0});
             })
 
             socket.on('PLAYER_LEAVE_ROOM', (data, callback) => {
@@ -226,6 +229,7 @@ class Server {
 				if (!gamePlayer) { callback({...data, code: 2, error: "Player does not exist"}); return; }
 
                 _game.removePlayer(gamePlayer);
+
                 if (_game.players.length === 0) {
                     this.closeGame(_game.gameName);
                 }
@@ -254,7 +258,6 @@ class Server {
 
     closeGame(gameName) {
         this.games = this.games.filter(game => game.gameName !== gameName);
-		//socket.emit('GAME_CLOSED', {gameName: gameName});
         console.log(`Closing game ${gameName}, there is ${this.games.length} game(s) running`);
     }
 

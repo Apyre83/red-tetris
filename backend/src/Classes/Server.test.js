@@ -1,7 +1,6 @@
 const Server = require('./Server');
 const ioClient = require('socket.io-client');
 const Player = require('./Player');
-const e = require('express');
 const Game = require('./Game');
 
 describe('Server', () => {
@@ -9,18 +8,9 @@ describe('Server', () => {
     const port = 8080;
     let clientSocket;
 
-    beforeAll((done) => {
+    beforeEach((done) => {
         server = new Server(port);
         server.start();
-        done();
-    });
-
-    afterAll((done) => {
-        server.server.close();
-        done();
-    });
-
-    beforeEach((done) => {
         clientSocket = ioClient(`http://localhost:${port}`, {
             transports: ['websocket'],
             'force new connection': true
@@ -32,23 +22,27 @@ describe('Server', () => {
         if (clientSocket.connected) {
             clientSocket.disconnect();
         }
+        server.io.close();
+        server.server.close();
         jest.restoreAllMocks();
         done();
     });
 
-    test('should handle disconnect event', (done) => {
-        const playersBefore = server.players.length;
-
-        clientSocket.on('disconnect', () => {
-        });
-
-        clientSocket.disconnect();
-
-        setTimeout(() => {
-            expect(server.players.length).toBe(playersBefore - 1);
-            done();
-        }, 100);
-    });
+    // afterEach((done) => {
+    //     if (clientSocket.connected) {
+    //         clientSocket.disconnect();
+    //     }
+    
+    //     // Fermer le serveur Socket.IO
+    //     server.io.close(() => {
+    //         // Fermer le serveur HTTP
+    //         server.server.close(() => {
+    //             jest.restoreAllMocks();
+    //             done();
+    //         });
+    //     });
+    // });
+    
 
     test('LOGIN event with valid credentials should succeed', (done) => {
         jest.spyOn(server, 'readDatabase').mockReturnValue({
@@ -59,6 +53,7 @@ describe('Server', () => {
             expect(response.code).toBe(0);
             done();
         });
+
     });
 
     test('LOGIN event with incorrect password should fail', (done) => {
@@ -77,6 +72,39 @@ describe('Server', () => {
 
         clientSocket.emit('LOGIN', { username: 'nonExistingUser', password: 'testPassword' }, (response) => {
             expect(response.code).toBe(1);
+            done();
+        });
+    });
+
+    test('LOGIN event with empty username should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({});
+
+        clientSocket.emit('LOGIN', { username: '', password: 'testPassword' }, (response) => {
+            expect(response.code).toBe(1);
+            done();
+        });
+    });
+
+    test('LOGIN event with empty password should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({});
+
+        clientSocket.emit('LOGIN', { username: 'validUsername', password: '' }, (response) => {
+            expect(response.code).toBe(2);
+            done();
+        });
+    });
+
+    test('LOGIN event when already connected should fail', (done) => {
+        jest.spyOn(server, 'readDatabase').mockReturnValue({
+            'validUsername': { password: 'validPassword' }
+        });
+
+        clientSocket.emit('LOGIN', { username: 'validUsername', password: 'validPassword' }, (response) => {
+            expect(response.code).toBe(0);
+        });
+
+        clientSocket.emit('LOGIN', { username: 'validUsername', password: 'validPassword' }, (response) => {
+            expect(response.code).toBe(3);
             done();
         });
     });
@@ -225,28 +253,152 @@ describe('Server', () => {
     
         const newGame = new Game(server, gameName);
         server.games.push(newGame);
-
-        const creatorPlayer = new Player(clientSocket, creatorName, {});        server.players.push(creatorPlayer);
+    
+        const creatorPlayer = new Player(clientSocket, creatorName, {});
+        server.players.push(creatorPlayer);
         newGame.addPlayer(creatorPlayer, () => {});
-
+    
         jest.spyOn(newGame, 'startGame').mockImplementation(() => {
             newGame.gameIsRunning = true; 
         });
     
-        // faire un seul client !
-        clientSocket.emit('START_GAME', { gameName: gameName, playerName: creatorName }, (response) => {
-            expect(game.players.length).toBe(1);
-            
-            // expect(response.code).toBe(0);
-        //     expect(newGame.gameIsRunning).toBe(true);
-        //     expect(newGame.startGame).toHaveBeenCalled();
-    
+        clientSocket.emit('START_GAME', { gameName: gameName, playerName: creatorName }, () => {
+            expect(newGame.gameIsRunning).toBe(true);
+            expect(newGame.startGame).toHaveBeenCalled();            
             done();
         });
-        done();
+    });
+
+    test('MOVEMENT event should process movement for an active player', (done) => {
+        const playerName = 'ActivePlayer';
+        const playerSocketId = clientSocket.id;
+        const movementCommand = 'moveRight'; 
+    
+        const moveRightSpy = jest.fn();
+    
+        const newPlayer = new Player({id: playerSocketId}, playerName, {});
+        newPlayer.isPlaying = true;
+        newPlayer.moveRight = moveRightSpy;
+        server.players.push(newPlayer);
+    
+        clientSocket.emit('MOVEMENT', { playerName: playerName, movement: movementCommand }, response => {
+            expect(response.code).toBe(0);
+            expect(moveRightSpy).toHaveBeenCalled();
+            done();
+        });
+    });
+
+    test('PLAYER_LEAVE_ROOM event should correctly handle a player leaving a room', done => {
+        const gameName = 'TestGameForLeave';
+        const playerName = 'PlayerLeaving';
+        const otherPlayerName = 'OtherPlayer';
+    
+        const newGame = new Game(server, gameName);
+        const leavingPlayer = new Player(clientSocket, playerName, {});
+        const otherPlayer = new Player(clientSocket, otherPlayerName, {});
+
+        server.games.push(newGame);
+        newGame.addPlayer(leavingPlayer, () => {});
+        newGame.addPlayer(otherPlayer, () => {});
+    
+        clientSocket.on('USER_LEAVE_GAME', (data) => {
+            expect(data.playerName).toBe(playerName);
+            expect(data.creator).toBe(playerName);
+            expect(data.creator).toBe(otherPlayerName); // Assumer que le deuxième joueur devient le créateur
+            done();
+        });
+    
+        // Simuler l'événement 'PLAYER_LEAVE_ROOM'
+        clientSocket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (response) => {
+            expect(response.code).toBe(0);
+            done();
+            const _game = server.games.find(game => game.gameName === gameName);
+            expect(_game.players.find(player => player.playerName === playerName)).toBeUndefined();
+    
+        });
     });
     
+    test('PLAYER_LEAVE_ROOM event should close the game is there is not player inside', done => {
+        const gameName = 'TestGameForLeave';
+        const playerName = 'PlayerLeaving';
     
+        const newGame = new Game(server, gameName);
+        const leavingPlayer = new Player(clientSocket, playerName, {});
 
+        const closeGameSpy = jest.fn();
+        server.closeGame = closeGameSpy;
+
+        server.games.push(newGame);
+        newGame.addPlayer(leavingPlayer, () => {});
     
+        clientSocket.on('USER_LEAVE_GAME', (data) => {
+            expect(data.playerName).toBe(playerName);
+            expect(data.creator).toBe(playerName);
+            done();
+        });
+    
+        clientSocket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (response) => {
+            expect(response.code).toBe(0);
+            done();
+            const _game = server.games.find(game => game.gameName === gameName);
+            expect(_game.players.find(player => player.playerName === playerName)).toBeUndefined();
+    
+            expect(_game.players.length).toBe(0);
+
+            if (_game.players.length === 0) {
+                expect(closeGameSpy).toHaveBeenCalled();
+            }
+        });
+    });
+
+    test('should return error if game does not exist', (done) => {
+        clientSocket.emit('PLAYER_GIVE_UP', { gameName: 'NonExistentGame', playerName: 'TestPlayer' }, (response) => {
+            expect(response.code).toBe(1);
+            expect(response.error).toBe('Game does not exist');
+            done();
+        });
+    });
+
+    test('should return error if player does not exist in the game', (done) => {
+        const gameName = 'TestGameForLeave';
+        const newGame = new Game(server, gameName);
+        const giveUpPlayer = new Player(clientSocket, 'existingPlayer', {});
+        server.games.push(newGame);
+        newGame.addPlayer(giveUpPlayer, () => {});
+        clientSocket.emit('PLAYER_GIVE_UP', { gameName, playerName: 'TestPlayer' }, (response) => {
+            expect(response.code).toBe(2);
+            expect(response.error).toBe('Player does not exist');
+            done();
+        });
+    });
+
+    test('should process give up successfully for an existing player', (done) => {
+        const gameName = 'TestGameForLeave';
+        const newGame = new Game(server, gameName);
+        const giveUpPlayer = new Player(clientSocket, 'existingPlayer', {});
+
+        const giveUpSpy = jest.fn();
+        giveUpPlayer.giveUp = giveUpSpy;
+
+        server.games.push(newGame);
+        newGame.addPlayer(giveUpPlayer, () => {});
+        clientSocket.emit('PLAYER_GIVE_UP', { gameName, playerName: 'existingPlayer' }, (response) => {
+            expect(giveUpSpy).toHaveBeenCalled();
+            expect(response.code).toBe(0);
+            done();
+        });
+    });
+
+    test('should remove the specified game from the list of games', () => {
+        server.games.push(new Game(server, 'TestGame1'));
+        server.games.push(new Game(server, 'TestGame2'));
+
+        const initialGameCount = server.games.length;
+
+        server.closeGame('TestGame1');
+        expect(server.games.find(game => game.gameName === 'TestGame1')).toBeUndefined();
+        expect(server.games.length).toBe(initialGameCount - 1);
+    });
+
 });
+

@@ -16,7 +16,6 @@ const LoginForm = () => {
                 setError(data.error || 'Error while logging in, please try again.');
                 return;
             }
-            console.log("LOGIN_SUCCESS", data);
             dispatch({ type: "LOGIN_SUCCESS", payload: data.username });
         });
     };

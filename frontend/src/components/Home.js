@@ -22,13 +22,10 @@ function Home() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!socket) { /*console.error('Socket not connected'); */return; }
+        if (!socket) { return; }
 
         socket.emit('GET_SCORE', { playerName: playerName }, (data) => {
-            console.log("GET_SCORE", data);
-            if (data.code !== 0) {
-                console.error('Error while getting score', data.error);
-            }
+            if (data.code !== 0) {}
             else setScore(data.score);
         });
 
@@ -37,28 +34,24 @@ function Home() {
     }, [socket, playerName]);
 
     const socketJoinGame = (gameName, playerName, callback) => {
-        socket.emit('JOIN_GAME', {
-            gameName: gameName,
-            playerName: playerName
-        }, (data) => {
-            console.log("JOIN_GAME", data);
+        socket.emit('JOIN_GAME', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) {
                 setError(data.error);
                 return;
             }
-            console.log("Game joined successfully: ", data);
             window.location.href = `#${data.gameName}[${data.playerName}]`;
         });
     }
 
     const handleJoinGame = (e) => {
-        if (!socket) { console.error('Socket not connected'); return; }
+        if (!socket) { return; }
 
         e.preventDefault();
         if (!playerName) {
             setError('Please enter a room name.');
             return;
         }
+
         if (!game) {
             setError('Please enter a valid room name.');
             return;
@@ -68,7 +61,7 @@ function Home() {
     };
 
     const handleCreateGame = (e) => {
-        if (!socket) { console.error('Socket not connected'); return; }
+        if (!socket) { return; }
 
         e.preventDefault();
         if (!playerName) {
@@ -76,13 +69,9 @@ function Home() {
             return;
         }
         setError('');
-        const uniqueGameName = generateUniqueGameName();
+        const uniqueGameName = Math.random().toString(36).substr(2, 9);
 
-        socket.emit('CREATE_GAME',{
-            gameName: uniqueGameName,
-            playerName: playerName
-        }, (data) => {
-            console.log("Game created successfully: ", data);
+        socket.emit('CREATE_GAME', { gameName: uniqueGameName, playerName: playerName }, (data) => {
             if (data.code !== 0) {
                 setError(data.error);
                 return;
@@ -90,10 +79,6 @@ function Home() {
             socketJoinGame(uniqueGameName, playerName);
         });
     };
-
-    function generateUniqueGameName() {
-        return Math.random().toString(36).substr(2, 9);
-    }
 
     const onAuthentication = (status) => {
         if (status === false) {
