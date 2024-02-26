@@ -16,7 +16,6 @@ function Leaderboard() {
             setLeaderboard(data.leaderboard);
         });
 
-        // Cleanup function to remove event listener
         return () => {
             socket.off('UPDATE_LEADERBOARD');
         };

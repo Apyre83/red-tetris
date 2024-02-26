@@ -21,7 +21,6 @@ jest.mock('react-router-dom', () => ({
 describe('GameComponent', () => {
     let store;
     let component;
-    let socket;
 
     beforeEach(() => {
         store = mockStore({
