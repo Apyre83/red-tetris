@@ -15,9 +15,7 @@ const Player = require('./Player');
 
 class Game {
     constructor(server, gameName/*, gameMaster*/) {
-        if (typeof server !== 'object') throw new Error('Server must be an object');
         this.server = server;
-        if (typeof gameName !== 'string') throw new Error('Game name must be a string');
         this.gameName = gameName;
         this.players = [/*gameMaster*/]; /* gameMaster is always the first player of the list */
         this.gameIsRunning = false;

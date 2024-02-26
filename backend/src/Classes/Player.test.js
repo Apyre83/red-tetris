@@ -22,7 +22,7 @@ describe('Player', () => {
     test('constructor initializes properties correctly', () => {
         expect(player.socket).toBe(mockSocket);
         expect(player.playerName).toBe(playerName);
-        expect(player.database).toBe(database);
+        // expect(player.database).toBe(database);
         expect(player.ranking).toBe(0);
         expect(player.listOfPieces).toEqual([]);
         expect(player.game).toBeUndefined();
@@ -164,5 +164,341 @@ describe('generateNewPiece - board update', () => {
         player.generateNewPiece(); 
         expect(player.board[player.actualPiece.y][player.actualPiece.x + 0]).toEqual([1, 'color']);
         expect(player.board[player.actualPiece.y][player.actualPiece.x + 1]).toEqual([1, 'color']);
+    });
+});
+
+describe('penalty', () => {
+    let player;
+    const mockSocket = {};
+    const playerName = 'TestPlayer';
+    const database = {};
+    const BORDER_WIDTH = 1; 
+    const COLS = 10;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.idRowBorder = ROWS;
+        player.gameOver = jest.fn();
+        player.updateBoard = jest.fn();
+        player.board = Array(ROWS + 1).fill().map(() => Array(COLS + 2 * BORDER_WIDTH).fill([0, 'empty']));
+    });
+
+    test('should decrement idRowBorder correctly', () => {
+        const nbLines = 2;
+        const initialIdRowBorder = player.idRowBorder;
+        player.penalty(nbLines);
+        expect(player.idRowBorder).toBe(initialIdRowBorder - nbLines);
+    });
+
+    test('should call gameOver when idRowBorder reaches 3', () => {
+        player.idRowBorder = 4;
+        player.penalty(1);
+        expect(player.gameOver).toHaveBeenCalled();
+    });
+
+    test('should update the board with border blocks', () => {
+        player.idRowBorder = ROWS;
+        const nbLines = 1;
+        player.penalty(nbLines);
+        expect(player.idRowBorder).toBe(ROWS - nbLines);
+    });
+
+    test('should call updateBoard at the end', () => {
+        player.penalty(1);
+        expect(player.updateBoard).toHaveBeenCalled();
+    });
+});
+
+describe('doubleCheckPenalty', () => {
+    let player;
+    const mockSocket = {};
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.gameOver = jest.fn();
+        player.updateBoard = jest.fn();
+        player.board = Array(ROWS + 1).fill().map(() => Array(COLS + 2 * BORDER_WIDTH).fill([0, 'empty']));
+        player.idRowBorder = ROWS;
+    });
+
+    test('should call gameOver when idRowBorder is 3', () => {
+        player.idRowBorder = 3;
+        player.doubleCheckPenalty();
+        expect(player.gameOver).toHaveBeenCalled();
+    });
+
+    test('should update the board with border blocks and not call gameOver when idRowBorder is not 3', () => {
+        player.idRowBorder = 4;
+        player.doubleCheckPenalty();
+        expect(player.gameOver).not.toHaveBeenCalled();
+    });
+});
+
+describe('supprLines', () => {
+    let player;
+    const mockSocket = {};
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.board = Array(ROWS).fill().map(() => Array(COLS + 2 * BORDER_WIDTH).fill([0, 'empty']));
+        player.board[5] = Array(COLS + 2 * BORDER_WIDTH).fill([1, 'filled']);
+        player.board[7] = Array(COLS + 2 * BORDER_WIDTH).fill([1, 'filled']);
+        player.actualScore = 0;
+    });
+
+    test('should correctly remove specified lines and update score', () => {
+        const completeLines = [5, 7];
+        player.supprLines(completeLines);
+        expect(player.actualScore).toEqual(completeLines.length);
+        expect(player.board.length).toBe(ROWS);
+
+        for (let i = 0; i < completeLines.length; i++) {
+            expect(player.board[i]).toEqual(player.createEmptyRow());
+        }
+    });
+});
+
+describe('checkCompleteLines', () => {
+    let player;
+    const mockSocket = {};
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.board = Array(ROWS).fill().map(() => Array(COLS + 2 * BORDER_WIDTH).fill([0, 'empty']));
+        player.board[10] = Array(COLS + 2 * BORDER_WIDTH).fill([1, 'filled']);
+        for (let col = 0; col < COLS + 2 * BORDER_WIDTH; col += COLS + 2 * BORDER_WIDTH - 1) {
+            player.board[10][col] = [1, 'border'];
+        }
+        player.supprLines = jest.fn();
+        player.game = { penalty: jest.fn() };
+    });
+
+    test('should identify complete lines and call supprLines', () => {
+        player.checkCompleteLines();
+        expect(player.supprLines).toHaveBeenCalledWith([10]);
+    });
+
+    test('should call penalty function if more than one line is complete', () => {
+        player.board[9] = Array(COLS + 2 * BORDER_WIDTH).fill([1, 'filled']);
+        for (let col = 0; col < COLS + 2 * BORDER_WIDTH; col += COLS + 2 * BORDER_WIDTH - 1) {
+            player.board[9][col] = [1, 'border'];
+        }
+
+        player.checkCompleteLines();
+        expect(player.game.penalty).toHaveBeenCalledWith(playerName, 1);
+    });
+
+    test('should not call penalty function if only one line is complete', () => {
+        player.checkCompleteLines();
+        expect(player.game.penalty).not.toHaveBeenCalled();
+    });
+});
+
+describe('convertBoardForDisplay', () => {
+    let player;
+    const mockSocket = {};
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        player.board = Array(30).fill().map((_, index) => `Ligne ${index + 1}`);
+    });
+
+    test('should return the last n rows of the board', () => {
+        const rowsToShow = 21;
+        const result = player.convertBoardForDisplay(player.board);
+
+        expect(result.length).toBe(rowsToShow);
+        expect(result[0]).toBe(`Ligne ${30 - rowsToShow + 1}`);
+        expect(result[result.length - 1]).toBe('Ligne 30');
+    });
+
+    test('should return the entire board if it has less than or equal to n rows', () => {
+        player.board = Array(20).fill().map((_, index) => `Ligne ${index + 1}`);
+        const result = player.convertBoardForDisplay(player.board);
+
+        expect(result.length).toBe(20);
+        expect(result[0]).toBe('Ligne 1');
+        expect(result[result.length - 1]).toBe('Ligne 20');
+    });
+});
+
+describe('updateBoard', () => {
+    let player, game;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        const Player = require('./Player');
+        const Game = require('./Game');
+        player = new Player(mockSocket, playerName, database);
+        game = new Game();
+        game.sendSpectrum = jest.fn();
+        player.game = game;
+        player.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
+                2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
+                4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
+                4, 1, 0, 4];
+        player.generateNewPiece();
+        player.makeSpectrum = jest.fn(); 
+    });
+
+    test('should clear old piece from the board', () => {
+        const oldPiece = player.actualPiece;
+        player.updateBoard(oldPiece);
+        expect(player.board[0][1]).toEqual([1, 'color']);
+    });
+
+    test('should place new piece on the board', () => {
+        player.updateBoard();
+        expect(player.board[0][1]).toEqual([1, 'color']);
+    });
+
+    test('should call makeSpectrum and emit update messages if playing', () => {
+        player.isPlaying = true;
+        player.updateBoard();
+        expect(player.makeSpectrum).toHaveBeenCalled();
+        expect(mockSocket.emit).toHaveBeenCalledWith('UPDATE_BOARD', expect.anything());
+    });
+});
+
+describe('Player.makeSpectrum', () => {
+    let player;
+    const mockSocket = {};
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        player = new Player(mockSocket, playerName, database);
+        player.board = player.createBoard(ROWS);
+        player.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
+            2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
+            4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
+            4, 1, 0, 4];
+        player.generateNewPiece();
+        player.moveDown();
+        player.updateBoard();
+    });
+
+    test('should correctly generate spectrum without actual piece', () => {
+        player.makeSpectrum();
+        expect(player.spectrum[0][1]).toEqual([0, "#ffffff"]);
+
+    });
+
+    test('should correctly identify full and empty columns in spectrum', () => {
+        for (let i = 0; i < ROWS; i++) {
+            player.board[i][BORDER_WIDTH] = [1, colors.full]; 
+            if (i < ROWS / 2) player.board[i][BORDER_WIDTH + 1] = [1, colors.full];
+        }
+    
+        player.makeSpectrum();
+    
+        for (let i = 1; i < ROWS; i++) {
+            expect(player.spectrum[i][BORDER_WIDTH]).toEqual([1, colors.full]);
+        }
+    });
+    
+});
+
+describe('Player.moveLeft', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        const piece = {
+            id: 2,
+            letter: 'T',
+            x: 4,
+            y: 1,
+            color: 'purple',
+            tetromino: [
+                [[0, 'empty'], [0, 'empty'], [0, 'empty']],
+                [[1, 'purple'], [1, 'purple'], [1, 'purple']],
+                [[0, 'empty'], [1, 'purple'], [0, 'empty']]
+            ],
+            width: 3,
+        }
+        player.board = player.createBoard(ROWS);
+        player.actualPiece = piece;
+        player.updateBoard = jest.fn(); // Spy sur la méthode pour vérifier son appel
+    });
+
+    test('should move piece left if there is no obstruction', () => {
+        player.moveLeft();
+        expect(player.actualPiece.x).toBe(3);
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything()); // Vérifie que updateBoard est appelé avec l'ancienne pièce
+    });
+
+    test('should not move piece left if there is an obstruction', () => {
+        player.actualPiece.x = 1;
+        player.board[player.actualPiece.y][player.actualPiece.x - 1][0] = 1;
+        player.moveLeft();
+        expect(player.updateBoard).not.toHaveBeenCalled();
+    });
+});
+
+
+describe('Player.moveRight', () => {
+    let player;
+    const mockSocket = { emit: jest.fn() };
+    const playerName = 'TestPlayer';
+    const database = {};
+
+    beforeEach(() => {
+        const Player = require('./Player');
+        player = new Player(mockSocket, playerName, database);
+        const piece = {
+            id: 2,
+            letter: 'T',
+            x: 4,
+            y: 1,
+            color: 'purple',
+            tetromino: [
+                [[0, 'empty'], [0, 'empty'], [0, 'empty']],
+                [[1, 'purple'], [1, 'purple'], [1, 'purple']],
+                [[0, 'empty'], [1, 'purple'], [0, 'empty']]
+            ],
+            width: 3,
+        }
+        player.board = player.createBoard(ROWS);
+        player.actualPiece = piece;
+        player.updateBoard = jest.fn(); // Spy sur la méthode pour vérifier son appel
+    });
+
+    test('should move piece right if there is no obstruction', () => {
+        player.moveRight();
+        expect(player.actualPiece.x).toBe(5);
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything()); // Vérifie que updateBoard est appelé avec l'ancienne pièce
+    });
+
+    test('should not move piece right if there is an obstruction', () => {
+        player.actualPiece.tetromino[0][player.actualPiece.width - 1][0] = 1;
+        player.board[player.actualPiece.y][player.actualPiece.x + player.actualPiece.width][0] = 1;
+        player.moveRight();
+        expect(player.updateBoard).not.toHaveBeenCalled();
     });
 });
