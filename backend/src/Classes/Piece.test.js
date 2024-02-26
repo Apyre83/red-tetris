@@ -1,6 +1,6 @@
 const colors = require('../constants/colors');
 const { BORDER_WIDTH }    = require('../constants/numbers');
-const Piece = require('./Piece'); // Assurez-vous d'ajuster le chemin d'accès selon votre structure de fichiers
+const Piece = require('./Piece');
 
 describe('Piece class', () => {
   describe('constructor', () => {

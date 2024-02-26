@@ -1,15 +1,3 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   Game.js                                            :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: lfresnay <marvin@42.fr>                    +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/02/19 18:07:25 by lfresnay          #+#    #+#             //
-//   Updated: 2024/02/19 18:07:28 by lfresnay         ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
 const { NB_PIECES, LIST_OF_PIECES_SIZE }      = require('../constants/numbers');
 const Player = require('./Player');
 
@@ -69,7 +57,6 @@ class Game {
 
         if (this.gameIsRunning) {
             callback({code: 1, error: "Game is already running"});
-            // if (typeof(player) !== typeof(Player)) throw new Error('Player must be an object Player');
         }
         else {
             this.players.push(player);
@@ -97,7 +84,6 @@ class Game {
         for (let i = 0 ; i < this.alivePlayers.length ; i++) {
             if (this.alivePlayers[i].playerName !== fromPlayerName) {
                 this.alivePlayers[i].penalty(nbLines);
-            //    TODO socket.emit('PENALTY', {info: `${nbLines} penalty row(s) from ${fromPlayerName}`};
             }
         }
     }
@@ -180,7 +166,6 @@ class Game {
 
     winner() {
         let playerWinner = this.alivePlayers[0];
-		// let playerWinner = this.players.filter(p => p.playerName === this.alivePlayers[0].playerName)[0];
         playerWinner.winner();
 		for (let i = 0 ; i < this.players.length ; i++) {
             this.players[i].socket.emit('PLAYER_WINNER', {playerName: playerWinner.playerName, rank: 1, score: playerWinner.actualScore, newCreator: playerWinner.playerName});

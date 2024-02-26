@@ -444,13 +444,13 @@ describe('Player.moveLeft', () => {
         }
         player.board = player.createBoard(ROWS);
         player.actualPiece = piece;
-        player.updateBoard = jest.fn(); // Spy sur la méthode pour vérifier son appel
+        player.updateBoard = jest.fn();
     });
 
     test('should move piece left if there is no obstruction', () => {
         player.moveLeft();
         expect(player.actualPiece.x).toBe(3);
-        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything()); // Vérifie que updateBoard est appelé avec l'ancienne pièce
+        expect(player.updateBoard).toHaveBeenCalledWith(expect.anything()); 
     });
 
     test('should not move piece left if there is an obstruction', () => {
@@ -510,7 +510,7 @@ describe('Player.moveDown', () => {
     const database = {};
 
     beforeEach(() => {
-        const Player = require('./Player'); // Assurez-vous que ce chemin est correct
+        const Player = require('./Player');
         player = new Player(mockSocket, playerName, database);
         player.isPlaying = true;
         player.board = player.createBoard(ROWS);

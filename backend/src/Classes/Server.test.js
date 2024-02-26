@@ -28,22 +28,6 @@ describe('Server', () => {
         done();
     });
 
-    // afterEach((done) => {
-    //     if (clientSocket.connected) {
-    //         clientSocket.disconnect();
-    //     }
-    
-    //     // Fermer le serveur Socket.IO
-    //     server.io.close(() => {
-    //         // Fermer le serveur HTTP
-    //         server.server.close(() => {
-    //             jest.restoreAllMocks();
-    //             done();
-    //         });
-    //     });
-    // });
-    
-
     test('LOGIN event with valid credentials should succeed', (done) => {
         jest.spyOn(server, 'readDatabase').mockReturnValue({
             'testUser': { password: 'testPassword' }
@@ -304,11 +288,10 @@ describe('Server', () => {
         clientSocket.on('USER_LEAVE_GAME', (data) => {
             expect(data.playerName).toBe(playerName);
             expect(data.creator).toBe(playerName);
-            expect(data.creator).toBe(otherPlayerName); // Assumer que le deuxième joueur devient le créateur
+            expect(data.creator).toBe(otherPlayerName);
             done();
         });
     
-        // Simuler l'événement 'PLAYER_LEAVE_ROOM'
         clientSocket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (response) => {
             expect(response.code).toBe(0);
             done();

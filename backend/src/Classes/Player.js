@@ -16,20 +16,14 @@ class Player {
         this.database = this.readDatabase();
         this.ranking = 0;
         this.listOfPieces = [];
-        // this.listOfPieces = [1, 4, 1, 2, 1, 2, 5,
-        //     2, 6, 3, 3, 5, 4, 2, 0, 6, 4, 5,
-        //     4, 0, 1, 3, 4, 4, 3, 6, 6, 5, 0, 0,
-        //     4, 1, 0, 4];
         this.game = undefined;
         this.isPlaying = false;
-        // this.isPlaying = true; // put on false if not in test
         this.idRowBorder = ROWS;
         this.idActualPiece = -1;
         this.actualPiece = undefined;
         this.actualScore = 0;
         this.board = this.createBoard(ROWS);
         this.spectrum = this.makeSpectrum();
-        // this.DATABASE_FILE = "./databases/database.json";
     }
 
     readDatabase() {
@@ -195,15 +189,11 @@ class Player {
                     }
             }
         }
-        // this.checkCompleteLines();
         this.makeSpectrum();
         if (this.isPlaying !== false) {
-            // TODO pour test unitaire decommenter printBoard et commenter socket.emit
-            // this.printBoard(); // TODO suppr
             let tmpBoard = this.convertBoardForDisplay(this.board);
             console.log({boardSize: tmpBoard.length, board: tmpBoard, board0: tmpBoard[0]});
             this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
-            // this.socket.emit('UPDATE_SPECTRUM', {spectrum: this.convertBoardForDisplay(this.spectrum), name: this.playerName})
             this.game.sendSpectrum(this.playerName, this.convertBoardForDisplay(this.spectrum));
         }
     }
@@ -297,7 +287,6 @@ class Player {
                                 return true;
                             }
                             this.checkCompleteLines();
-                            // TODO pour test unitaire commenter ces 3 lignes (de if a }, pas le return true)
                             if (this.isPlaying !== false) {
                                 this.generateNewPiece();
                             }
@@ -334,7 +323,6 @@ class Player {
         const   x     = this.actualPiece.x;
         const   y     = this.actualPiece.y;
 
-        // replace all the 1 of the actual piece by zero in a copy of the board
         for (let row = 0 ; row < width ; row++) {
             for (let col = 0; col < width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
@@ -343,7 +331,6 @@ class Player {
             }
         }
 
-        // check if rotatedTetromino fits in the copy of the board
         for (let row = 0 ; row < width ; row++) {   
             for (let col = 0; col < width ; col++) {
                     if ((y + row < 0 || x + col < 0)) {
@@ -422,22 +409,6 @@ class Player {
         this.spectrum = this.makeSpectrum();
         this.rank = 0;
     }
-
-    // printBoard() {
-    //     for (let row = 0; row < this.board.length; row++) {
-    //         const rowValues = this.board[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
-    //         console.log(`${rowValues.join()}`);
-    //     }
-    //     console.log(`\n-------\n`);
-    // }
-
-    // printSpectrum() {
-    //     for (let row = 0; row < this.spectrum.length; row++) {
-    //         const rowValues = this.spectrum[row].map(cell => (cell[0] === 0 ? '.' : cell[0]));
-    //         console.log(`${rowValues.join()}`);
-    //     }
-    //     console.log(`\n-------\n`);
-    // }
 }
 
 module.exports = Player;

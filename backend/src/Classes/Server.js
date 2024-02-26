@@ -41,7 +41,7 @@ class Server {
 
     handleSocketConnections() {
         this.io.on('connection', (socket) => {
-            this.players.push(new Player(socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
+            this.players.push(new Player(socket, ''));
 
             socket.on('disconnect', () => {
                 this.players = this.players.filter(player => player.socket.id !== socket.id);
@@ -60,14 +60,12 @@ class Server {
 
                 const hashedPasswordFromDB = database[data.username].password;
 
-                // Définition de la fonction de vérification
                 const verifyPassword = function(err, isMatch) {
                     if (err) {
                         throw err;
                     } else if (!isMatch) {
                         callback({...data, code: 4, error: "Wrong password"});
                     } else {
-                        // Utilisation de `this` pour accéder à `this.players`
                         for (const player of this.players) {
                             if (player.playerName === data.username) {
                                 callback({...data, code: 5, error: "Player already connected"});

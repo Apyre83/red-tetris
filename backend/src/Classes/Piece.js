@@ -97,8 +97,3 @@ class Piece {
 }
 
 module.exports = Piece;
-
-// const piece = new Piece(2);
-// console.log(piece.tetromino);
-// console.log(`\n\n\n`)
-// console.log(piece.rotate('right'));
