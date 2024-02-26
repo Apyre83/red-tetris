@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Player = require('./Player');
 const Game = require('./Game');
+const bcrypt = require('bcrypt');
 
 class Server {
     constructor(port) {
@@ -40,7 +41,7 @@ class Server {
 
     handleSocketConnections() {
         this.io.on('connection', (socket) => {
-            this.players.push(new Player(socket, '', this.readDatabase())); /* '' is the username but since the user is not logged in yet, it is empty */
+            this.players.push(new Player(socket, '')); /* '' is the username but since the user is not logged in yet, it is empty */
 
             socket.on('disconnect', () => {
                 this.players = this.players.filter(player => player.socket.id !== socket.id);
@@ -55,22 +56,36 @@ class Server {
                 if (data.password === '') { callback({...data, code: 2, error: "Password cannot be empty"}); return; }
 
                 const database = this.readDatabase();
-                if (!database[data.username]) { callback({...data, code: 1, error: "Username does not exist"}); return; }
-                if (database[data.username].password !== data.password) { callback({...data, code: 2, error: "Wrong password"}); return; }
+                if (!database[data.username]) { callback({...data, code: 3, error: "Username does not exist"}); return; }
 
-                // if players already connected cannot login
-                for (const player of this.players) {
-                    if (player.playerName === data.username) { callback({...data, code: 3, error: "Player already connected"}); return; }
-                }
+                const hashedPasswordFromDB = database[data.username].password;
 
-                /* Change the username of the player */
-                for (const player of this.players) {
-                    if (player.socket.id === socket.id) {
-                        player.playerName = data.username;
+                // Définition de la fonction de vérification
+                const verifyPassword = function(err, isMatch) {
+                    if (err) {
+                        throw err;
+                    } else if (!isMatch) {
+                        callback({...data, code: 4, error: "Wrong password"});
+                    } else {
+                        // Utilisation de `this` pour accéder à `this.players`
+                        for (const player of this.players) {
+                            if (player.playerName === data.username) {
+                                callback({...data, code: 5, error: "Player already connected"});
+                                return;
+                            }
+                        }
+                        for (const player of this.players) {
+                            if (player.socket.id === socket.id) {
+                                player.playerName = data.username;
+                            }
+                        }
+                        callback({...data, code: 0});
                     }
-                }
-                callback({...data, code: 0});
+                };
+                bcrypt.compare(data.password, hashedPasswordFromDB, verifyPassword.bind(this));
             });
+
+
 
             socket.on('LOGOUT', (data, callback) => {
                 console.log('LOGOUT', data);
@@ -82,7 +97,7 @@ class Server {
                 callback({...data, code: 0});
             });
 
-            socket.on('SIGNUP', (data, callback) => {
+            socket.on('SIGNUP', async (data, callback) => {
                 console.log('SIGNUP', data);
                 const database = this.readDatabase();
                 if (database[data.username]) { callback({...data, code: 1, error: "Username already exists"}); return; }
@@ -92,15 +107,21 @@ class Server {
                 if (data.email === '') { callback({...data, code: 4, error: "Email cannot be empty"}); return; }
                 if (data.password === '') { callback({...data, code: 5, error: "Password cannot be empty"}); return; }
 
-                // TODO: password hashing
-                database[data.username] = {
-                    password: data.password,
-                    email: data.email,
-                    allTimeScores: 0,
-                };
-                this.writeDatabase(database);
+                try {
+                    const saltRounds = 10;
+                    const hash = await bcrypt.hash(data.password, saltRounds);
 
-                callback({...data, code: 0});
+                    database[data.username] = {
+                        password: hash,
+                        email: data.email,
+                        allTimeScores: 0,
+                    };
+
+                    this.writeDatabase(database);
+                    callback({...data, code: 0});
+                } catch (err) {
+                    callback({...data, code: 6, error: "Server error hashing password"});
+                }
             });
 
             socket.on('GET_SCORE', (data, callback) => {
