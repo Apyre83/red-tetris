@@ -27,8 +27,8 @@ function Leaderboard() {
             <table>
                 <thead>
                 <tr>
-                    <th>Place</th>
-                    <th>Nom</th>
+                    <th>Rank</th>
+                    <th>Username</th>
                     <th>Score</th>
                 </tr>
                 </thead>
