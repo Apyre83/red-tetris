@@ -20,7 +20,6 @@ function Home() {
     const [score, setScore] = useState(0);
 
     const [error, setError] = useState('');
-
     useEffect(() => {
         if (!socket) { return; }
 

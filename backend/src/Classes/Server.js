@@ -44,10 +44,25 @@ class Server {
             this.players.push(new Player(socket, ''));
 
             socket.on('disconnect', () => {
-                this.players = this.players.filter(player => player.socket.id !== socket.id);
-                for (const _game of this.games) {
+                const player = this.players.find(player => player.socket.id === socket.id);
 
+                for (const _game of this.games) {
+                    if (_game.hasPlayer(player.playerName)) {
+                        if (player.isPlaying === true) {
+                            player.giveUp();
+                        }
+                        _game.removePlayer(player);
+                        if (_game.players.length === 0) {
+                            this.closeGame(_game.gameName);
+                        }
+                        else {
+                            for (const _player of _game.players) {
+                                _player.socket.emit('USER_LEAVE_GAME', {playerName: player.playerName, creator: _game.players[0].playerName});
+                            }
+                        }
+                    }
                 }
+                this.players = this.players.filter(player => player.socket.id !== socket.id);
             });
 
             socket.on('LOGIN', async (data, callback) => {
@@ -226,7 +241,9 @@ class Server {
                 const gamePlayer = _game.players.find(player => player.playerName === data.playerName);
 				if (!gamePlayer) { callback({...data, code: 2, error: "Player does not exist"}); return; }
 
-                gamePlayer.giveUp();
+                if (gamePlayer.isPlaying === true) {
+                    gamePlayer.giveUp();
+                }
                 _game.removePlayer(gamePlayer);
 
                 if (_game.players.length === 0) {

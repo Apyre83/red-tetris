@@ -93,9 +93,7 @@ class Game {
     }
 
     hasPlayer(playerName) {
-        console.log("hasPlayer", playerName, this.gameName);
         for (const player of this.players) {
-            console.log("player", player.playerName, playerName, player.playerName === playerName);
             if (player.playerName === playerName)
                 return true;
         }

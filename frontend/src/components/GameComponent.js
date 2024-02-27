@@ -41,7 +41,6 @@ function GameComponent() {
 
     const [isAlive, setIsAlive] = useState(false);
 
-
     useEffect(() => {
         if (!socket) { return; }
         if (!isAuthenticated) { return;}
@@ -60,10 +59,7 @@ function GameComponent() {
             socket.emit('PLAYER_LEAVE_ROOM', { gameName: gameName, playerName: playerName }, (data) => {
                 if (data.code !== 0) { return; }
             });
-            navigate("/");
         };
-
-        window.addEventListener("beforeunload", handleLeavePage);
 
         socket.on('USER_LEAVE_GAME', (data) => {
             setPlayers(prev => prev.filter(player => player !== data.playerName));
@@ -110,11 +106,11 @@ function GameComponent() {
 
         socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
             if (data.code !== 0) {
-                if (data.code !== 2) { navigate('/'); }
+                if (data.code === 1) { navigate('/'); return; }
                 socket.emit('JOIN_GAME', { gameName: gameName, playerName: playerName }, (data) => {
-                    if (data.code !== 0) { navigate('/');}
-                    window.location.href = `#${data.gameName}[${data.playerName}]`;
-
+                    if (data.code !== 0) {
+                        navigate('/');
+                    }
                     socket.emit('ASK_INFORMATIONS_GAME_PAGE', { gameName: gameName, playerName: playerName }, (data) => {
                         if (data.code !== 0) { return; }
                         setIsCreator(data.creator === playerName);
