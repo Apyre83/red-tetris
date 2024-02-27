@@ -35,7 +35,7 @@ class Player {
         fs.writeFileSync(DATABASE_FILE, JSON.stringify(data, null, 2), 'utf8');
     }
 
-    startGame() {
+    startGame(factor_difficulty) {
         this.listOfPieces = this.game.listOfPieces;
         this.generateNewPiece();
         var interval = setInterval(() => {
@@ -46,7 +46,7 @@ class Player {
             if (this.isPlaying === true) {
                 this.doubleCheckPenalty();
             }
-        }, INIT_TIME_MS );
+        }, INIT_TIME_MS * factor_difficulty);
 
     }
 

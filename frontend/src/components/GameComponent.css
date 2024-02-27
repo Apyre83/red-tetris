@@ -1,4 +1,3 @@
-/* GameComponent.css */
 .game-container {
     display: flex;
     flex-direction: column;
@@ -6,40 +5,72 @@
     justify-content: center;
     height: 100vh;
     width: 100vw;
-    background-color: #222; /* Fond sombre */
-    color: #fff; /* Texte blanc */
-    font-family: 'Tetris', sans-serif; /* Utilisez une police appropriée */
+    background-color: #222;
+    color: #fff;
+    font-family: 'Tetris', sans-serif;
+    margin-bottom: 20px;
 }
 
-.game-title, .game-subtitle {
-    margin: 10px 0;
-    color: #4caf50; /* Couleur verte de Tetris */
+
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40%;
+    margin-top: 20px;
+    padding: 10px;
 }
 
-.game-title {
-    font-size: 2.5em; /* Taille de police plus grande pour le titre */
-}
 
-.game-subtitle {
-    font-size: 1.5em; /* Taille de police pour le sous-titre */
-}
 
 .game-button {
-    margin: 10px;
-    padding: 10px 20px;
+    width: 40%;
     background-color: #333;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-size: 15px;
 }
 
 .game-button:hover {
-    background-color: #4caf50; /* Effet au survol */
+    background-color: #4caf50;
 }
 
+select {
+    width: 40%;
+    padding: 10px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #4caf50;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align-last: center;
+    font-size: 15px;
+}
+
+select:focus {
+    outline: none;
+    border-color: #66ff66;
+}
+
+
 .game-response-message {
-    color: #ff3860; /* rouge pour les erreurs, vert pour succès */
+    color: #ff3860;
     margin: 20px;
+}
+
+
+.game-title, .game-subtitle {
+    margin: 10px 0;
+    color: #4caf50;
+}
+.game-title {
+    font-size: 2.5em;
+}
+.game-subtitle {
+    font-size: 1.5em;
 }

@@ -226,7 +226,7 @@ describe('GameComponent', () => {
         await act(async () => {
             screen.getByText('Start').click();
         });
-        expect(mockSocket.emit).toHaveBeenCalledWith('START_GAME', { gameName: null, playerName: 'testUser' }, expect.any(Function));
+        expect(mockSocket.emit).toHaveBeenCalledWith('START_GAME', { gameName: null, playerName: 'testUser', difficulty: "normal" }, expect.any(Function));
     });
     it('should render the final score when the player ends the game', async () => {
 

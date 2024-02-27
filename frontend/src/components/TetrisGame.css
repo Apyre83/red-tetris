@@ -1,4 +1,3 @@
-/* TetrisGame.css */
 .tetris-game-container {
     display: flex;
     justify-content: center;
@@ -15,27 +14,41 @@
 }
 
 .tetris-cell {
-    width: 35px; /* Taille pour le joueur principal */
+    width: 35px;
     height: 35px;
     border: 1px solid #ddd;
     box-sizing: border-box;
 }
 
 .tetris-cell.small {
-    width: 20px; /* Taille réduite pour les joueurs sur les côtés */
+    width: 20px;
     height: 20px;
 }
 
 .tetris-cell.filled {
-    background-color: blue; /* ou toute autre couleur visible */
+    background-color: blue;
 }
 
 .playerInformationGame {
-    font-size: 24px; /* Taille de la police */
-    color: #333; /* Couleur de la police */
-    text-align: center; /* Centrer le texte */
-    margin: 0 0 10px; /* Marge en bas pour espacer du reste */
-    font-weight: bold; /* Rendre le texte en gras */
-    text-transform: uppercase; /* Mettre le texte en majuscules pour plus d'impact */
-    letter-spacing: 1px; /* Espacer légèrement les lettres */
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin: 0 0 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.game-button-give-up {
+    position: fixed;
+    top: 30px;
+    left: 10px;
+    width: 5%;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 15px;
 }

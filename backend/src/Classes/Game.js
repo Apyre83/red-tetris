@@ -26,9 +26,10 @@ class Game {
         return list;
     }
 
-    startGame() {
+    startGame(factor_speed) {
         if (this.players.length === 0) throw new Error('No player in the game');
         else {
+            this.factor_speed = factor_speed;
             this.calculateScores();
             this.gameIsRunning = true;
             this.rank = this.players.length;
@@ -37,7 +38,7 @@ class Game {
                 this.players[i].listOfPieces = this.listOfPieces;
                 this.players[i].isPlaying = true;
                 this.players[i].game = this;
-                this.players[i].startGame();
+                this.players[i].startGame(this.factor_speed);
             }
         }
     }

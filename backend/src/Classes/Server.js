@@ -184,7 +184,14 @@ class Server {
                 if (!_game) { callback({...data, code: 1, error: "Game does not exist"}); return; }
                 if (_game.players[0].playerName !== data.playerName) { callback({...data, code: 2, error: "Only the creator can start the game"}); return; }
 
-                _game.startGame();
+                let factor_speed = 1;
+                switch (data.difficulty) {
+                    case 'easy': factor_speed = 1.5; break;
+                    case 'normal': factor_speed = 1; break;
+                    case 'hard': factor_speed = 0.3; break;
+                    default: factor_speed = 1; break;
+                }
+                _game.startGame(factor_speed);
 
                 for (let i = 0; i < _game.players.length; i++) {
                     const leftPlayerIndex = (i - 1 + _game.players.length) % _game.players.length;

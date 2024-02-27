@@ -76,7 +76,7 @@ function TetrisGame({ handlerGiveUp, leftPlayerName, rightPlayerName }) {
 
     return (
         <div>
-        <button className="game-button" onClick={handlerGiveUp}>GIVE UP</button>
+        <button className="game-button-give-up" onClick={handlerGiveUp}>GIVE UP</button>
 		<div className="tetris-game-container">
 			<div className="side-player">
                 <h1 className="playerInformationGame">{leftPlayerName}</h1>
