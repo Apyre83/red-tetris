@@ -1,12 +1,13 @@
-body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #222;
+.leaderboard-container {
+    height: 100vh;
+    width: 100vw;
+    background-color: #333;
     color: #fff;
+    padding: 20px;
 }
 
-.leaderboard-container {
+
+.leaderboard-content {
     max-width: 800px;
     margin: 20px auto;
     padding: 20px;
@@ -16,7 +17,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.leaderboard-container h2 {
+.leaderboard-content h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #4caf50;

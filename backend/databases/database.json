@@ -2,16 +2,21 @@
   "apyre": {
     "password": "$2b$10$gV5f4zDMVGnaudDyN9nikuIg1o8TaRfm42Es6pRFZLMZSlEQpuE/6",
     "email": "apyre@apyre.com",
-    "allTimeScores": 88
+    "allTimeScores": 345
   },
   "apyre2": {
     "password": "$2b$10$aVRas/yG7B1/5N2pMV2qn.gwmjtPFrlsPNrESOx6WrP9WUDKO8cJq",
     "email": "apyre@apyre2.com",
-    "allTimeScores": 0
+    "allTimeScores": 10
   },
   "apyre3": {
     "password": "$2b$10$2FVMHGCLVSdCKNzz2EKpReo6idel0YL3M4Vztdr6yXLHhhEtirQ5u",
     "email": "apyre@apyre3.com",
-    "allTimeScores": 0
+    "allTimeScores": 22
+  },
+  "brettleclerc": {
+    "password": "$2b$10$O0VJGwDi8YHdbCdohQKwAOrX0Q0F5o/4sf0ZfVl.dfkxBP85fPdEK",
+    "email": "brettleclerc13@gmail.com",
+    "allTimeScores": 24
   }
 }

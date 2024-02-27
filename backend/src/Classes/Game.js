@@ -32,7 +32,6 @@ class Game {
             this.calculateScores();
             this.gameIsRunning = true;
             this.rank = this.players.length;
-            console.log("Scores : ", this.scores);
             for (let i = 0 ; i < this.players.length ; i++) {
                 this.alivePlayers.push(this.players[i]);
                 this.players[i].listOfPieces = this.listOfPieces;
@@ -52,9 +51,6 @@ class Game {
     }
 
     addPlayer(player, callback) {
-        console.log("Adding player to game " + this.gameName);
-        console.log("typeof player : " + typeof(player));
-
         if (this.gameIsRunning) {
             callback({code: 1, error: "Game is already running"});
         }
@@ -80,7 +76,6 @@ class Game {
     }
 
     penalty(fromPlayerName, nbLines) {
-        console.log(`PENALTY FROM ${fromPlayerName} : ${nbLines} lines`);
         for (let i = 0 ; i < this.alivePlayers.length ; i++) {
             if (this.alivePlayers[i].playerName !== fromPlayerName) {
                 this.alivePlayers[i].penalty(nbLines);
@@ -108,24 +103,19 @@ class Game {
 
     playerGameOver(player) {
         this.rank--;
-        console.log(`Game over for ${player.playerName} in game ${this.gameName}`);
         this.playerFinishedGame(player);
     }
 
     playerGiveUp(player) {
         this.rank--;
-        console.log(`Player ${player.playerName} gave up from game ${this.gameName}`);
         this.playerFinishedGame(player);
     }
 
     playerFinishedGame(player) {
         if (player.isPlaying === true) {
             const database = this.server.readDatabase();
-            console.log('actual score : ' + player.actualScore);
 
             database[player.playerName].allTimeScores += player.actualScore;
-            console.log("resultat " + database[player.playerName].allTimeScores);
-
             this.server.writeDatabase(database);
         }
         const leftPlayers = this.alivePlayers.filter(p => p.playerName !== player.playerName);
@@ -137,7 +127,6 @@ class Game {
     }
 
     removePlayer(player) {
-        console.log(`Player ${player.playerName} is removed from game ${this.gameName}`);
         player.resetPlayer();
 
         const leftPlayers = this.players.filter(p => p.playerName !== player.playerName);
@@ -148,7 +137,6 @@ class Game {
         if (this.alivePlayers.length === 1) {
             this.winner();
         } else if (this.alivePlayers.length === 0) {
-			console.log("No one is alive");
             this.resetGame();
             if (this.players.length === 0) {
                 this.server.closeGame(this.gameName);

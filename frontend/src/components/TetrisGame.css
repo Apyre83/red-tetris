@@ -15,9 +15,9 @@
 }
 
 .tetris-cell {
-    width: 40px; /* Taille pour le joueur principal */
-    height: 40px;
-    border: 2px solid #ddd;
+    width: 35px; /* Taille pour le joueur principal */
+    height: 35px;
+    border: 1px solid #ddd;
     box-sizing: border-box;
 }
 

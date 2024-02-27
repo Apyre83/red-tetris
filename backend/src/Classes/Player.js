@@ -27,7 +27,6 @@ class Player {
     }
 
     readDatabase() {
-        console.log("this.DATABASE_FILE : " + DATABASE_FILE);
         const data = fs.readFileSync(DATABASE_FILE, 'utf8');
         return JSON.parse(data);
     }
@@ -86,7 +85,6 @@ class Player {
 
         for (let col = BORDER_WIDTH ; col < COLS + BORDER_WIDTH ; col++) {
             if (this.board[3][col][0] != 0) {
-                console.log(`Coordonnees de la piece : 3, ${col}`);
                 this.gameOver();
                 return;
             }
@@ -192,7 +190,6 @@ class Player {
         this.makeSpectrum();
         if (this.isPlaying !== false) {
             let tmpBoard = this.convertBoardForDisplay(this.board);
-            console.log({boardSize: tmpBoard.length, board: tmpBoard, board0: tmpBoard[0]});
             this.socket.emit('UPDATE_BOARD', {board: this.convertBoardForDisplay(this.board), name: this.playerName});
             this.game.sendSpectrum(this.playerName, this.convertBoardForDisplay(this.spectrum));
         }
@@ -237,7 +234,6 @@ class Player {
             for (let col = 0 ; col < width ; col++) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
                     if (this.board[y + row][x + col - 1][0] > 0) {
-                        console.log(`Can't move left`);
                         return;
                     }
                     break;
@@ -258,7 +254,6 @@ class Player {
             for (let col = width - 1 ; col >= 0 ; col--) {
                 if (this.actualPiece.tetromino[row][col][0] === 1) {
                     if (this.board[y + row][x + col + 1][0] > 0) {
-                        console.log(`Can't move right`);
                         return;
                     }
                     break;
@@ -271,7 +266,6 @@ class Player {
     }
 
     moveDown(goToBottom) {
-        console.log('Dans move Down');
         if (this.isPlaying !== false) {
             const width = this.actualPiece.width;
             const oldPiece = JSON.parse(JSON.stringify(this.actualPiece));
@@ -282,7 +276,6 @@ class Player {
                 for (let row = width - 1 ; row >= 0 ; row--) {
                     if (this.actualPiece.tetromino[row][col][0] === 1) {
                         if (this.board[y + row + 1][x + col][0] > 0) {
-                            console.log(`Can't move down`);
                             if (goToBottom) {
                                 return true;
                             }
@@ -334,12 +327,10 @@ class Player {
         for (let row = 0 ; row < width ; row++) {   
             for (let col = 0; col < width ; col++) {
                     if ((y + row < 0 || x + col < 0)) {
-                        console.log(`Can't rotate`);
                         return false;
                     }
                     if (rotatedTetromino[row][col][0] === 1) {
                         if (board[y + row][x + col][0] === 1) {
-                            console.log(`Can't rotate`);
                             return false;
                         }
                     }
@@ -369,32 +360,26 @@ class Player {
     }
 
     gameOver() {
-        console.log(`Game Over`);
         const rank = this.game.rank;
         this.actualScore += this.game.giveScore(rank);
 
         this.database = this.readDatabase();
-        console.log(this.database);
         this.socket.emit('PLAYER_GAME_OVER', {playerName: this.playerName, rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores });
         this.game.playerGameOver(this);
     }
 
     giveUp() {
-        console.log(`Gave up`);
         const rank = this.game.rank;
         this.isPlaying = false;
         this.game.playerGiveUp(this);
 
         this.database = this.readDatabase();
-        console.log(this.database);
 		return {rank: rank, score: this.actualScore, allTimeScore: this.database[this.playerName].allTimeScores };
     }
 
     winner() {
-        console.log(`Winner`);
         const rank = this.game.rank;
         this.actualScore += this.game.giveScore(rank);
-        console.log(`Score de winner : ` + this.actualScore);
     }
 
     resetPlayer() {

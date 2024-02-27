@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom'; // Importez useNavigate
+import { useNavigate } from 'react-router-dom';
 import './Leaderboard.css';
 
 function Leaderboard() {
@@ -23,32 +23,34 @@ function Leaderboard() {
 
     return (
         <div className="leaderboard-container">
-            <h2>Leaderboard</h2>
-            <table>
-                <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Username</th>
-                    <th>Score</th>
-                </tr>
-                </thead>
-                <tbody>
-                {leaderboard.length > 0 ? (
-                    leaderboard.map((player, index) => (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{player.name}</td>
-                            <td>{player.score}</td>
-                        </tr>
-                    ))
-                ) : (
+            <div className="leaderboard-content">
+                <h2>Leaderboard</h2>
+                <table>
+                    <thead>
                     <tr>
-                        <td colSpan="3">No data available</td>
+                        <th>Rank</th>
+                        <th>Username</th>
+                        <th>Score</th>
                     </tr>
-                )}
-                </tbody>
-            </table>
-            <button onClick={() => navigate('/')}>Home</button>
+                    </thead>
+                    <tbody>
+                    {leaderboard.length > 0 ? (
+                        leaderboard.map((player, index) => (
+                            <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{player.name}</td>
+                                <td>{player.score}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="3">No data available</td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+                <button onClick={() => navigate('/')}>Home</button>
+            </div>
         </div>
     );
 }

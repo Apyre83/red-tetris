@@ -16,13 +16,12 @@ describe('Player', () => {
     const database = {}; 
 
     beforeEach(() => {
-        player = new Player(mockSocket, playerName, database);
+        player = new Player(mockSocket, playerName);
     });
 
     test('constructor initializes properties correctly', () => {
         expect(player.socket).toBe(mockSocket);
         expect(player.playerName).toBe(playerName);
-        expect(player.database).toBe(database);
         expect(player.ranking).toBe(0);
         expect(player.listOfPieces).toEqual([]);
         expect(player.game).toBeUndefined();
